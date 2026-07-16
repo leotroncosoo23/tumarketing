@@ -82,6 +82,7 @@ export default function Navbar() {
         {/* Menú Desktop */}
         <div className="hidden md:flex items-center gap-8 font-medium">
           <Link href="/servicios" className="hover:text-[#ccff00] transition-colors">Servicios</Link>
+          <Link href="/desarrollo-software" className="hover:text-[#ccff00] transition-colors">Software</Link>
           {CURSOS_HABILITADO && (
             <Link href="/cursos" className="hover:text-[#ccff00] transition-colors">Cursos</Link>
           )}
@@ -143,13 +144,13 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/login" className="text-sm font-semibold hover:text-[#ccff00] transition-colors">
-                Login Alumnos
+                Iniciar sesión
               </Link>
-              <button className={`bg-[#ccff00] text-black rounded-full font-bold hover:bg-[#b8e600] transition-all ${
+              <Link href="/servicios" className={`bg-[#ccff00] text-black rounded-full font-bold hover:bg-[#b8e600] transition-all ${
                 isScrolled ? "px-5 py-2 text-sm" : "px-6 py-2.5"
               }`}>
                 Empecemos
-              </button>
+              </Link>
             </>
           )}
         </div>
@@ -203,6 +204,13 @@ export default function Navbar() {
             className="block py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
           >
             Servicios
+          </Link>
+          <Link
+            href="/desarrollo-software"
+            onClick={handleLinkClick}
+            className="block py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
+          >
+            Software
           </Link>
           {CURSOS_HABILITADO && (
             <Link
@@ -290,12 +298,16 @@ export default function Navbar() {
                 onClick={handleLinkClick}
                 className="block w-full text-left py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium text-sm"
               >
-                Login Alumnos
+                Iniciar sesión
               </Link>
 
-              <button className="w-full bg-[#ccff00] text-black rounded-lg font-bold py-3 px-4 hover:bg-[#b8e600] transition-all text-sm mt-2">
+              <Link
+                href="/servicios"
+                onClick={handleLinkClick}
+                className="block w-full text-center bg-[#ccff00] text-black rounded-lg font-bold py-3 px-4 hover:bg-[#b8e600] transition-all text-sm mt-2"
+              >
                 Empecemos
-              </button>
+              </Link>
             </>
           )}
         </div>

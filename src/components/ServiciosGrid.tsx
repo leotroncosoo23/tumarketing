@@ -22,7 +22,7 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
           <button
             onClick={() => setMoneda("ARS")}
             className={`px-5 py-2 rounded-lg font-bold text-sm transition-colors ${
-              moneda === "ARS" ? "bg-[#ccff00] text-black shadow-sm" : "text-neutral-400 hover:text-white"
+              moneda === "ARS" ? "bg-[#D4EE26] text-black shadow-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
             🇦🇷 $ (ARS)
@@ -30,7 +30,7 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
           <button
             onClick={() => setMoneda("USD")}
             className={`px-5 py-2 rounded-lg font-bold text-sm transition-colors ${
-              moneda === "USD" ? "bg-[#ccff00] text-black shadow-sm" : "text-neutral-400 hover:text-white"
+              moneda === "USD" ? "bg-[#D4EE26] text-black shadow-sm" : "text-neutral-400 hover:text-white"
             }`}
           >
             🇺🇸 $ (USD)
@@ -54,19 +54,19 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
                 key={servicio.id}
                 className={`relative bg-neutral-900/40 border rounded-3xl overflow-hidden transition-all duration-300 flex flex-col h-full ${
                   servicio.destacado
-                    ? "border-[#ccff00]/60 shadow-[0_0_30px_rgba(204,255,0,0.15)]"
-                    : "border-neutral-800 hover:border-[#ccff00]/50 hover:shadow-[0_0_30px_rgba(204,255,0,0.1)]"
+                    ? "border-[#D4EE26]/60 shadow-[0_0_30px_rgba(212,238,38,0.15)]"
+                    : "border-neutral-800 hover:border-[#D4EE26]/50 hover:shadow-[0_0_30px_rgba(212,238,38,0.1)]"
                 }`}
               >
                 {servicio.destacado && (
-                  <div className="absolute top-4 left-0 z-10 bg-gradient-to-r from-[#ccff00] to-lime-400 text-black text-xs font-black px-4 py-1.5 rounded-r-full shadow-lg flex items-center gap-1.5">
+                  <div className="absolute top-4 left-0 z-10 bg-gradient-to-r from-[#D4EE26] to-lime-400 text-black text-xs font-black px-4 py-1.5 rounded-r-full shadow-lg flex items-center gap-1.5">
                     ⭐ Destacado
                   </div>
                 )}
 
                 <div className={`p-6 flex flex-col flex-grow ${servicio.destacado ? "pt-12" : ""}`}>
                   {servicio.categoria && (
-                    <span className="self-start bg-[#ccff00]/10 text-[#ccff00] border border-[#ccff00]/30 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                    <span className="self-start bg-[#D4EE26]/10 text-[#D4EE26] border border-[#D4EE26]/30 px-3 py-1 rounded-full text-xs font-bold mb-4">
                       {servicio.categoria}
                     </span>
                   )}
@@ -100,7 +100,7 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
                             fill="none"
                             stroke="currentColor"
                             strokeWidth={2}
-                            className="w-5 h-5 shrink-0 text-[#ccff00] mt-0.5"
+                            className="w-5 h-5 shrink-0 text-[#D4EE26] mt-0.5"
                           >
                             <path
                               strokeLinecap="round"
@@ -116,7 +116,7 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
 
                   <Link
                     href={`/servicios/${servicio.id}`}
-                    className="mt-auto w-full bg-[#ccff00] text-black px-5 py-3 rounded-xl font-black hover:bg-[#b8e600] transition-all flex justify-center items-center gap-2"
+                    className="mt-auto w-full bg-[#D4EE26] text-black px-5 py-3 rounded-xl font-black hover:bg-[#c2dd22] transition-all flex justify-center items-center gap-2"
                   >
                     Contratar <span>→</span>
                   </Link>

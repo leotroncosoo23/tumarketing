@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <!-- Gradientes para simular volumen y luces -->
+    <linearGradient id="phoneBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#64748b" />
+      <stop offset="50%" stop-color="#334155" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    
+    <linearGradient id="screenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f8fafc" />
+    </linearGradient>
+    
+    <linearGradient id="envelopeBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6" />
+      <stop offset="100%" stop-color="#be185d" />
+    </linearGradient>
+    
+    <radialGradient id="sphereLight" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="70%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#a16207" />
+    </radialGradient>
+    
+    <!-- Filtros para sombras proyectadas (3D effect) -->
+    <filter id="shadowHeavy" x="-20%" y="-20%" width="150%" height="150%">
+      <feDropShadow dx="15" dy="20" stdDeviation="15" flood-color="#0f172a" flood-opacity="0.25"/>
+    </filter>
+    
+    <filter id="shadowLight" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="5" dy="10" stdDeviation="8" flood-color="#be185d" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Fondo circular con gradiente suave -->
+  <radialGradient id="bgLight" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#e0f2fe" />
+    <stop offset="100%" stop-color="#bae6fd" />
+  </radialGradient>
+  <circle cx="200" cy="200" r="170" fill="url(#bgLight)" />
+
+  <!-- GRUPO TELÉFONO (Con sombra proyectada pesada) -->
+  <g filter="url(#shadowHeavy)">
+    <!-- Borde lateral simulando grosor 3D -->
+    <rect x="138" y="55" width="140" height="280" rx="24" fill="#1e293b" />
+    <!-- Cuerpo principal del teléfono -->
+    <rect x="130" y="50" width="140" height="280" rx="24" fill="url(#phoneBody)" />
+    <!-- Pantalla -->
+    <rect x="136" y="56" width="128" height="268" rx="18" fill="url(#screenGrad)" />
+    <!-- Isla dinámica (Cámara) -->
+    <rect x="175" y="65" width="50" height="14" rx="7" fill="#000000" />
+    
+    <!-- Mockup de interfaz en pantalla -->
+    <rect x="150" y="100" width="100" height="40" rx="8" fill="#e2e8f0" />
+    <rect x="150" y="155" width="80" height="8" rx="4" fill="#cbd5e1" />
+    <rect x="150" y="175" width="60" height="8" rx="4" fill="#cbd5e1" />
+    <rect x="150" y="200" width="100" height="90" rx="8" fill="#f1f5f9" />
+  </g>
+
+  <!-- GRUPO SOBRE Y NOTIFICACIÓN (Con luz y sombra) -->
+  <g transform="translate(50, 180)" filter="url(#shadowLight)">
+    <!-- Parte trasera del sobre -->
+    <rect x="0" y="0" width="130" height="85" rx="8" fill="#db2777" />
+    
+    <!-- Carta saliendo del sobre -->
+    <rect x="15" y="-35" width="100" height="60" rx="4" fill="#ffffff" />
+    <rect x="30" y="-20" width="70" height="6" rx="3" fill="#cbd5e1" />
+    <rect x="30" y="-5" width="45" height="6" rx="3" fill="#cbd5e1" />
+    
+    <!-- Frente del sobre (con gradiente) -->
+    <path d="M 0 0 L 65 50 L 130 0 Z" fill="#f472b6" />
+    <path d="M 0 85 L 65 45 L 130 85 Z" fill="url(#envelopeBase)" />
+    <path d="M 0 0 L 65 50 L 130 0" fill="none" stroke="#be185d" stroke-width="2" stroke-linejoin="round" />
+    
+    <!-- Esfera de notificación simulando 3D -->
+    <circle cx="120" cy="-15" r="24" fill="url(#sphereLight)" filter="url(#shadowHeavy)" />
+    <!-- Texto de notificación -->
+    <text x="120" y="-6" font-family="Arial, sans-serif" font-weight="900" font-size="24" fill="#ffffff" text-anchor="middle">1</text>
+  </g>
+</svg>

@@ -1,11 +1,4 @@
-export const CATEGORIAS_SERVICIOS = [
-  "Desarrollo Web",
-  "Marketing Digital",
-  "Redes Sociales",
-  "Diseño Gráfico",
-  "Consultoría",
-  "Otro",
-] as const;
+export const CATEGORIAS_SERVICIOS = ["Marketing Digital", "Software"] as const;
 
 export type EstadoServicio = "Activo" | "Borrador";
 

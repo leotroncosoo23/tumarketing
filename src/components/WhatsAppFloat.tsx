@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function WhatsAppFloat() {
   const [whatsapp, setWhatsapp] = useState("");
+  const [ocultoPorSeccion, setOcultoPorSeccion] = useState(false);
 
   useEffect(() => {
     supabase
@@ -22,6 +23,32 @@ export default function WhatsAppFloat() {
       });
   }, []);
 
+  // Algunas secciones (ej. el CTA final con su propio botón de WhatsApp)
+  // marcan un elemento con data-oculta-whatsapp-flotante para evitar que el
+  // botón flotante se superponga con un botón de WhatsApp propio de la página.
+  useEffect(() => {
+    const elementos = document.querySelectorAll("[data-oculta-whatsapp-flotante]");
+    if (elementos.length === 0) return;
+
+    const interseccionesActivas = new Set<Element>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            interseccionesActivas.add(entry.target);
+          } else {
+            interseccionesActivas.delete(entry.target);
+          }
+        });
+        setOcultoPorSeccion(interseccionesActivas.size > 0);
+      },
+      { threshold: 0.2 }
+    );
+
+    elementos.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
   const numeroLimpio = whatsapp.replace(/\D/g, "");
   // Sin número cargado en Configuración todavía: no mostramos un botón roto.
   if (!numeroLimpio) return null;
@@ -35,7 +62,9 @@ export default function WhatsAppFloat() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chatear por WhatsApp"
-      className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60] w-14 h-14 sm:w-16 sm:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:scale-110 transition-transform duration-300"
+      className={`fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60] w-14 h-14 sm:w-16 sm:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:scale-110 transition-all duration-300 ${
+        ocultoPorSeccion ? "opacity-0 scale-75 pointer-events-none" : "opacity-100 scale-100"
+      }`}
     >
       <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
       <svg className="relative w-7 h-7 sm:w-8 sm:h-8 text-white" fill="currentColor" viewBox="0 0 24 24">

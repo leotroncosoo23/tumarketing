@@ -1,34 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { suscribirNewsletter } from "@/lib/newsletter-actions";
+import { useNewsletterForm } from "@/lib/useNewsletterForm";
 
 export default function NewsletterForm() {
-  const [nombre, setNombre] = useState("");
-  const [email, setEmail] = useState("");
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
-  const [enviando, setEnviando] = useState(false);
-  const [error, setError] = useState("");
-  const [exito, setExito] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aceptaTerminos) return;
-
-    setError("");
-    setEnviando(true);
-
-    const resultado = await suscribirNewsletter(nombre.trim(), email.trim());
-
-    if (resultado?.error) {
-      setError(resultado.error);
-      setEnviando(false);
-      return;
-    }
-
-    setExito(true);
-    setEnviando(false);
-  };
+  const {
+    nombre, setNombre,
+    email, setEmail,
+    aceptaTerminos, setAceptaTerminos,
+    enviando, error, exito,
+    handleSubmit,
+  } = useNewsletterForm();
 
   if (exito) {
     return (
