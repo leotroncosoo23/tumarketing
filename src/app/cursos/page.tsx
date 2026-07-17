@@ -8,8 +8,28 @@ import { supabase } from "@/lib/supabase";
 
 const VEINTIUN_DIAS_MS = 1000 * 60 * 60 * 24 * 21;
 
+type Curso = {
+  id: string;
+  titulo: string;
+  categoria: string | null;
+  duracion: string | null;
+  nivel: string | null;
+  precio: number;
+  precio_descuento: number | null;
+  oferta_activa: boolean;
+  oferta_etiqueta: string | null;
+  oferta_fecha_fin: string | null;
+  creado_en: string;
+};
+
+type InscripcionConCurso = {
+  id: string;
+  progreso: number;
+  cursos: { id: string; titulo: string; imagen_url: string | null; modalidad: string | null } | null;
+};
+
 export default function CursosPage() {
-  const [cursos, setCursos] = useState<any[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
@@ -17,8 +37,11 @@ export default function CursosPage() {
   const [vista, setVista] = useState<"catalogo" | "mis-cursos">("catalogo");
   const [usuario, setUsuario] = useState<User | null>(null);
   const [cargandoUsuario, setCargandoUsuario] = useState(true);
-  const [misInscripciones, setMisInscripciones] = useState<any[]>([]);
+  const [misInscripciones, setMisInscripciones] = useState<InscripcionConCurso[]>([]);
   const [cargandoMisCursos, setCargandoMisCursos] = useState(false);
+  // Capturado una sola vez al montar: "esNuevo" no necesita recalcularse en cada
+  // render, y Date.now() no puede llamarse directamente durante el render.
+  const [ahora] = useState(() => Date.now());
 
   useEffect(() => {
     const fetchCursos = async () => {
@@ -57,6 +80,7 @@ export default function CursosPage() {
 
   useEffect(() => {
     if (!usuario) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMisInscripciones([]);
       return;
     }
@@ -68,14 +92,14 @@ export default function CursosPage() {
         .eq("usuario_id", usuario.id);
 
       if (error) console.error("Error al traer tus cursos:", error.message);
-      setMisInscripciones(data || []);
+      setMisInscripciones((data as unknown as InscripcionConCurso[]) || []);
       setCargandoMisCursos(false);
     };
     fetchMisCursos();
   }, [usuario]);
 
   const categorias = useMemo(
-    () => Array.from(new Set(cursos.map((c) => c.categoria).filter(Boolean))),
+    () => Array.from(new Set(cursos.map((c) => c.categoria).filter((c): c is string => Boolean(c)))),
     [cursos]
   );
 
@@ -163,7 +187,7 @@ export default function CursosPage() {
             </div>
           ) : (
             cursosFiltrados.map((curso) => {
-              const esNuevo = Date.now() - new Date(curso.creado_en).getTime() < VEINTIUN_DIAS_MS;
+              const esNuevo = ahora - new Date(curso.creado_en).getTime() < VEINTIUN_DIAS_MS;
               const porcentajeOff = curso.precio_descuento
                 ? Math.round((1 - curso.precio_descuento / curso.precio) * 100)
                 : null;

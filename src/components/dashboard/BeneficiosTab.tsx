@@ -3,8 +3,19 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
+type Cupon = {
+  id: string;
+  codigo: string;
+  tipo_descuento: string;
+  valor: number;
+  limite_usos: number | null;
+  usos_actuales: number;
+  fecha_vencimiento: string | null;
+  activo: boolean;
+};
+
 export default function BeneficiosTab() {
-  const [cupones, setCupones] = useState<any[]>([]);
+  const [cupones, setCupones] = useState<Cupon[]>([]);
   const [cargando, setCargando] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [guardando, setGuardando] = useState(false);
@@ -25,6 +36,9 @@ export default function BeneficiosTab() {
   };
 
   useEffect(() => {
+    // fetchCupones también se reutiliza tras crear/editar/borrar un cupón
+    // (ver más abajo), por eso vive fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCupones();
   }, []);
 

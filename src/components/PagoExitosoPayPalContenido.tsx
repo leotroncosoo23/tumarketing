@@ -13,8 +13,15 @@ export default function PagoExitosoPayPalContenido() {
   const searchParams = useSearchParams();
   const { vaciarCarrito } = useCart();
 
-  const [estado, setEstado] = useState<Estado>("confirmando");
-  const [error, setError] = useState<string | null>(null);
+  // PayPal manda el ID de la orden como "token" en la URL de retorno.
+  // searchParams ya está disponible durante el render, así que el estado
+  // inicial se puede derivar acá directamente en vez de pasar por un efecto.
+  const ordenId = searchParams.get("token");
+
+  const [estado, setEstado] = useState<Estado>(ordenId ? "confirmando" : "error");
+  const [error, setError] = useState<string | null>(
+    ordenId ? null : "No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano."
+  );
 
   // Si llegamos acá es porque PayPal redirigió tras la aprobación: vaciamos
   // el carrito ya mismo, sin esperar la confirmación del servidor.
@@ -23,14 +30,7 @@ export default function PagoExitosoPayPalContenido() {
   }, [vaciarCarrito]);
 
   useEffect(() => {
-    // PayPal manda el ID de la orden como "token" en la URL de retorno.
-    const ordenId = searchParams.get("token");
-
-    if (!ordenId) {
-      setEstado("error");
-      setError("No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano.");
-      return;
-    }
+    if (!ordenId) return;
 
     confirmarCapturaPayPal(ordenId).then((resultado) => {
       if (!resultado.ok) {
@@ -41,7 +41,7 @@ export default function PagoExitosoPayPalContenido() {
       setEstado("listo");
       router.push("/alumnos");
     });
-  }, [searchParams, router]);
+  }, [ordenId, router]);
 
   return (
     <div className="max-w-lg mx-auto px-6 py-24 text-center">

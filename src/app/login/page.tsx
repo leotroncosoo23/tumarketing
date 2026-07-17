@@ -9,7 +9,10 @@ export default function LoginAlumnos() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // window no existe en el servidor: este chequeo tiene que esperar a que
+    // el componente esté montado en el cliente, por eso va en un efecto.
     if (new URLSearchParams(window.location.search).get("revocado") === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Tu acceso fue revocado. Contactanos si creés que es un error.");
     }
   }, []);

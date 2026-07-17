@@ -96,6 +96,9 @@ export default function TestimoniosTab() {
   };
 
   useEffect(() => {
+    // Ambas se reutilizan tras crear/editar/borrar testimonios y comentarios
+    // (ver más abajo), por eso viven fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     fetchComentariosBlog();
   }, []);
@@ -161,7 +164,7 @@ export default function TestimoniosTab() {
         <div>
           <h1 className="text-3xl font-black">💬 Testimonios y Reseñas</h1>
           <p className="text-neutral-400 text-sm">
-            Gestioná la "Prueba Social" para convencer a más clientes.
+            Gestioná la &quot;Prueba Social&quot; para convencer a más clientes.
           </p>
         </div>
         <button
@@ -351,7 +354,7 @@ export default function TestimoniosTab() {
                     </span>
                   </div>
                   <p className="text-sm text-neutral-400 italic mb-2">
-                    "{testimonio.comentario}"
+                    &quot;{testimonio.comentario}&quot;
                   </p>
                   <span className="text-xs text-neutral-500 font-bold bg-neutral-950 px-2 py-1 rounded border border-neutral-800">
                     Curso: {testimonio.cursos?.titulo || "Curso eliminado"}
@@ -423,7 +426,7 @@ export default function TestimoniosTab() {
                         })}
                       </span>
                     </div>
-                    <p className="text-sm text-neutral-400 italic mb-2 break-words">"{c.comentario}"</p>
+                    <p className="text-sm text-neutral-400 italic mb-2 break-words">&quot;{c.comentario}&quot;</p>
                     <span className="text-xs text-neutral-500 font-bold bg-neutral-950 px-2 py-1 rounded border border-neutral-800">
                       Artículo: {c.blogs?.titulo || "Artículo eliminado"}
                     </span>

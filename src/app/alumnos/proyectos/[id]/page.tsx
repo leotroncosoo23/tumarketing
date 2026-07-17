@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useAlumnoSession } from "@/lib/useAlumnoSession";
-import { enviarMensaje, obtenerUrlArchivo } from "@/lib/mensajes-actions";
+import { enviarMensaje, marcarMensajesLeidos, obtenerUrlArchivo } from "@/lib/mensajes-actions";
 import { inferirTipoArchivo, type MensajeProyecto, type TipoArchivoMensaje } from "@/lib/mensajes";
 import { ESTADOS_SERVICIO_CONTRATADO, ETIQUETA_ESTADO } from "@/lib/estado-servicio";
 import FacturacionCard from "@/components/alumnos/FacturacionCard";
@@ -109,6 +109,10 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
 
         if (errorMensajes) console.error("Error al traer los mensajes:", errorMensajes.message);
         setMensajes((mensajesData as MensajeProyecto[]) || []);
+
+        // Al entrar acá, el alumno ya está viendo los mensajes del admin: se
+        // marcan leídos para que baje el badge de no-leídos en su sidebar.
+        marcarMensajesLeidos(id);
       }
 
       setCargandoProyecto(false);
@@ -118,13 +122,14 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
 
   // Chat en vivo: cualquier mensaje nuevo (propio o de la agencia) llega acá.
   useEffect(() => {
-    if (!proyecto) return;
+    const proyectoId = proyecto?.id;
+    if (!proyectoId) return;
 
     const canal = supabase
-      .channel(`mensajes-proyecto-${proyecto.id}`)
+      .channel(`mensajes-proyecto-${proyectoId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "mensajes_proyecto", filter: `servicio_contratado_id=eq.${proyecto.id}` },
+        { event: "INSERT", schema: "public", table: "mensajes_proyecto", filter: `servicio_contratado_id=eq.${proyectoId}` },
         (payload) => {
           setMensajes((prev) => [...prev, payload.new as MensajeProyecto]);
         }

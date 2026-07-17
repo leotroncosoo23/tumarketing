@@ -38,10 +38,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [hidratado, setHidratado] = useState(false);
 
-  // Recupera el carrito guardado en el navegador al montar.
+  // Recupera el carrito guardado en el navegador al montar. localStorage no
+  // existe en el servidor y su valor puede no coincidir con el HTML ya
+  // renderizado, así que esta lectura tiene que esperar a después del
+  // hidratado (deliberadamente en un efecto, no es un simple fetch evitable).
   useEffect(() => {
     try {
       const guardado = window.localStorage.getItem(CARRITO_STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (guardado) setItems(JSON.parse(guardado));
     } catch {
       // localStorage corrupto o no disponible: arrancamos con el carrito vacío.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { obtenerUrlArchivo } from "@/lib/mensajes-actions";
 import { aprobarPost, solicitarCambiosPost } from "@/lib/posts-actions";
@@ -91,8 +91,9 @@ function ModuloSocial({ servicioContratadoId, mensajesImagenesCliente }: Pick<Mo
   const [comentario, setComentario] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [urlsImagenes, setUrlsImagenes] = useState<Record<string, string>>({});
+  const urlsSolicitadas = useRef(new Set<string>());
 
-  const cargarPosts = async () => {
+  const cargarPosts = useCallback(async () => {
     const { data, error } = await supabase
       .from("posts_calendario")
       .select("*")
@@ -102,15 +103,21 @@ function ModuloSocial({ servicioContratadoId, mensajesImagenesCliente }: Pick<Mo
     if (error) console.error("Error al traer el calendario:", error.message);
     setPosts((data as PostCalendario[]) || []);
     setCargando(false);
-  };
-
-  useEffect(() => {
-    cargarPosts();
   }, [servicioContratadoId]);
 
   useEffect(() => {
+    // Patrón estándar de "traer datos al montar" usado en toda la app: el
+    // setState real ocurre después del await dentro de cargarPosts, no acá.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    cargarPosts();
+  }, [cargarPosts]);
+
+  useEffect(() => {
+    // Un ref (no el estado) trackea qué imágenes ya se pidieron, para no
+    // depender de "urlsImagenes" acá y disparar el efecto en bucle.
     posts.forEach((post) => {
-      if (post.imagen_path && !urlsImagenes[post.id]) {
+      if (post.imagen_path && !urlsSolicitadas.current.has(post.id)) {
+        urlsSolicitadas.current.add(post.id);
         obtenerUrlArchivo(post.imagen_path).then((r) => {
           if (r.url) setUrlsImagenes((prev) => ({ ...prev, [post.id]: r.url! }));
         });

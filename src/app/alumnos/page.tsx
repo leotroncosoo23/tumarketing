@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -89,9 +89,13 @@ export default function AlumnosDashboard() {
   const { perfil, usuario, cargando } = useAlumnoSession();
 
   const [inscripciones, setInscripciones] = useState<Inscripcion[]>([]);
-  const [cargandoCursos, setCargandoCursos] = useState(true);
+  // Si cursos está deshabilitado, arranca directo en "no cargando": nunca hay
+  // nada que pedirle a Supabase para esa sección.
+  const [cargandoCursos, setCargandoCursos] = useState(CURSOS_HABILITADO);
   const [serviciosActivos, setServiciosActivos] = useState<ServicioActivo[]>([]);
   const [config, setConfig] = useState<{ whatsapp_numero: string; whatsapp_comunidad_url: string; discord_url: string } | null>(null);
+  const [mensajesSinLeer, setMensajesSinLeer] = useState(0);
+  const idsServiciosRef = useRef<string[]>([]);
 
   const [vista, setVista] = useState<Vista>("inicio");
   const [mostrarTipo, setMostrarTipo] = useState<"cursando" | "finalizados">("cursando");
@@ -99,14 +103,43 @@ export default function AlumnosDashboard() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [colapsado, setColapsado] = useState(false);
 
+  // Cuenta mensajes del admin sin leer en los proyectos del alumno. Usa un ref
+  // (no el estado de serviciosActivos) para que la suscripción realtime, que se
+  // arma una sola vez al montar, siempre lea la lista de ids más actual.
+  const contarMensajesSinLeer = async () => {
+    const ids = idsServiciosRef.current;
+    if (ids.length === 0) {
+      setMensajesSinLeer(0);
+      return;
+    }
+    const { count } = await supabase
+      .from("mensajes_proyecto")
+      .select("id", { count: "exact", head: true })
+      .eq("autor_rol", "admin")
+      .eq("leido", false)
+      .in("servicio_contratado_id", ids);
+    setMensajesSinLeer(count || 0);
+  };
+
+  useEffect(() => {
+    // Se arma una sola vez: contarMensajesSinLeer siempre lee el ref actualizado.
+    const canal = supabase
+      .channel("mensajes-proyecto-sidebar-alumno")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "mensajes_proyecto" }, contarMensajesSinLeer)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "mensajes_proyecto" }, contarMensajesSinLeer)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, []);
+
   useEffect(() => {
     if (!perfil) return;
 
     // Cursos deshabilitado (ver feature-flags.ts): no tiene sentido pedirle
     // datos a Supabase para una sección que no se muestra.
-    if (!CURSOS_HABILITADO) {
-      setCargandoCursos(false);
-    } else {
+    if (CURSOS_HABILITADO) {
       const fetchInscripciones = async () => {
         const { data, error } = await supabase
           .from("inscripciones")
@@ -136,8 +169,14 @@ export default function AlumnosDashboard() {
         (briefingsRes.data || []).map((b: { servicio_contratado_id: string | null }) => b.servicio_contratado_id)
       );
 
+      type ServicioContratadoFila = {
+        id: string;
+        estado: string;
+        suspendido: boolean;
+        servicios: { titulo: string } | null;
+      };
       setServiciosActivos(
-        (serviciosRes.data || []).map((sc: any) => ({
+        ((serviciosRes.data as unknown as ServicioContratadoFila[]) || []).map((sc) => ({
           id: sc.id,
           nombre: sc.servicios?.titulo || "Servicio eliminado",
           estado: sc.estado as EstadoServicioContratado,
@@ -145,6 +184,9 @@ export default function AlumnosDashboard() {
           suspendido: sc.suspendido,
         }))
       );
+
+      idsServiciosRef.current = (serviciosRes.data || []).map((sc) => sc.id);
+      await contarMensajesSinLeer();
     };
     fetchServiciosActivos();
 
@@ -159,9 +201,14 @@ export default function AlumnosDashboard() {
     fetchConfig();
   }, [perfil]);
 
-  useEffect(() => {
+  // Reinicia el carrusel cuando cambia el filtro, ajustando el estado durante
+  // el render en vez de un efecto (patrón recomendado por React para "adjusting
+  // state when a prop changes": https://react.dev/learn/you-might-not-need-an-effect).
+  const [mostrarTipoAnterior, setMostrarTipoAnterior] = useState(mostrarTipo);
+  if (mostrarTipo !== mostrarTipoAnterior) {
+    setMostrarTipoAnterior(mostrarTipo);
     setIndiceDestacado(0);
-  }, [mostrarTipo]);
+  }
 
   const handleCerrarSesion = async () => {
     await supabase.auth.signOut();
@@ -269,7 +316,14 @@ export default function AlumnosDashboard() {
                 vista === "proyectos" ? "bg-[#ccff00]/10 text-[#ccff00]" : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
               }`}
             >
-              <span className="text-lg shrink-0">🗂️</span>
+              <span className="relative text-lg shrink-0">
+                🗂️
+                {mensajesSinLeer > 0 && (
+                  <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-[#ccff00] text-black text-[9px] font-black flex items-center justify-center">
+                    {mensajesSinLeer > 9 ? "9+" : mensajesSinLeer}
+                  </span>
+                )}
+              </span>
               {!colapsado && <span className="font-medium text-sm">Mis Proyectos</span>}
             </button>
 

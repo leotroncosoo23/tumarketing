@@ -6,8 +6,19 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+type Recurso = {
+  id: string;
+  slug: string;
+  titulo: string;
+  descripcion_corta: string | null;
+  tipo: string;
+  formato: string | null;
+  icono: string | null;
+  precio: number | null;
+};
+
 export default function GuiasPage() {
-  const [recursos, setRecursos] = useState<any[]>([]);
+  const [recursos, setRecursos] = useState<Recurso[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("");
@@ -33,7 +44,7 @@ export default function GuiasPage() {
   }, []);
 
   const formatos = useMemo(
-    () => Array.from(new Set(recursos.map((r) => r.formato).filter(Boolean))),
+    () => Array.from(new Set(recursos.map((r) => r.formato).filter((f): f is string => Boolean(f)))),
     [recursos]
   );
 

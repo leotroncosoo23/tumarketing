@@ -78,7 +78,8 @@ export default function ResumenTab() {
 
       // Sin tabla de ventas propia, contamos inscripciones por curso como proxy.
       const conteoPorCurso = new Map<string, { nombre: string; ventas: number }>();
-      (inscripcionesRes.data || []).forEach((insc: any) => {
+      type InscripcionConCurso = { curso_id: string; cursos: { titulo: string } | null };
+      ((inscripcionesRes.data as unknown as InscripcionConCurso[]) || []).forEach((insc) => {
         const nombre = insc.cursos?.titulo || "Curso eliminado";
         const actual = conteoPorCurso.get(insc.curso_id) || { nombre, ventas: 0 };
         actual.ventas += 1;
@@ -90,8 +91,9 @@ export default function ResumenTab() {
         .slice(0, 3);
       setTopCursos(ranking);
 
+      type BlogFila = { id: string; titulo: string; creado_en: string };
       setUltimosBlogs(
-        (blogsRes.data || []).map((b: any) => ({
+        ((blogsRes.data as unknown as BlogFila[]) || []).map((b) => ({
           id: b.id,
           titulo: b.titulo,
           fecha: new Date(b.creado_en).toLocaleDateString("es-AR", {
@@ -102,8 +104,9 @@ export default function ResumenTab() {
         }))
       );
 
+      type CuponFila = { id: string; codigo: string; tipo_descuento: string; valor: number; activo: boolean; creado_en: string };
       setUltimosCupones(
-        (cuponesRes.data || []).map((c: any) => ({
+        ((cuponesRes.data as unknown as CuponFila[]) || []).map((c) => ({
           id: c.id,
           codigo: c.codigo,
           descuento: c.tipo_descuento === "porcentaje" ? `${c.valor}%` : `$${Number(c.valor).toLocaleString("es-AR")}`,

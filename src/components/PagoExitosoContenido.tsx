@@ -13,8 +13,17 @@ export default function PagoExitosoContenido() {
   const searchParams = useSearchParams();
   const { vaciarCarrito } = useCart();
 
-  const [estado, setEstado] = useState<Estado>("confirmando");
-  const [error, setError] = useState<string | null>(null);
+  const paymentId = searchParams.get("payment_id");
+  const status = searchParams.get("status");
+  const parametrosInvalidos = status !== "approved" || !paymentId;
+
+  // searchParams ya está disponible durante el render (a diferencia de
+  // localStorage/window), así que el estado inicial se puede derivar acá
+  // directamente en vez de pasar por un efecto.
+  const [estado, setEstado] = useState<Estado>(parametrosInvalidos ? "error" : "confirmando");
+  const [error, setError] = useState<string | null>(
+    parametrosInvalidos ? "No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano." : null
+  );
 
   // Si llegamos acá es porque Mercado Pago redirigió tras el pago: vaciamos
   // el carrito ya mismo, sin esperar la confirmación del servidor.
@@ -23,14 +32,7 @@ export default function PagoExitosoContenido() {
   }, [vaciarCarrito]);
 
   useEffect(() => {
-    const paymentId = searchParams.get("payment_id");
-    const status = searchParams.get("status");
-
-    if (status !== "approved" || !paymentId) {
-      setEstado("error");
-      setError("No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano.");
-      return;
-    }
+    if (parametrosInvalidos || !paymentId) return;
 
     confirmarPagoYOtorgarAcceso(paymentId).then((resultado) => {
       if (!resultado.ok) {
@@ -41,7 +43,7 @@ export default function PagoExitosoContenido() {
       setEstado("listo");
       router.push("/alumnos");
     });
-  }, [searchParams, router]);
+  }, [paymentId, parametrosInvalidos, router]);
 
   return (
     <div className="max-w-lg mx-auto px-6 py-24 text-center">

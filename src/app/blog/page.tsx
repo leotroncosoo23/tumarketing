@@ -6,8 +6,19 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+type Blog = {
+  id: string;
+  slug: string;
+  titulo: string;
+  resumen: string | null;
+  autor: string | null;
+  categoria: string | null;
+  imagen_url: string | null;
+  creado_en: string;
+};
+
 export default function BlogPage() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [categoriaFiltro, setCategoriaFiltro] = useState("");
@@ -32,7 +43,7 @@ export default function BlogPage() {
   }, []);
 
   const categorias = useMemo(
-    () => Array.from(new Set(blogs.map((b) => b.categoria).filter(Boolean))),
+    () => Array.from(new Set(blogs.map((b) => b.categoria).filter((c): c is string => Boolean(c)))),
     [blogs]
   );
 

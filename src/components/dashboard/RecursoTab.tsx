@@ -9,11 +9,28 @@ const RECURSO_VACIO = {
   beneficios: "", estado: "Publicado",
 };
 
+type Recurso = {
+  id: string;
+  titulo: string;
+  slug: string;
+  tipo: string;
+  precio: number | null;
+  formato: string;
+  icono: string;
+  imagen_url: string;
+  archivo_url: string;
+  descripcion_corta: string;
+  descripcion_larga: string;
+  beneficios: string;
+  estado: string;
+  recursos_descargas?: { count: number }[];
+};
+
 export default function RecursoTab() {
   const [showForm, setShowForm] = useState(false);
-  const [recursos, setRecursos] = useState<any[]>([]);
+  const [recursos, setRecursos] = useState<Recurso[]>([]);
   const [cargando, setCargando] = useState(false);
-  const [recursoEditando, setRecursoEditando] = useState<any | null>(null);
+  const [recursoEditando, setRecursoEditando] = useState<Recurso | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [subiendoImagen, setSubiendoImagen] = useState(false);
   const [subiendoImagenContenido, setSubiendoImagenContenido] = useState(false);
@@ -34,6 +51,9 @@ export default function RecursoTab() {
   };
 
   useEffect(() => {
+    // fetchRecursos también se reutiliza tras crear/editar/borrar un recurso
+    // (ver más abajo), por eso vive fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRecursos();
   }, []);
 
@@ -53,8 +73,9 @@ export default function RecursoTab() {
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("imagenes-blog").getPublicUrl(fileName);
       setNuevoRecurso({ ...nuevoRecurso, imagen_url: data.publicUrl });
-    } catch (error: any) {
-      alert("Error subiendo la imagen: " + error.message);
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : "Error desconocido";
+      alert("Error subiendo la imagen: " + mensaje);
     } finally {
       setSubiendoImagen(false);
     }
@@ -89,8 +110,9 @@ export default function RecursoTab() {
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("imagenes-blog").getPublicUrl(fileName);
       insertarEnContenido(`\n[img]${data.publicUrl}[/img]\n`);
-    } catch (error: any) {
-      alert("Error subiendo la imagen: " + error.message);
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : "Error desconocido";
+      alert("Error subiendo la imagen: " + mensaje);
     } finally {
       setSubiendoImagenContenido(false);
       e.target.value = "";
@@ -129,7 +151,7 @@ export default function RecursoTab() {
     setGuardando(false);
   };
 
-  const iniciarEdicion = (recurso: any) => {
+  const iniciarEdicion = (recurso: Recurso) => {
     setRecursoEditando(recurso);
     setNuevoRecurso({
       titulo: recurso.titulo,

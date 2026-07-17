@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-black border-t border-neutral-900 pt-20 pb-10">
@@ -74,13 +76,13 @@ export default function Footer() {
           <div className="flex flex-col">
             <h4 className="text-white font-bold text-lg mb-6">Servicios</h4>
             <ul className="space-y-3">
-              <li><a href="/" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Inicio</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Google & Meta Ads</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Redes Sociales</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Posicionamiento SEO</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">IA / GEO</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">E-commerce</a></li>
-              <li><a href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Diseño Web</a></li>
+              <li><Link href="/" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Inicio</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Google & Meta Ads</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Redes Sociales</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Posicionamiento SEO</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">IA / GEO</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">E-commerce</Link></li>
+              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Diseño Web</Link></li>
             </ul>
           </div>
 

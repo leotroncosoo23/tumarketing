@@ -33,35 +33,34 @@ export default function ConfiguracionTab() {
   const [guardando, setGuardando] = useState(false);
   const [guardadoOk, setGuardadoOk] = useState(false);
 
-  const fetchConfig = async () => {
-    setCargando(true);
-    const { data, error } = await supabase
-      .from("configuracion")
-      .select("*")
-      .eq("id", 1)
-      .single();
-
-    if (error) {
-      console.error("Error al traer configuración:", error.message);
-    } else if (data) {
-      // Completamos con "" cualquier columna que haya quedado en NULL en la base
-      // (inputs controlados no aceptan null como value).
-      setConfig({
-        id: data.id,
-        whatsapp_numero: data.whatsapp_numero ?? "",
-        instagram_url: data.instagram_url ?? "",
-        tiktok_url: data.tiktok_url ?? "",
-        youtube_url: data.youtube_url ?? "",
-        banner_texto: data.banner_texto ?? "",
-        banner_activo: data.banner_activo ?? false,
-        whatsapp_comunidad_url: data.whatsapp_comunidad_url ?? "",
-        discord_url: data.discord_url ?? "",
-      });
-    }
-    setCargando(false);
-  };
-
   useEffect(() => {
+    const fetchConfig = async () => {
+      setCargando(true);
+      const { data, error } = await supabase
+        .from("configuracion")
+        .select("*")
+        .eq("id", 1)
+        .single();
+
+      if (error) {
+        console.error("Error al traer configuración:", error.message);
+      } else if (data) {
+        // Completamos con "" cualquier columna que haya quedado en NULL en la base
+        // (inputs controlados no aceptan null como value).
+        setConfig({
+          id: data.id,
+          whatsapp_numero: data.whatsapp_numero ?? "",
+          instagram_url: data.instagram_url ?? "",
+          tiktok_url: data.tiktok_url ?? "",
+          youtube_url: data.youtube_url ?? "",
+          banner_texto: data.banner_texto ?? "",
+          banner_activo: data.banner_activo ?? false,
+          whatsapp_comunidad_url: data.whatsapp_comunidad_url ?? "",
+          discord_url: data.discord_url ?? "",
+        });
+      }
+      setCargando(false);
+    };
     fetchConfig();
   }, []);
 
@@ -265,7 +264,7 @@ export default function ConfiguracionTab() {
               </div>
             </div>
             <p className="text-xs text-neutral-500 mt-4">
-              Estos links aparecen en la sección "Soporte / Comunidad" de la plataforma de alumnos. Dejalo vacío para que ese botón no se muestre.
+              Estos links aparecen en la sección &quot;Soporte / Comunidad&quot; de la plataforma de alumnos. Dejalo vacío para que ese botón no se muestre.
             </p>
           </div>
 

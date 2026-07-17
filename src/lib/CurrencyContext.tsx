@@ -19,8 +19,12 @@ const MONEDA_STORAGE_KEY = "tumarketing_moneda";
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [moneda, setMonedaState] = useState<Moneda>("ARS");
 
+  // localStorage no existe en el servidor y su valor puede no coincidir con
+  // el HTML ya renderizado, así que esta lectura tiene que esperar a después
+  // del hidratado (deliberadamente en un efecto).
   useEffect(() => {
     const guardada = window.localStorage.getItem(MONEDA_STORAGE_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (guardada === "ARS" || guardada === "USD") setMonedaState(guardada);
   }, []);
 

@@ -22,6 +22,10 @@ export default function AulaVirtualPage({ params }: { params: Promise<{ id: stri
 
   const inscripto = inscripcionId !== null ? true : cargandoCurso ? null : false;
 
+  const marcarComoVista = async (idInscripcion: string, idLeccion: string) => {
+    await supabase.from("inscripciones").update({ ultima_leccion_id: idLeccion }).eq("id", idInscripcion);
+  };
+
   useEffect(() => {
     if (!perfil) return;
 
@@ -56,12 +60,7 @@ export default function AulaVirtualPage({ params }: { params: Promise<{ id: stri
     };
 
     cargar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perfil, id]);
-
-  const marcarComoVista = async (idInscripcion: string, idLeccion: string) => {
-    await supabase.from("inscripciones").update({ ultima_leccion_id: idLeccion }).eq("id", idInscripcion);
-  };
 
   const seleccionarLeccion = (leccion: Leccion) => {
     setLeccionActivaState(leccion);

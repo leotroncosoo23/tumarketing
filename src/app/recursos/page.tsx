@@ -6,11 +6,32 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
+type Blog = {
+  id: string;
+  slug: string;
+  titulo: string;
+  resumen: string | null;
+  autor: string | null;
+  categoria: string | null;
+  imagen_url: string | null;
+};
+
+type Guia = {
+  id: string;
+  slug: string;
+  titulo: string;
+  descripcion_corta: string | null;
+  tipo: string;
+  formato: string | null;
+  icono: string | null;
+  precio: number | null;
+};
+
 export default function RecursosPage() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
-  const [guias, setGuias] = useState<any[]>([]);
+  const [guias, setGuias] = useState<Guia[]>([]);
   const [cargandoGuias, setCargandoGuias] = useState(true);
 
   useEffect(() => {

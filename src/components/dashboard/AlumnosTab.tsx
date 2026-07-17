@@ -348,8 +348,9 @@ export default function AlumnosTab() {
       } else {
         setAlumnos((prev) => prev.map((a) => (a.id === usuarioId ? { ...a, activo: activarAcceso } : a)));
       }
-    } catch (err: any) {
-      alert("Error de conexión: " + err.message);
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : "Error desconocido";
+      alert("Error de conexión: " + mensaje);
     }
     setProcesando(false);
   };
@@ -397,8 +398,9 @@ export default function AlumnosTab() {
       setAccesosRecursos([]);
       setNombreNuevoAlumno("");
       setEmailNuevoAlumno("");
-    } catch (err: any) {
-      alert("Error de conexión: " + err.message);
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : "Error desconocido";
+      alert("Error de conexión: " + mensaje);
     }
     setCreandoAlumno(false);
   };

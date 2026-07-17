@@ -33,9 +33,12 @@ export default function OnboardingPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // window no existe en el servidor: esta lectura tiene que esperar a que
+    // el componente esté montado en el cliente, por eso va en un efecto.
     const params = new URLSearchParams(window.location.search);
     const servicio = params.get("servicio");
     const scid = params.get("scid");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (servicio) setPlan(servicio);
     if (scid) setServicioContratadoId(scid);
   }, []);

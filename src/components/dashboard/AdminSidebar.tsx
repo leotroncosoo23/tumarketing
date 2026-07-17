@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export type AdminTabId =
@@ -46,6 +46,32 @@ export default function AdminSidebar({ activeId, onSelectTab }: AdminSidebarProp
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
+  const [mensajesSinLeer, setMensajesSinLeer] = useState(0);
+
+  useEffect(() => {
+    const contarSinLeer = async () => {
+      const { count } = await supabase
+        .from("mensajes_proyecto")
+        .select("id", { count: "exact", head: true })
+        .eq("autor_rol", "cliente")
+        .eq("leido", false);
+      setMensajesSinLeer(count || 0);
+    };
+    contarSinLeer();
+
+    // Recalcula ante cualquier mensaje nuevo o cualquier marcado como leído
+    // (desde acá o desde AlumnosTab, que vive aparte) para que el número
+    // del sidebar nunca quede desactualizado.
+    const canal = supabase
+      .channel("mensajes-proyecto-sidebar-admin")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "mensajes_proyecto" }, contarSinLeer)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "mensajes_proyecto" }, contarSinLeer)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canal);
+    };
+  }, []);
 
   const handleCerrarSesion = async () => {
     setCerrandoSesion(true);
@@ -73,11 +99,16 @@ export default function AdminSidebar({ activeId, onSelectTab }: AdminSidebarProp
           <nav className="space-y-2 mt-4 md:mt-0">
             {NAV_ITEMS.map((item) => {
               const activo = activeId === item.id;
-              const claseComun = `w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+              const claseComun = `relative w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
                 activo
                   ? "bg-[#ccff00]/10 text-[#ccff00] border border-[#ccff00]/20"
                   : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
               }`;
+              const badge = item.id === "alumnos" && mensajesSinLeer > 0 && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 min-w-[20px] h-5 px-1.5 rounded-full bg-[#ccff00] text-black text-[10px] font-black flex items-center justify-center">
+                  {mensajesSinLeer > 9 ? "9+" : mensajesSinLeer}
+                </span>
+              );
 
               // Ítem con ruta propia (Servicios), o cualquier ítem cuando esta
               // instancia no maneja pestañas (estamos en una página aparte).
@@ -90,6 +121,7 @@ export default function AdminSidebar({ activeId, onSelectTab }: AdminSidebarProp
                     className={claseComun}
                   >
                     {item.label}
+                    {badge}
                   </Link>
                 );
               }
@@ -104,6 +136,7 @@ export default function AdminSidebar({ activeId, onSelectTab }: AdminSidebarProp
                   className={claseComun}
                 >
                   {item.label}
+                  {badge}
                 </button>
               );
             })}

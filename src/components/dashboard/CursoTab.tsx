@@ -10,11 +10,38 @@ function isoAInputLocal(iso: string) {
   return conOffset.toISOString().slice(0, 16);
 }
 
+type Curso = {
+  id: string;
+  titulo: string;
+  categoria: string;
+  precio: number;
+  precio_descuento: number | null;
+  descripcion: string;
+  imagen_url: string;
+  video_url: string;
+  duracion: string;
+  nivel: string;
+  modalidad: string;
+  requisitos: string;
+  para_quien: string;
+  aprendizajes: string;
+  oferta_activa: boolean;
+  oferta_etiqueta: string;
+  oferta_fecha_fin: string | null;
+};
+
+type Leccion = {
+  id: string;
+  titulo: string;
+  video_url: string;
+  orden: number;
+};
+
 export default function CursoTab() {
   const [showCursoForm, setShowCursoForm] = useState(false);
-  const [cursos, setCursos] = useState<any[]>([]);
+  const [cursos, setCursos] = useState<Curso[]>([]);
   const [cargandoCursos, setCargandoCursos] = useState(false);
-  const [cursoEditando, setCursoEditando] = useState<any | null>(null);
+  const [cursoEditando, setCursoEditando] = useState<Curso | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [subiendoImagen, setSubiendoImagen] = useState(false);
   
@@ -26,8 +53,8 @@ export default function CursoTab() {
     oferta_activa: false, oferta_etiqueta: "", oferta_fecha_fin: ""
   });
 
-  const [cursoSeleccionado, setCursoSeleccionado] = useState<any | null>(null);
-  const [lecciones, setLecciones] = useState<any[]>([]);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(null);
+  const [lecciones, setLecciones] = useState<Leccion[]>([]);
   const [cargandoLecciones, setCargandoLecciones] = useState(false);
   const [showLeccionForm, setShowLeccionForm] = useState(false);
   const [nuevaLeccion, setNuevaLeccion] = useState({ titulo: "", video_url: "", orden: 1 });
@@ -40,6 +67,9 @@ export default function CursoTab() {
   };
 
   useEffect(() => {
+    // fetchCursos también se reutiliza tras crear/editar/borrar un curso (ver
+    // más abajo), por eso vive fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCursos();
   }, []);
 
@@ -53,8 +83,9 @@ export default function CursoTab() {
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from("imagenes-cursos").getPublicUrl(fileName);
       setNuevoCurso({ ...nuevoCurso, imagen_url: data.publicUrl });
-    } catch (error: any) {
-      alert("Error subiendo la imagen: " + error.message);
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : "Error desconocido";
+      alert("Error subiendo la imagen: " + mensaje);
     } finally {
       setSubiendoImagen(false);
     }
@@ -99,7 +130,7 @@ export default function CursoTab() {
     setGuardando(false);
   };
 
-  const iniciarEdicionCurso = (curso: any) => {
+  const iniciarEdicionCurso = (curso: Curso) => {
     setCursoEditando(curso);
     setNuevoCurso({
       titulo: curso.titulo,
@@ -141,7 +172,7 @@ export default function CursoTab() {
   };
 
   // --- LÓGICA DE LECCIONES ---
-  const abrirGestorLecciones = async (curso: any) => {
+  const abrirGestorLecciones = async (curso: Curso) => {
     setCursoSeleccionado(curso);
     await fetchLecciones(curso.id);
   };
@@ -156,6 +187,7 @@ export default function CursoTab() {
 
   const handleGuardarLeccion = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!cursoSeleccionado) return;
     setGuardando(true);
     const { error } = await supabase.from("lecciones").insert([{ curso_id: cursoSeleccionado.id, titulo: nuevaLeccion.titulo, video_url: nuevaLeccion.video_url, orden: Number(nuevaLeccion.orden) }]);
     if (error) alert("Error guardando lección: " + error.message);
@@ -169,6 +201,7 @@ export default function CursoTab() {
   };
 
   const eliminarLeccion = async (id: string) => {
+    if (!cursoSeleccionado) return;
     if (!confirm("¿Seguro que querés borrar esta lección?")) return;
     const { error } = await supabase.from("lecciones").delete().eq("id", id);
     if (error) alert("Error: " + error.message);
@@ -306,7 +339,7 @@ export default function CursoTab() {
               <div>
                 <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">Imagen de Portada</label>
                 <div className="flex gap-4">
-                  {nuevoCurso.imagen_url && <img src={nuevoCurso.imagen_url} className="w-12 h-12 rounded object-cover" />}
+                  {nuevoCurso.imagen_url && <img src={nuevoCurso.imagen_url} alt="Portada del curso" className="w-12 h-12 rounded object-cover" />}
                   <input type="file" accept="image/*" onChange={handleSubirImagen} disabled={subiendoImagen} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-2 py-2 text-sm text-neutral-400 file:bg-[#ccff00] file:text-black file:rounded-lg file:border-0 file:px-3 file:py-1 file:font-bold" />
                 </div>
               </div>

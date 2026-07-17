@@ -3,11 +3,23 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
+type Blog = {
+  id: string;
+  titulo: string;
+  slug: string;
+  autor: string;
+  resumen: string;
+  contenido: string;
+  imagen_url: string;
+  categoria: string;
+  estado: string;
+};
+
 export default function BlogTab() {
   const [showBlogForm, setShowBlogForm] = useState(false);
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [cargandoBlogs, setCargandoBlogs] = useState(false);
-  const [blogEditando, setBlogEditando] = useState<any | null>(null);
+  const [blogEditando, setBlogEditando] = useState<Blog | null>(null);
 
   const [guardando, setGuardando] = useState(false);
   const [subiendoImagen, setSubiendoImagen] = useState(false);
@@ -27,6 +39,9 @@ export default function BlogTab() {
   };
 
   useEffect(() => {
+    // fetchBlogs también se reutiliza tras crear/editar/borrar un post (ver
+    // más abajo), por eso vive fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchBlogs();
   }, []);
 
@@ -43,8 +58,9 @@ export default function BlogTab() {
 
       const { data } = supabase.storage.from("imagenes-blog").getPublicUrl(fileName);
       setNuevoBlog({ ...nuevoBlog, imagen_url: data.publicUrl });
-    } catch (error: any) {
-      alert("Error subiendo la imagen: " + error.message);
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : "Error desconocido";
+      alert("Error subiendo la imagen: " + mensaje);
     } finally {
       setSubiendoImagen(false);
     }
@@ -83,8 +99,9 @@ export default function BlogTab() {
 
       const { data } = supabase.storage.from("imagenes-blog").getPublicUrl(fileName);
       insertarEnContenido(`\n[img]${data.publicUrl}[/img]\n`);
-    } catch (error: any) {
-      alert("Error subiendo la imagen: " + error.message);
+    } catch (error) {
+      const mensaje = error instanceof Error ? error.message : "Error desconocido";
+      alert("Error subiendo la imagen: " + mensaje);
     } finally {
       setSubiendoImagenContenido(false);
       e.target.value = "";
@@ -124,7 +141,7 @@ export default function BlogTab() {
     setGuardando(false);
   };
 
-  const iniciarEdicionBlog = (blog: any) => {
+  const iniciarEdicionBlog = (blog: Blog) => {
     setBlogEditando(blog);
     setNuevoBlog({
       titulo: blog.titulo,

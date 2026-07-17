@@ -26,7 +26,10 @@ export default function AnuncioBanner() {
   }, []);
 
   useEffect(() => {
+    // sessionStorage no existe en el servidor: este chequeo tiene que esperar
+    // a que el componente esté montado en el cliente, por eso va en un efecto.
     if (config?.banner_texto && sessionStorage.getItem("banner_cerrado") === config.banner_texto) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCerrado(true);
     }
   }, [config?.banner_texto]);

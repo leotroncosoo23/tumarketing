@@ -48,10 +48,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || "Error inesperado en el servidor." },
-      { status: 500 }
-    );
+  } catch (err) {
+    const mensaje = err instanceof Error ? err.message : "Error inesperado en el servidor.";
+    return NextResponse.json({ error: mensaje }, { status: 500 });
   }
 }

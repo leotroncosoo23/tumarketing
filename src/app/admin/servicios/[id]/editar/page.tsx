@@ -37,7 +37,7 @@ export default async function EditarServicioPage({ params }: { params: Promise<{
             ← Volver a Servicios
           </Link>
           <h1 className="text-3xl font-black">Editar Servicio</h1>
-          <p className="text-neutral-400 text-sm">Actualizá la ficha de "{servicio.titulo}".</p>
+          <p className="text-neutral-400 text-sm">Actualizá la ficha de &quot;{servicio.titulo}&quot;.</p>
         </div>
 
         <ServicioForm servicioInicial={servicio} onGuardar={guardarCambios} />

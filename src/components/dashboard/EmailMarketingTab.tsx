@@ -41,6 +41,9 @@ export default function EmailMarketingTab() {
   };
 
   useEffect(() => {
+    // fetchHistorial también se reutiliza después de enviar un comunicado (ver
+    // más abajo), por eso ambas viven fuera del efecto en vez de estar inline.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchCantidadSuscriptores();
     fetchHistorial();
   }, []);
@@ -73,8 +76,9 @@ export default function EmailMarketingTab() {
         setMensaje("");
         fetchHistorial();
       }
-    } catch (err: any) {
-      alert("Error de conexión: " + err.message);
+    } catch (err) {
+      const mensaje = err instanceof Error ? err.message : "Error desconocido";
+      alert("Error de conexión: " + mensaje);
     }
     setEnviando(false);
   };

@@ -68,7 +68,10 @@ export default function CursoDetallePage({ params }: { params: Promise<{ id: str
   }, [id]);
 
   useEffect(() => {
+    // Sincroniza con un timer externo (setInterval más abajo): es un caso
+    // legítimo de efecto, no un simple fetch-on-mount.
     if (!curso?.oferta_activa || !curso.oferta_fecha_fin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTiempoRestante(null);
       return;
     }

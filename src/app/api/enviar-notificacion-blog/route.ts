@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
         } else {
           enviados += batch.length;
         }
-      } catch (error: any) {
+      } catch (error) {
         errores += batch.length;
         console.error('Error en lote:', error);
       }
@@ -90,9 +90,10 @@ export async function POST(request: NextRequest) {
       errores
     });
 
-  } catch (error: any) {
+  } catch (error) {
+    const mensaje = error instanceof Error ? error.message : "Error desconocido";
     return NextResponse.json(
-      { error: 'Error al enviar notificación', details: error.message },
+      { error: 'Error al enviar notificación', details: mensaje },
       { status: 500 }
     );
   }

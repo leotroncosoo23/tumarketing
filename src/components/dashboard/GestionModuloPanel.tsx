@@ -27,6 +27,13 @@ const COLUMNAS_CALENDARIO = [
   { estado: "cambios_solicitados", titulo: "🔄 Con Cambios" },
 ] as const;
 
+// Función de módulo (no del componente): Date.now() es impuro y no puede
+// llamarse desde una función definida en el cuerpo de un componente con
+// React Compiler activado (reactCompiler: true en next.config.ts).
+function generarPathArchivo(carpeta: string, archivo: File, prefijoNombre = ""): string {
+  return `${carpeta}/${prefijoNombre}${Date.now()}-${archivo.name}`;
+}
+
 type ColorMarca = { nombre: string; hex: string };
 type Tipografia = { nombre: string; url: string };
 
@@ -169,7 +176,7 @@ export default function GestionModuloPanel({ servicioContratadoId, usuarioId, no
 
     let imagenPath: string | null = null;
     if (imagenPost) {
-      const path = `${servicioContratadoId}/posts/${Date.now()}-${imagenPost.name}`;
+      const path = generarPathArchivo(`${servicioContratadoId}/posts`, imagenPost);
       const { error: errorSubida } = await supabase.storage.from("archivos-proyectos").upload(path, imagenPost);
       if (errorSubida) {
         alert("Error al subir la imagen: " + errorSubida.message);
@@ -236,7 +243,7 @@ export default function GestionModuloPanel({ servicioContratadoId, usuarioId, no
 
   const subirLogo = async (variante: "logo_png_path" | "logo_svg_path" | "logo_blanco_path" | "logo_negro_path", archivo: File) => {
     setSubiendoLogo(variante);
-    const path = `${servicioContratadoId}/brandkit/${variante}-${Date.now()}-${archivo.name}`;
+    const path = generarPathArchivo(`${servicioContratadoId}/brandkit`, archivo, `${variante}-`);
     const { error: errorSubida } = await supabase.storage.from("archivos-proyectos").upload(path, archivo);
     if (errorSubida) {
       alert("Error al subir el logo: " + errorSubida.message);

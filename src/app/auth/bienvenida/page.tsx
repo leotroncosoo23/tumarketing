@@ -38,8 +38,9 @@ export default function BienvenidaAlumno() {
       if (!user) throw new Error("Se perdió la sesión, iniciá sesión de nuevo.");
       await crearPerfilAlumno(user, aceptaNewsletter);
       router.replace("/alumnos");
-    } catch (e: any) {
-      setError("No pudimos crear tu cuenta: " + e.message);
+    } catch (e) {
+      const mensaje = e instanceof Error ? e.message : "Error desconocido";
+      setError("No pudimos crear tu cuenta: " + mensaje);
       setGuardando(false);
     }
   };

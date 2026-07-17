@@ -66,16 +66,29 @@ export async function enviarMensaje(input: NuevoMensajeInput): Promise<Resultado
   return {};
 }
 
-// Solo tiene efecto para admin: la RLS de "mensajes_proyecto" no le da permiso
-// de UPDATE al cliente, así que si lo llama un cliente simplemente no actualiza nada.
+// Cada rol marca como leídos los mensajes del OTRO rol: el admin marca los del
+// cliente, el cliente marca los del admin. La RLS de "mensajes_proyecto" espeja
+// esta misma regla (cada uno solo puede actualizar mensajes ajenos en su propio
+// proyecto), así que esto nunca deja que alguien marque sus propios mensajes
+// como leídos ni toque un proyecto que no es suyo.
 export async function marcarMensajesLeidos(servicioContratadoId: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Se perdió la sesión, iniciá sesión de nuevo." };
+
+  const rol = await resolverRolEnProyecto(supabase, user.id, servicioContratadoId);
+  if (!rol) return { error: "No tenés acceso a este proyecto." };
+
+  const rolAutorAMarcar = rol === "admin" ? "cliente" : "admin";
 
   const { error } = await supabase
     .from("mensajes_proyecto")
     .update({ leido: true })
     .eq("servicio_contratado_id", servicioContratadoId)
-    .eq("autor_rol", "cliente")
+    .eq("autor_rol", rolAutorAMarcar)
     .eq("leido", false);
 
   if (error) return { error: error.message };
