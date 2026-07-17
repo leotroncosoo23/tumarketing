@@ -32,7 +32,8 @@ export default function DiferencialGeografico() {
     </span>
 
     <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-6 leading-[1.1]">
-      Calidad de vida. Calidad de código.
+      Calidad de <span className="text-[#D4EE26]">vida</span>. Calidad de{" "}
+      <span className="text-[#D4EE26]">código</span>.
     </h2>
 
     <p className="text-zinc-400 text-lg leading-relaxed max-w-xl">

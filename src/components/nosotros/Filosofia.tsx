@@ -51,7 +51,7 @@ export default function Filosofia() {
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4 leading-[1.1]">
-            Nuestra filosofía de trabajo.
+            Nuestra <span className="text-[#D4EE26]">filosofía de trabajo</span>.
           </h2>
           <p className="text-zinc-400 text-lg">
             Los principios innegociables que fusionan marketing y desarrollo de software, en partes

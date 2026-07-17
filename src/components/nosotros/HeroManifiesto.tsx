@@ -40,9 +40,9 @@ export default function HeroManifiesto() {
           variants={item}
           className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] text-white mb-8"
         >
-          Estrategia digital y{" "}
-          <span className="text-[#D4EE26]">software de alto rendimiento</span>, desde el sur para el
-          mundo.
+          Estrategia <span className="text-[#D4EE26]">digital</span> y{" "}
+          <span className="text-[#D4EE26]">software</span> de alto rendimiento, desde el{" "}
+          <span className="text-[#D4EE26]">sur para el mundo</span>.
         </motion.h1>
 
         <motion.p

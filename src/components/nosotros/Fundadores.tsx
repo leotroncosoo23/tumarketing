@@ -36,7 +36,7 @@ export default function Fundadores() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4 leading-[1.1]">
-            Marketing para atraer. Código a medida para escalar.
+            Marketing y código, hechos para <span className="text-[#D4EE26]">escalar</span>.
           </h2>
           <p className="text-zinc-400 text-lg">
             La fusión perfecta entre visión comercial y arquitectura tecnológica robusta.
