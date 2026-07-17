@@ -1,17 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCurrency } from "@/lib/CurrencyContext";
 import type { Servicio } from "@/lib/servicios";
-
-type Moneda = "ARS" | "USD";
 
 type ServiciosGridProps = {
   servicios: Servicio[];
 };
 
 export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
-  const [moneda, setMoneda] = useState<Moneda>("ARS");
+  const { moneda, setMoneda } = useCurrency();
 
   return (
     <>
