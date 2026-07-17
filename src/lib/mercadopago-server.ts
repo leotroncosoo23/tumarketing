@@ -42,15 +42,19 @@ export function crearClienteSupabaseAdmin(): SupabaseClient | null {
 }
 
 // TABLA: inscripciones (usuario_id, curso_id, progreso, mercadopago_payment_id)
-// TABLA: servicios_contratados (usuario_id, servicio_id, estado, mercadopago_payment_id)
-// El índice único (mercadopago_payment_id, curso_id / servicio_id) hace que insertar
-// dos veces el mismo pago no duplique el acceso: la segunda inserción falla con
-// el código 23505 (unique_violation) y lo tratamos como éxito silencioso.
+// TABLA: servicios_contratados (usuario_id, servicio_id, estado, mercadopago_payment_id, paypal_order_id)
+// El índice único (mercadopago_payment_id, curso_id / servicio_id) -o su equivalente
+// para paypal_order_id- hace que insertar dos veces el mismo pago no duplique el
+// acceso: la segunda inserción falla con el código 23505 (unique_violation) y lo
+// tratamos como éxito silencioso.
+// "proveedor" solo importa para servicios: los cursos todavía no soportan pago con
+// PayPal (no tienen precio_usd), así que ese flujo siempre llega con "mercadopago".
 export async function otorgarAcceso(
   supabaseAdmin: SupabaseClient,
   usuarioId: string,
   item: ItemComprado,
-  paymentId: string
+  paymentId: string,
+  proveedor: "mercadopago" | "paypal" = "mercadopago"
 ) {
   if (item.tipo === "curso") {
     const { error } = await supabaseAdmin
@@ -63,11 +67,13 @@ export async function otorgarAcceso(
     return;
   }
 
+  const columnaPago = proveedor === "paypal" ? "paypal_order_id" : "mercadopago_payment_id";
+
   // Estado inicial "Esperando información": es el mismo texto que ya lee
   // el panel de alumnos (src/app/alumnos/page.tsx).
   const { error } = await supabaseAdmin
     .from("servicios_contratados")
-    .insert([{ usuario_id: usuarioId, servicio_id: item.id, estado: "Esperando información", mercadopago_payment_id: paymentId }]);
+    .insert([{ usuario_id: usuarioId, servicio_id: item.id, estado: "Esperando información", [columnaPago]: paymentId }]);
 
   if (error && error.code !== "23505") {
     console.error(`No pudimos activar el servicio ${item.id} para ${usuarioId}:`, error.message);

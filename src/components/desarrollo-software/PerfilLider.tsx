@@ -59,7 +59,7 @@ export default function PerfilLider() {
 
           <p className="text-2xl font-bold text-white mb-1">Leonardo Troncoso</p>
           <p className="text-cyan-400 font-medium mb-6">
-            Líder de Desarrollo / Analista Programador Universitario
+            Líder de Desarrollo / Analista Programador 
           </p>
 
           <p className="text-neutral-400 leading-relaxed mb-8">

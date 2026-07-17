@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "@/lib/CartContext";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { crearPreferenciaPago } from "@/app/actions/mercadopago";
+import { crearOrdenPayPalAction } from "@/app/actions/paypal";
 
 export default function CartDrawer() {
   const { items, isOpen, cerrarCarrito, eliminarItem, calcularTotal } = useCart();
@@ -15,7 +16,7 @@ export default function CartDrawer() {
   const simbolo = moneda === "ARS" ? "$" : "U$D ";
   const formatoLocale = moneda === "ARS" ? "es-AR" : "en-US";
 
-  const handleCheckout = async () => {
+  const handleCheckoutMercadoPago = async () => {
     setErrorPago(null);
     setProcesandoPago(true);
     try {
@@ -28,6 +29,25 @@ export default function CartDrawer() {
       window.location.href = resultado.initPoint;
     } catch {
       setErrorPago("No pudimos conectar con Mercado Pago. Intentá de nuevo.");
+      setProcesandoPago(false);
+    }
+  };
+
+  // Si el usuario está viendo precios en USD, el pago se procesa siempre con
+  // PayPal: no tiene sentido ofrecerle Mercado Pago (solo cobra en ARS).
+  const handleCheckoutPayPal = async () => {
+    setErrorPago(null);
+    setProcesandoPago(true);
+    try {
+      const resultado = await crearOrdenPayPalAction(items);
+      if (!resultado.ok) {
+        setErrorPago(resultado.error);
+        setProcesandoPago(false);
+        return;
+      }
+      window.location.href = resultado.linkAprobacion;
+    } catch {
+      setErrorPago("No pudimos conectar con PayPal. Intentá de nuevo.");
       setProcesandoPago(false);
     }
   };
@@ -133,13 +153,20 @@ export default function CartDrawer() {
             </span>
           </div>
           {moneda === "USD" ? (
-            <p className="text-neutral-500 text-xs text-center">
-              Mercado Pago solo procesa pagos en ARS por ahora. Cambiá la moneda a pesos para continuar.
-            </p>
+            <>
+              <button
+                onClick={handleCheckoutPayPal}
+                disabled={items.length === 0 || procesandoPago}
+                className="w-full bg-[#ffc439] text-black text-base font-black py-4 rounded-xl hover:bg-[#f0b429] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#ffc439]"
+              >
+                {procesandoPago ? "Redirigiendo a PayPal..." : "Pagar con PayPal"}
+              </button>
+              {errorPago && <p className="text-red-400 text-xs text-center">{errorPago}</p>}
+            </>
           ) : (
             <>
               <button
-                onClick={handleCheckout}
+                onClick={handleCheckoutMercadoPago}
                 disabled={items.length === 0 || procesandoPago}
                 className="w-full bg-[#ccff00] text-black text-base font-black py-4 rounded-xl hover:bg-[#b8e600] transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#ccff00]"
               >

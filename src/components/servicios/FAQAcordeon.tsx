@@ -12,12 +12,12 @@ const FAQS = [
   {
     pregunta: "¿Qué medios de pago aceptan?",
     respuesta:
-      "Trabajamos con las pasarelas más seguras del mercado. Para clientes dentro de Argentina, operamos con MercadoPago, permitiendo pagos con saldo, débito o tarjetas de crédito (aprovechando las cuotas disponibles). Para clientes internacionales, los pagos se procesan de forma 100% segura a través de PayPal.",
+      "Todos los pagos se procesan a través de MercadoPago, la pasarela más segura y usada en Argentina: podés pagar con saldo en cuenta, débito o tarjeta de crédito, aprovechando las cuotas disponibles. Si estás fuera de Argentina y querés coordinar otra forma de pago, escribinos por WhatsApp y lo vemos juntos.",
   },
   {
     pregunta: "¿Por qué puedo ver los precios en pesos y en dólares?",
     respuesta:
-      "Porque brindamos soluciones tecnológicas y de marketing tanto a empresas locales como al exterior. Usando el selector de moneda de nuestra web, no solo cambian los precios, sino que el sistema ajusta automáticamente la pasarela de pago (MercadoPago o PayPal) para que abones en tu moneda local sin sorpresas ni comisiones ocultas.",
+      "Porque brindamos soluciones tecnológicas y de marketing tanto a empresas locales como al exterior. El selector de moneda te deja ver el precio en la que te resulte más clara para comparar, pero el pago siempre se procesa en pesos argentinos a través de MercadoPago.",
   },
   {
     pregunta: "¿Puedo pedir ajustes después de la entrega?",
