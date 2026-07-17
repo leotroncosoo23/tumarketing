@@ -6,6 +6,7 @@ type ServicioDestacado = {
   icono: React.ReactNode;
   titulo: string;
   descripcion: string;
+  href: string;
 };
 
 const SERVICIOS: ServicioDestacado[] = [
@@ -13,21 +14,25 @@ const SERVICIOS: ServicioDestacado[] = [
     icono: <Users className="w-6 h-6" />,
     titulo: "Gestión Integral de Redes",
     descripcion: "Convertimos tu perfil en una máquina de generar confianza y ventas, sin que tengas que ocuparte de publicar todos los días.",
+    href: "/servicios",
   },
   {
     icono: <Target className="w-6 h-6" />,
     titulo: "Publicidad Digital",
     descripcion: "Encontramos a tus clientes ideales antes que tu competencia y convertimos cada peso invertido en resultados medibles.",
+    href: "/servicios",
   },
   {
     icono: <PenTool className="w-6 h-6" />,
     titulo: "Creación de Contenido",
     descripcion: "Piezas visuales que detienen el scroll y comunican por qué tu marca es la mejor opción, no solo que existe.",
+    href: "/servicios",
   },
   {
     icono: <Code2 className="w-6 h-6" />,
     titulo: "Desarrollo Web",
     descripcion: "Un sitio que vende mientras dormís: rápido, profesional y diseñado para convertir visitas en clientes.",
+    href: "/desarrollo-software#soluciones",
   },
 ];
 
@@ -56,7 +61,7 @@ export default function NuestrosServicios() {
               <h3 className="text-white font-bold text-lg mb-2 leading-snug">{servicio.titulo}</h3>
               <p className="text-neutral-400 text-sm leading-relaxed mb-6 flex-grow">{servicio.descripcion}</p>
               <Link
-                href="/servicios"
+                href={servicio.href}
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-white hover:text-[#ccff00] transition-colors w-fit"
               >
                 Saber más <ArrowRight className="w-4 h-4" />

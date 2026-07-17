@@ -36,7 +36,7 @@ const tarjeta: Variants = {
 
 export default function Servicios() {
   return (
-    <section className="relative bg-slate-950 text-white py-24 md:py-32 overflow-hidden">
+    <section id="soluciones" className="relative bg-slate-950 text-white py-24 md:py-32 overflow-hidden">
       <div className="relative z-10 max-w-6xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}

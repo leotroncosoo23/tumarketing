@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useAlumnoSession } from "@/lib/useAlumnoSession";
 import { generarDiplomaPDF } from "@/lib/diploma";
 import { iniciales } from "@/lib/iniciales";
+import { CURSOS_HABILITADO } from "@/lib/feature-flags";
 import CircularProgress from "@/components/alumnos/CircularProgress";
 
 type Inscripcion = {
@@ -92,17 +93,23 @@ export default function AlumnosDashboard() {
   useEffect(() => {
     if (!perfil) return;
 
-    const fetchInscripciones = async () => {
-      const { data, error } = await supabase
-        .from("inscripciones")
-        .select("id, progreso, cursos (id, titulo, imagen_url, modalidad), leccion_actual:lecciones!ultima_leccion_id (titulo)")
-        .eq("usuario_id", perfil.id);
-
-      if (error) console.error("Error al traer tus cursos:", error.message);
-      setInscripciones((data as unknown as Inscripcion[]) || []);
+    // Cursos deshabilitado (ver feature-flags.ts): no tiene sentido pedirle
+    // datos a Supabase para una sección que no se muestra.
+    if (!CURSOS_HABILITADO) {
       setCargandoCursos(false);
-    };
-    fetchInscripciones();
+    } else {
+      const fetchInscripciones = async () => {
+        const { data, error } = await supabase
+          .from("inscripciones")
+          .select("id, progreso, cursos (id, titulo, imagen_url, modalidad), leccion_actual:lecciones!ultima_leccion_id (titulo)")
+          .eq("usuario_id", perfil.id);
+
+        if (error) console.error("Error al traer tus cursos:", error.message);
+        setInscripciones((data as unknown as Inscripcion[]) || []);
+        setCargandoCursos(false);
+      };
+      fetchInscripciones();
+    }
 
     const fetchServiciosActivos = async () => {
       const { data, error } = await supabase
@@ -217,23 +224,27 @@ export default function AlumnosDashboard() {
               {!colapsado && <span className="font-medium text-sm">Inicio</span>}
             </button>
 
-            <button
-              onClick={() => { setVista("certificados"); setMenuAbierto(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
-                vista === "certificados" ? "bg-[#ccff00]/10 text-[#ccff00]" : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
-              }`}
-            >
-              <span className="text-lg shrink-0">🎓</span>
-              {!colapsado && <span className="font-medium text-sm">Certificados</span>}
-            </button>
+            {CURSOS_HABILITADO && (
+              <button
+                onClick={() => { setVista("certificados"); setMenuAbierto(false); }}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+                  vista === "certificados" ? "bg-[#ccff00]/10 text-[#ccff00]" : "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+                }`}
+              >
+                <span className="text-lg shrink-0">🎓</span>
+                {!colapsado && <span className="font-medium text-sm">Certificados</span>}
+              </button>
+            )}
 
-            <Link
-              href="/cursos"
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-neutral-400 hover:text-white hover:bg-neutral-800/50"
-            >
-              <span className="text-lg shrink-0">🛍️</span>
-              {!colapsado && <span className="font-medium text-sm">Más Cursos</span>}
-            </Link>
+            {CURSOS_HABILITADO && (
+              <Link
+                href="/cursos"
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-colors text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+              >
+                <span className="text-lg shrink-0">🛍️</span>
+                {!colapsado && <span className="font-medium text-sm">Más Cursos</span>}
+              </Link>
+            )}
 
             <button
               onClick={() => { setVista("proyectos"); setMenuAbierto(false); }}
@@ -345,99 +356,103 @@ export default function AlumnosDashboard() {
                 <h2 className="text-2xl md:text-3xl font-black">
                   ¡Hola, <span className="text-[#ccff00]">{nombreMostrado}</span>!
                 </h2>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-neutral-500 mb-1">Mostrar Cursos</label>
-                  <select
-                    value={mostrarTipo}
-                    onChange={(e) => setMostrarTipo(e.target.value as "cursando" | "finalizados")}
-                    className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2.5 text-white outline-none focus:border-[#ccff00] transition-colors text-sm font-bold"
-                  >
-                    <option value="cursando">Cursando ({activos.length})</option>
-                    <option value="finalizados">Finalizados ({finalizados.length})</option>
-                  </select>
-                </div>
+                {CURSOS_HABILITADO && (
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-neutral-500 mb-1">Mostrar Cursos</label>
+                    <select
+                      value={mostrarTipo}
+                      onChange={(e) => setMostrarTipo(e.target.value as "cursando" | "finalizados")}
+                      className="bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2.5 text-white outline-none focus:border-[#ccff00] transition-colors text-sm font-bold"
+                    >
+                      <option value="cursando">Cursando ({activos.length})</option>
+                      <option value="finalizados">Finalizados ({finalizados.length})</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
-              {cargandoCursos ? (
-                <div className="text-center py-16 text-neutral-400">Cargando tus cursos...</div>
-              ) : listaSegunTipo.length === 0 ? (
-                <div className="text-center py-16 bg-neutral-900/40 border border-neutral-800 rounded-3xl mb-12">
-                  {mostrarTipo === "cursando" ? (
-                    <>
-                      <p className="text-neutral-400 text-lg mb-6">Todavía no estás cursando nada activamente.</p>
-                      <Link href="/cursos" className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors">
-                        Ver catálogo de cursos <span>→</span>
-                      </Link>
-                    </>
-                  ) : (
-                    <p className="text-neutral-400 text-lg">Todavía no completaste ningún curso. ¡Seguí aprendiendo!</p>
-                  )}
-                </div>
-              ) : (
-                <div className="relative mb-12">
-                  <div className="bg-neutral-900/60 border-2 border-[#ccff00] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
-                    {destacado && (
+              {CURSOS_HABILITADO && (
+                cargandoCursos ? (
+                  <div className="text-center py-16 text-neutral-400">Cargando tus cursos...</div>
+                ) : listaSegunTipo.length === 0 ? (
+                  <div className="text-center py-16 bg-neutral-900/40 border border-neutral-800 rounded-3xl mb-12">
+                    {mostrarTipo === "cursando" ? (
                       <>
-                        <CircularProgress porcentaje={destacado.progreso} />
+                        <p className="text-neutral-400 text-lg mb-6">Todavía no estás cursando nada activamente.</p>
+                        <Link href="/cursos" className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors">
+                          Ver catálogo de cursos <span>→</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <p className="text-neutral-400 text-lg">Todavía no completaste ningún curso. ¡Seguí aprendiendo!</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative mb-12">
+                    <div className="bg-neutral-900/60 border-2 border-[#ccff00] rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-6">
+                      {destacado && (
+                        <>
+                          <CircularProgress porcentaje={destacado.progreso} />
 
-                        <div className="flex-grow min-w-0">
-                          <h3 className="text-xl md:text-2xl font-black text-white mb-1 truncate">
-                            {destacado.cursos?.titulo || "Curso eliminado"}
-                          </h3>
-                          <p className="text-neutral-500 text-sm">{destacado.cursos?.modalidad}</p>
-                        </div>
-
-                        <div className="flex items-center gap-4 bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 md:min-w-[320px]">
-                          <span className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl shrink-0">
-                            {destacado.leccion_actual ? "▶️" : "🎉"}
-                          </span>
-                          <div className="min-w-0 flex-grow">
-                            <p className="text-white font-bold text-sm leading-snug">
-                              {destacado.leccion_actual ? "Seguí donde lo dejaste" : "¡Bienvenido/a a tu nuevo curso!"}
-                            </p>
-                            <p className="text-neutral-500 text-xs truncate">
-                              {destacado.leccion_actual?.titulo || "Arrancá cuando quieras"}
-                            </p>
+                          <div className="flex-grow min-w-0">
+                            <h3 className="text-xl md:text-2xl font-black text-white mb-1 truncate">
+                              {destacado.cursos?.titulo || "Curso eliminado"}
+                            </h3>
+                            <p className="text-neutral-500 text-sm">{destacado.cursos?.modalidad}</p>
                           </div>
-                          {destacado.cursos && (
-                            <Link
-                              href={`/alumnos/cursos/${destacado.cursos.id}`}
-                              className="shrink-0 bg-[#ccff00] text-black text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#b8e600] transition-colors whitespace-nowrap"
-                            >
-                              Ir al Curso
-                            </Link>
-                          )}
-                        </div>
+
+                          <div className="flex items-center gap-4 bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 md:min-w-[320px]">
+                            <span className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl shrink-0">
+                              {destacado.leccion_actual ? "▶️" : "🎉"}
+                            </span>
+                            <div className="min-w-0 flex-grow">
+                              <p className="text-white font-bold text-sm leading-snug">
+                                {destacado.leccion_actual ? "Seguí donde lo dejaste" : "¡Bienvenido/a a tu nuevo curso!"}
+                              </p>
+                              <p className="text-neutral-500 text-xs truncate">
+                                {destacado.leccion_actual?.titulo || "Arrancá cuando quieras"}
+                              </p>
+                            </div>
+                            {destacado.cursos && (
+                              <Link
+                                href={`/alumnos/cursos/${destacado.cursos.id}`}
+                                className="shrink-0 bg-[#ccff00] text-black text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#b8e600] transition-colors whitespace-nowrap"
+                              >
+                                Ir al Curso
+                              </Link>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {listaSegunTipo.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => avanzar(-1)}
+                          aria-label="Curso anterior"
+                          className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-5 w-10 h-10 rounded-full bg-neutral-900 border border-neutral-700 items-center justify-center text-white hover:border-[#ccff00] hover:text-[#ccff00] transition-colors shadow-xl"
+                        >
+                          ‹
+                        </button>
+                        <button
+                          onClick={() => avanzar(1)}
+                          aria-label="Siguiente curso"
+                          className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-5 w-10 h-10 rounded-full bg-neutral-900 border border-neutral-700 items-center justify-center text-white hover:border-[#ccff00] hover:text-[#ccff00] transition-colors shadow-xl"
+                        >
+                          ›
+                        </button>
+                        <p className="text-center text-neutral-500 text-xs mt-3">
+                          {indiceDestacado + 1} / {listaSegunTipo.length}
+                        </p>
                       </>
                     )}
                   </div>
-
-                  {listaSegunTipo.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => avanzar(-1)}
-                        aria-label="Curso anterior"
-                        className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-5 w-10 h-10 rounded-full bg-neutral-900 border border-neutral-700 items-center justify-center text-white hover:border-[#ccff00] hover:text-[#ccff00] transition-colors shadow-xl"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        onClick={() => avanzar(1)}
-                        aria-label="Siguiente curso"
-                        className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-5 w-10 h-10 rounded-full bg-neutral-900 border border-neutral-700 items-center justify-center text-white hover:border-[#ccff00] hover:text-[#ccff00] transition-colors shadow-xl"
-                      >
-                        ›
-                      </button>
-                      <p className="text-center text-neutral-500 text-xs mt-3">
-                        {indiceDestacado + 1} / {listaSegunTipo.length}
-                      </p>
-                    </>
-                  )}
-                </div>
+                )
               )}
 
-              {/* Tus Servicios Activos: solo se muestra si el usuario tiene servicios contratados */}
-              {serviciosActivos.length > 0 && (
+              {/* Tus Servicios Activos: en Inicio, con cursos desactivados, es el contenido principal */}
+              {serviciosActivos.length > 0 ? (
                 <section className="mb-12">
                   <div className="mb-6">
                     <h2 className="text-xl font-black mb-1">Tus Servicios Activos</h2>
@@ -449,24 +464,35 @@ export default function AlumnosDashboard() {
                     ))}
                   </div>
                 </section>
+              ) : (
+                !CURSOS_HABILITADO && (
+                  <div className="text-center py-16 bg-neutral-900/40 border border-neutral-800 rounded-3xl">
+                    <p className="text-neutral-400 text-lg mb-6">Todavía no contrataste ningún servicio.</p>
+                    <Link href="/servicios" className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors">
+                      Ver nuestros servicios <span>→</span>
+                    </Link>
+                  </div>
+                )
               )}
 
               {/* Teaser de más cursos */}
-              <section>
-                <h2 className="text-xl font-black mb-2">Seguí aprendiendo</h2>
-                <p className="text-neutral-400 text-sm mb-6 max-w-2xl">
-                  Explorá el catálogo completo y sumá nuevas habilidades a tu perfil profesional.
-                </p>
-                <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                  <div>
-                    <p className="font-bold text-white text-lg mb-1">¿Qué querés aprender ahora?</p>
-                    <p className="text-neutral-500 text-sm">Descubrí todos nuestros cursos disponibles.</p>
+              {CURSOS_HABILITADO && (
+                <section>
+                  <h2 className="text-xl font-black mb-2">Seguí aprendiendo</h2>
+                  <p className="text-neutral-400 text-sm mb-6 max-w-2xl">
+                    Explorá el catálogo completo y sumá nuevas habilidades a tu perfil profesional.
+                  </p>
+                  <div className="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-3xl p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div>
+                      <p className="font-bold text-white text-lg mb-1">¿Qué querés aprender ahora?</p>
+                      <p className="text-neutral-500 text-sm">Descubrí todos nuestros cursos disponibles.</p>
+                    </div>
+                    <Link href="/cursos" className="shrink-0 inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors w-fit">
+                      Ver catálogo <span>→</span>
+                    </Link>
                   </div>
-                  <Link href="/cursos" className="shrink-0 inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors w-fit">
-                    Ver catálogo <span>→</span>
-                  </Link>
-                </div>
-              </section>
+                </section>
+              )}
             </>
           )}
 
