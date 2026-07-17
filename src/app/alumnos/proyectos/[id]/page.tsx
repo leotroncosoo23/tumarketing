@@ -16,13 +16,21 @@ import { supabase } from "@/lib/supabase";
 import { useAlumnoSession } from "@/lib/useAlumnoSession";
 import { enviarMensaje, obtenerUrlArchivo } from "@/lib/mensajes-actions";
 import { inferirTipoArchivo, type MensajeProyecto, type TipoArchivoMensaje } from "@/lib/mensajes";
+import { ESTADOS_SERVICIO_CONTRATADO, ETIQUETA_ESTADO } from "@/lib/estado-servicio";
+import FacturacionCard from "@/components/alumnos/FacturacionCard";
+import ModuloProyecto from "@/components/alumnos/ModuloProyecto";
 
-const PASOS_ESTADO = ["Esperando información", "En Desarrollo", "En Revisión"];
+const PASOS_ESTADO = ESTADOS_SERVICIO_CONTRATADO;
 
 type Proyecto = {
   id: string;
   estado: string;
-  servicios: { titulo: string; descripcion_corta: string | null; tiempo_entrega: string | null } | null;
+  servicio_id: string;
+  suspendido: boolean;
+  link_staging: string | null;
+  link_panel_final: string | null;
+  video_tutorial_url: string | null;
+  servicios: { titulo: string; descripcion_corta: string | null; tiempo_entrega: string | null; modulo: string } | null;
 };
 
 function IconoArchivo({ tipo }: { tipo: TipoArchivoMensaje }) {
@@ -82,7 +90,9 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
     const cargar = async () => {
       const { data: proyectoData, error: errorProyecto } = await supabase
         .from("servicios_contratados")
-        .select("id, estado, servicios (titulo, descripcion_corta, tiempo_entrega)")
+        .select(
+          "id, estado, servicio_id, suspendido, link_staging, link_panel_final, video_tutorial_url, servicios (titulo, descripcion_corta, tiempo_entrega, modulo)"
+        )
         .eq("id", id)
         .eq("usuario_id", perfil.id)
         .maybeSingle();
@@ -203,7 +213,28 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
     );
   }
 
-  const pasoActual = Math.max(PASOS_ESTADO.indexOf(proyecto.estado), 0);
+  if (proyecto.suspendido) {
+    return (
+      <main className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-6 text-center">
+        <div className="max-w-md">
+          <div className="text-5xl mb-6">🚫</div>
+          <h1 className="text-2xl font-black mb-4">Acceso suspendido</h1>
+          <p className="text-neutral-400 mb-8">
+            El acceso a este proyecto está suspendido temporalmente. Si creés que es un error o querés regularizar tu
+            situación, contactanos y lo resolvemos.
+          </p>
+          <Link
+            href="/alumnos"
+            className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-6 py-3 rounded-full font-bold hover:bg-[#b8e600] transition-colors"
+          >
+            ← Volver a Mis Proyectos
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const pasoActual = Math.max((PASOS_ESTADO as readonly string[]).indexOf(proyecto.estado), 0);
   const archivosDelProyecto = mensajes.filter((m) => m.archivo_nombre && m.archivo_path);
 
   return (
@@ -215,6 +246,18 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
         >
           ← Volver a Mis Proyectos
         </Link>
+
+        {proyecto.estado === "Esperando información" && (
+          <div className="bg-neutral-900 border border-[#ccff00]/30 rounded-2xl px-6 py-4 flex items-center gap-4 mb-6">
+            <span className="w-11 h-11 rounded-xl bg-[#ccff00]/10 text-[#ccff00] flex items-center justify-center text-xl shrink-0">
+              📋
+            </span>
+            <p className="text-neutral-300 text-sm leading-relaxed">
+              Ya recibimos tu información. <span className="text-white font-bold">Pronto vamos a revisar tu solicitud</span> —
+              mientras tanto, escribinos acá si tenés alguna consulta.
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 items-start">
           {/* COLUMNA IZQUIERDA: Ficha del proyecto */}
@@ -265,7 +308,7 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
                             activo ? "text-[#ccff00]" : completado ? "text-white" : "text-neutral-500"
                           }`}
                         >
-                          {paso}
+                          {ETIQUETA_ESTADO[paso]}
                         </p>
                         {activo && <p className="text-xs text-neutral-500 mt-0.5">Paso actual</p>}
                       </div>
@@ -274,6 +317,19 @@ export default function ProyectoDetallePage({ params }: { params: Promise<{ id: 
                 })}
               </ol>
             </div>
+
+            <FacturacionCard servicioContratadoId={proyecto.id} />
+
+            <ModuloProyecto
+              modulo={proyecto.servicios?.modulo || "otro"}
+              servicioContratadoId={proyecto.id}
+              linkStaging={proyecto.link_staging}
+              linkPanelFinal={proyecto.link_panel_final}
+              videoTutorialUrl={proyecto.video_tutorial_url}
+              mensajesImagenesCliente={mensajes.filter(
+                (m) => m.autor_rol === "cliente" && m.archivo_tipo === "imagen" && m.archivo_path
+              )}
+            />
 
             {/* Archivos del proyecto (derivados de los mensajes con adjunto) */}
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">

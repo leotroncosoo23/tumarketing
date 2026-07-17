@@ -12,7 +12,6 @@ export type AdminTabId =
   | "blog"
   | "recursos"
   | "alumnos"
-  | "mensajes"
   | "beneficios"
   | "testimonios"
   | "configuracion"
@@ -26,8 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "servicios", label: "🛠️ Gestionar Servicios", href: "/admin/servicios" },
   { id: "blog", label: "📝 CMS del Blog" },
   { id: "recursos", label: "📂 Guías y Recursos" },
-  { id: "alumnos", label: "👥 Lista de Alumnos" },
-  { id: "mensajes", label: "💬 Mensajes" },
+  { id: "alumnos", label: "👥 Alumnos" },
   { id: "beneficios", label: "🎁 Beneficios y Promos" },
   { id: "testimonios", label: "💬 Testimonios" },
   { id: "configuracion", label: "⚙️ Configuración" },

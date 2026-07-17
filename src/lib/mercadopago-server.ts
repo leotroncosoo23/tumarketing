@@ -71,11 +71,45 @@ export async function otorgarAcceso(
 
   // Estado inicial "Esperando información": es el mismo texto que ya lee
   // el panel de alumnos (src/app/alumnos/page.tsx).
-  const { error } = await supabaseAdmin
+  const { data: insertado, error } = await supabaseAdmin
     .from("servicios_contratados")
-    .insert([{ usuario_id: usuarioId, servicio_id: item.id, estado: "Esperando información", [columnaPago]: paymentId }]);
+    .insert([{ usuario_id: usuarioId, servicio_id: item.id, estado: "Esperando información", [columnaPago]: paymentId }])
+    .select("id")
+    .single();
 
-  if (error && error.code !== "23505") {
-    console.error(`No pudimos activar el servicio ${item.id} para ${usuarioId}:`, error.message);
+  if (error) {
+    // 23505 = unique_violation: el webhook y la página de retorno pueden llamar a
+    // otorgarAcceso dos veces para el mismo pago. La primera vez ya generó la
+    // factura, así que acá no hay nada más que hacer.
+    if (error.code !== "23505") {
+      console.error(`No pudimos activar el servicio ${item.id} para ${usuarioId}:`, error.message);
+    }
+    return;
+  }
+
+  const { data: servicio } = await supabaseAdmin
+    .from("servicios")
+    .select("titulo, precio_ars, precio_usd")
+    .eq("id", item.id)
+    .maybeSingle();
+
+  if (servicio) {
+    const moneda = proveedor === "paypal" ? "USD" : "ARS";
+    const monto = proveedor === "paypal" ? servicio.precio_usd : servicio.precio_ars;
+
+    const { error: errorFactura } = await supabaseAdmin.from("facturas").insert([
+      {
+        usuario_id: usuarioId,
+        servicio_contratado_id: insertado.id,
+        concepto: servicio.titulo,
+        monto,
+        moneda,
+        proveedor_pago: proveedor,
+        pago_id: paymentId,
+        estado: "pagada",
+      },
+    ]);
+
+    if (errorFactura) console.error(`No pudimos generar la factura del servicio ${item.id}:`, errorFactura.message);
   }
 }

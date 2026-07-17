@@ -4,6 +4,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 type ResultadoAccion = { error?: string };
 
+export type CredencialAcceso = { servicio: string; usuario: string; clave: string };
+
 export type BriefingPayload = {
   plan: string;
   servicio_contratado_id: string | null;
@@ -14,6 +16,7 @@ export type BriefingPayload = {
   objetivo_negocio: string;
   cliente_ideal: string;
   gestion_cuenta: "agencia" | "cliente";
+  credenciales: CredencialAcceso[];
 };
 
 export async function crearBriefing(payload: BriefingPayload): Promise<ResultadoAccion> {

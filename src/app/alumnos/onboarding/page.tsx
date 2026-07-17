@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAlumnoSession } from "@/lib/useAlumnoSession";
-import { crearBriefing } from "@/lib/briefings-actions";
+import { crearBriefing, type CredencialAcceso } from "@/lib/briefings-actions";
 
 type GestionCuenta = "agencia" | "cliente";
 
@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [objetivo, setObjetivo] = useState("");
   const [clienteIdeal, setClienteIdeal] = useState("");
   const [gestionCuenta, setGestionCuenta] = useState<GestionCuenta>("agencia");
+  const [credenciales, setCredenciales] = useState<CredencialAcceso[]>([]);
 
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
@@ -60,6 +61,7 @@ export default function OnboardingPage() {
       objetivo_negocio: objetivo.trim(),
       cliente_ideal: clienteIdeal.trim(),
       gestion_cuenta: gestionCuenta,
+      credenciales: credenciales.filter((c) => c.servicio.trim() || c.usuario.trim() || c.clave.trim()),
     });
 
     if (resultado?.error) {
@@ -284,6 +286,64 @@ export default function OnboardingPage() {
                 </span>
               </label>
             </div>
+          </section>
+
+          {/* 4. Accesos (opcional) */}
+          <section className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-lg font-bold text-[#ccff00] border-b border-neutral-800 pb-3 mb-2">
+              4. Accesos (opcional)
+            </h2>
+            <p className="text-xs text-neutral-500 mb-6">
+              Si querés dejarnos usuario y clave de tu Instagram, hosting, etc. para que el equipo pueda entrar a
+              trabajar directamente, agregalos acá. Es opcional y lo podés completar después.
+            </p>
+
+            <div className="space-y-4 mb-4">
+              {credenciales.map((cred, i) => (
+                <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
+                  <input
+                    value={cred.servicio}
+                    onChange={(e) =>
+                      setCredenciales((prev) => prev.map((c, idx) => (idx === i ? { ...c, servicio: e.target.value } : c)))
+                    }
+                    placeholder="Servicio (Ej: Instagram)"
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-[#ccff00]"
+                  />
+                  <input
+                    value={cred.usuario}
+                    onChange={(e) =>
+                      setCredenciales((prev) => prev.map((c, idx) => (idx === i ? { ...c, usuario: e.target.value } : c)))
+                    }
+                    placeholder="Usuario"
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-[#ccff00]"
+                  />
+                  <input
+                    type="password"
+                    value={cred.clave}
+                    onChange={(e) =>
+                      setCredenciales((prev) => prev.map((c, idx) => (idx === i ? { ...c, clave: e.target.value } : c)))
+                    }
+                    placeholder="Clave"
+                    className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none focus:border-[#ccff00]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCredenciales((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="text-red-500 hover:text-red-400 text-xs font-bold px-2 py-2.5"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCredenciales((prev) => [...prev, { servicio: "", usuario: "", clave: "" }])}
+              className="bg-white text-black px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-neutral-200 transition"
+            >
+              + Agregar acceso
+            </button>
           </section>
 
           <button

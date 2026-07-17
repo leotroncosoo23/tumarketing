@@ -8,8 +8,7 @@ import ResumenTab from "@/components/dashboard/ResumenTab";
 import CursoTab from "@/components/dashboard/CursoTab";
 import BlogTab from "@/components/dashboard/BlogTab";
 import RecursoTab from "@/components/dashboard/RecursoTab";
-import AlumnoTab from "@/components/dashboard/AlumnoTab";
-import MensajesTab from "@/components/dashboard/MensajesTab";
+import AlumnosTab from "@/components/dashboard/AlumnosTab";
 import BeneficiosTab from "@/components/dashboard/BeneficiosTab";
 import TestimoniosTab from "@/components/dashboard/TestimoniosTab";
 import ConfiguracionTab from "@/components/dashboard/ConfiguracionTab";
@@ -28,8 +27,7 @@ export default function AdminDashboard() {
         {activeTab === "cursos" && <CursoTab />}
         {activeTab === "blog" && <BlogTab />}
         {activeTab === "recursos" && <RecursoTab />}
-        {activeTab === "alumnos" && <AlumnoTab />}
-        {activeTab === "mensajes" && <MensajesTab />}
+        {activeTab === "alumnos" && <AlumnosTab />}
         {activeTab === "beneficios" && <BeneficiosTab />}
         {activeTab === "testimonios" && <TestimoniosTab />}
         {activeTab === "configuracion" && <ConfiguracionTab />}

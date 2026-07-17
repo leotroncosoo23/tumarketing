@@ -8,6 +8,7 @@ import { useAlumnoSession } from "@/lib/useAlumnoSession";
 import { generarDiplomaPDF } from "@/lib/diploma";
 import { iniciales } from "@/lib/iniciales";
 import { CURSOS_HABILITADO } from "@/lib/feature-flags";
+import { ESTADO_ESTILOS, ETIQUETA_ESTADO, type EstadoServicioContratado } from "@/lib/estado-servicio";
 import CircularProgress from "@/components/alumnos/CircularProgress";
 
 type Inscripcion = {
@@ -24,51 +25,59 @@ type Inscripcion = {
 
 type Vista = "inicio" | "certificados" | "proyectos";
 
-type EstadoServicioCliente = "Esperando información" | "En Desarrollo" | "En Revisión";
-
 type ServicioActivo = {
   id: string;
   nombre: string;
-  estado: EstadoServicioCliente;
+  estado: EstadoServicioContratado;
+  tieneBriefing: boolean;
+  suspendido: boolean;
 };
 
-const ESTADO_ESTILOS: Record<EstadoServicioCliente, string> = {
-  "Esperando información": "bg-amber-400/10 text-amber-400 border border-amber-400/30",
-  "En Desarrollo": "bg-blue-400/10 text-blue-400 border border-blue-400/30",
-  "En Revisión": "bg-[#ccff00]/10 text-[#ccff00] border border-[#ccff00]/30",
-};
-
-function accionServicio(estado: EstadoServicioCliente) {
-  return estado === "Esperando información" ? "Completar Formulario Base" : "Ver Entregables";
+// El chat se habilita apenas el cliente manda el formulario base (tieneBriefing),
+// sin esperar a que el admin cambie el estado a mano — por eso esto mira ambas
+// variables en vez de derivar todo del estado.
+function accionServicio(servicio: ServicioActivo) {
+  if (servicio.estado === "Esperando información") {
+    return servicio.tieneBriefing ? "Chatear con el equipo" : "Completar Formulario Base";
+  }
+  return "Ver Entregables";
 }
 
 function TarjetaServicio({ servicio }: { servicio: ServicioActivo }) {
+  const faltaFormulario = servicio.estado === "Esperando información" && !servicio.tieneBriefing;
+
   return (
     <div className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-6 hover:border-[#ccff00]/40 transition-colors flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <span className="w-11 h-11 rounded-xl bg-[#ccff00]/10 text-[#ccff00] flex items-center justify-center text-xl shrink-0">
           🛠️
         </span>
-        <span
-          className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${ESTADO_ESTILOS[servicio.estado]}`}
-        >
-          {servicio.estado}
-        </span>
+        {servicio.suspendido ? (
+          <span className="text-[10px] uppercase font-bold px-2.5 py-1 rounded-full whitespace-nowrap bg-red-500/10 text-red-400 border border-red-500/30">
+            🚫 Suspendido
+          </span>
+        ) : (
+          <span
+            className={`text-[10px] uppercase font-bold px-2.5 py-1 rounded-full whitespace-nowrap ${ESTADO_ESTILOS[servicio.estado]}`}
+          >
+            {ETIQUETA_ESTADO[servicio.estado]}
+          </span>
+        )}
       </div>
       <h3 className="font-bold text-white text-base leading-snug">{servicio.nombre}</h3>
-      {servicio.estado === "Esperando información" ? (
+      {faltaFormulario ? (
         <Link
           href={`/alumnos/onboarding?servicio=${encodeURIComponent(servicio.nombre)}&scid=${servicio.id}`}
           className="mt-auto w-full text-center bg-[#ccff00] text-black text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#b8e600] transition-colors"
         >
-          {accionServicio(servicio.estado)}
+          {accionServicio(servicio)}
         </Link>
       ) : (
         <Link
           href={`/alumnos/proyectos/${servicio.id}`}
           className="mt-auto w-full text-center bg-[#ccff00] text-black text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#b8e600] transition-colors"
         >
-          {accionServicio(servicio.estado)}
+          {accionServicio(servicio)}
         </Link>
       )}
     </div>
@@ -112,20 +121,28 @@ export default function AlumnosDashboard() {
     }
 
     const fetchServiciosActivos = async () => {
-      const { data, error } = await supabase
-        .from("servicios_contratados")
-        .select("id, estado, servicios (titulo)")
-        .eq("usuario_id", perfil.id);
+      const [serviciosRes, briefingsRes] = await Promise.all([
+        supabase.from("servicios_contratados").select("id, estado, suspendido, servicios (titulo)").eq("usuario_id", perfil.id),
+        supabase.from("briefings").select("servicio_contratado_id").eq("usuario_id", perfil.id),
+      ]);
 
-      if (error) {
-        console.error("Error al traer tus servicios:", error.message);
+      if (serviciosRes.error) {
+        console.error("Error al traer tus servicios:", serviciosRes.error.message);
         return;
       }
+      if (briefingsRes.error) console.error("Error al traer tus formularios:", briefingsRes.error.message);
+
+      const idsConBriefing = new Set(
+        (briefingsRes.data || []).map((b: { servicio_contratado_id: string | null }) => b.servicio_contratado_id)
+      );
+
       setServiciosActivos(
-        (data || []).map((sc: any) => ({
+        (serviciosRes.data || []).map((sc: any) => ({
           id: sc.id,
           nombre: sc.servicios?.titulo || "Servicio eliminado",
-          estado: sc.estado as EstadoServicioCliente,
+          estado: sc.estado as EstadoServicioContratado,
+          tieneBriefing: idsConBriefing.has(sc.id),
+          suspendido: sc.suspendido,
         }))
       );
     };

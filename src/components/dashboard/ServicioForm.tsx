@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   CATEGORIAS_SERVICIOS,
+  MODULOS_SERVICIO,
   type EstadoServicio,
+  type ModuloServicio,
   type NuevoServicioPayload,
   type Servicio,
 } from "@/lib/servicios";
@@ -24,6 +26,7 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
   const [titulo, setTitulo] = useState(servicioInicial?.titulo ?? "");
   const [categoria, setCategoria] = useState<string>(servicioInicial?.categoria ?? CATEGORIAS_SERVICIOS[0]);
   const [estado, setEstado] = useState<EstadoServicio>(servicioInicial?.estado ?? "Borrador");
+  const [modulo, setModulo] = useState<ModuloServicio>(servicioInicial?.modulo ?? "otro");
 
   const [descripcionCorta, setDescripcionCorta] = useState(servicioInicial?.descripcion_corta ?? "");
   const [descripcionDetallada, setDescripcionDetallada] = useState(servicioInicial?.descripcion_detallada ?? "");
@@ -68,6 +71,7 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
       miniatura_url: miniaturaUrl,
       caracteristicas,
       destacado,
+      modulo,
     });
 
     // Si se guardó bien, la Server Action ya redirigió a /admin/servicios.
@@ -127,6 +131,25 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
                 <option value="Borrador">Borrador</option>
                 <option value="Activo">Activo</option>
               </select>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">
+                Módulo en el Portal de Alumnos
+              </label>
+              <select
+                value={modulo}
+                onChange={(e) => setModulo(e.target.value as ModuloServicio)}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
+              >
+                {MODULOS_SERVICIO.map((m) => (
+                  <option key={m.valor} value={m.valor}>
+                    {m.etiqueta}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-neutral-500 mt-2">
+                Define qué sección extra ve el cliente en su proyecto (accesos web, calendario de posts, métricas, brand kit).
+              </p>
             </div>
           </div>
         </section>
