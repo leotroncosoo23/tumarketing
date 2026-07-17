@@ -8,7 +8,7 @@ import { crearOrdenPayPalAction } from "@/app/actions/paypal";
 
 export default function CartDrawer() {
   const { items, isOpen, cerrarCarrito, eliminarItem, calcularTotal } = useCart();
-  const { moneda } = useCurrency();
+  const { moneda, setMoneda } = useCurrency();
   const [procesandoPago, setProcesandoPago] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
 
@@ -144,6 +144,31 @@ export default function CartDrawer() {
 
         {/* Pie */}
         <div className="border-t border-neutral-800 px-6 py-5 space-y-4 shrink-0">
+          {/* Selector de moneda: define en el momento con qué pasarela se va a pagar
+              (ARS -> Mercado Pago, USD -> PayPal), para que quede explícito acá mismo
+              y no dependa de lo que haya quedado elegido en otra página. */}
+          <div className="flex items-center justify-between">
+            <span className="text-neutral-400 text-sm font-medium">Pagar en</span>
+            <div className="flex bg-neutral-900 p-1 rounded-lg border border-neutral-800">
+              <button
+                onClick={() => setMoneda("ARS")}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
+                  moneda === "ARS" ? "bg-[#ccff00] text-black" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                ARS (Mercado Pago)
+              </button>
+              <button
+                onClick={() => setMoneda("USD")}
+                className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
+                  moneda === "USD" ? "bg-[#ffc439] text-black" : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                USD (PayPal)
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <span className="text-neutral-400 text-sm font-medium">Total</span>
             <span className="text-2xl font-black text-white">
