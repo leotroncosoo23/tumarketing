@@ -72,7 +72,7 @@ export default function LandingHero({
   );
 
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-neutral-950 text-white">
+    <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-hidden bg-neutral-950 text-white">
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
@@ -87,14 +87,14 @@ export default function LandingHero({
       <div className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ${colores.heroGlow} blur-[140px] rounded-full pointer-events-none`} />
 
       {tieneVisual ? (
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-32 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="text-center lg:text-left">{encabezado}</div>
           <FadeInScroll y={20} delay={0.2} className="hidden lg:block">
             {visualPersonalizado ?? (mockup && <ServiceMockup variant={mockup} acento={acento} />)}
           </FadeInScroll>
         </div>
       ) : (
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center py-32">{encabezado}</div>
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center py-24 md:py-32">{encabezado}</div>
       )}
     </section>
   );

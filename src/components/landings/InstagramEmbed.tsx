@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ACCENTS, type Acento } from "./accents";
 
 declare global {
@@ -16,11 +16,15 @@ type InstagramEmbedProps = {
 
 const SCRIPT_ID = "instagram-embed-script";
 
-// Ancho fijo del embed: si cambia, hay que volver a calibrar HEADER_ALTO /
-// CROP_ALTO de abajo (se midieron a mano para este ancho exacto).
-const EMBED_ANCHO = 400;
-const HEADER_ALTO = 55; // franja superior (usuario + "View profile") a recortar
-const CROP_ALTO = 497; // alto visible resultante: solo el video, sin header ni pie
+// El header (usuario + "View profile") y el pie (like/comentario/"Add a
+// comment") del embed de Instagram miden lo mismo en píxeles sin importar el
+// ancho renderizado (326–658px, el rango que soporta su script) — medido a
+// mano en dos anchos distintos y confirmado que no varía. Lo único que
+// escala con el ancho es el video. Por eso NO usamos una altura de recorte
+// fija: medimos la altura real del iframe en cada momento (abajo, con
+// ResizeObserver) y le restamos estos dos valores constantes.
+const HEADER_ALTO = 55;
+const FOOTER_ALTO = 154;
 
 // Embed oficial de Instagram (instagram.com/embed.js): la misma pieza que
 // ofrece Instagram para insertar un reel/post real en un sitio de terceros.
@@ -28,31 +32,66 @@ const CROP_ALTO = 497; // alto visible resultante: solo el video, sin header ni 
 // contenido interno — lo que hacemos es recortar el iframe COMPLETO desde
 // afuera (overflow:hidden + margin-top negativo) para que solo se vea la
 // franja del video, ocultando el header y el pie (likes/comentarios).
-// Es un recorte a medida (no algo que ofrezca Instagram): si Instagram
-// cambia su template de embed, estos números habría que reajustarlos.
 export default function InstagramEmbed({ url, acento = "fuchsia" }: InstagramEmbedProps) {
   const colores = ACCENTS[acento];
+  const contenedorRef = useRef<HTMLDivElement>(null);
+  const [altoVideo, setAltoVideo] = useState<number | null>(null);
 
   useEffect(() => {
-    const procesarEmbeds = () => window.instgrm?.Embeds.process();
+    let observer: ResizeObserver | null = null;
+    let intervalo: ReturnType<typeof setInterval> | null = null;
+
+    const medir = (iframe: HTMLIFrameElement) => {
+      const altoTotal = iframe.getBoundingClientRect().height;
+      if (altoTotal > 0) {
+        setAltoVideo(Math.max(0, altoTotal - HEADER_ALTO - FOOTER_ALTO));
+      }
+    };
+
+    const observarIframe = () => {
+      const iframe = contenedorRef.current?.querySelector<HTMLIFrameElement>("iframe.instagram-media");
+      if (!iframe) return false;
+      medir(iframe);
+      observer = new ResizeObserver(() => medir(iframe));
+      observer.observe(iframe);
+      return true;
+    };
+
+    const procesarEmbeds = () => {
+      window.instgrm?.Embeds.process();
+      // Instagram tarda un instante en reemplazar el blockquote por el
+      // iframe (y en ajustar su tamaño final), así que reintentamos hasta
+      // encontrarlo en vez de asumir que ya está.
+      if (!observarIframe()) {
+        intervalo = setInterval(() => {
+          if (observarIframe() && intervalo) {
+            clearInterval(intervalo);
+            intervalo = null;
+          }
+        }, 200);
+      }
+    };
 
     if (window.instgrm) {
       procesarEmbeds();
-      return;
+    } else {
+      const scriptExistente = document.getElementById(SCRIPT_ID);
+      if (scriptExistente) {
+        scriptExistente.addEventListener("load", procesarEmbeds);
+      } else {
+        const script = document.createElement("script");
+        script.id = SCRIPT_ID;
+        script.src = "https://www.instagram.com/embed.js";
+        script.async = true;
+        script.addEventListener("load", procesarEmbeds);
+        document.body.appendChild(script);
+      }
     }
 
-    const scriptExistente = document.getElementById(SCRIPT_ID);
-    if (scriptExistente) {
-      scriptExistente.addEventListener("load", procesarEmbeds);
-      return () => scriptExistente.removeEventListener("load", procesarEmbeds);
-    }
-
-    const script = document.createElement("script");
-    script.id = SCRIPT_ID;
-    script.src = "https://www.instagram.com/embed.js";
-    script.async = true;
-    script.addEventListener("load", procesarEmbeds);
-    document.body.appendChild(script);
+    return () => {
+      observer?.disconnect();
+      if (intervalo) clearInterval(intervalo);
+    };
   }, [url]);
 
   return (
@@ -61,14 +100,15 @@ export default function InstagramEmbed({ url, acento = "fuchsia" }: InstagramEmb
 
       <div className={`relative bg-white/5 backdrop-blur-xl border ${colores.border} rounded-[2rem] p-3 md:p-4 shadow-2xl`}>
         <div
+          ref={contenedorRef}
           className="ig-solo-video flex justify-center overflow-hidden rounded-[1.5rem]"
-          style={{ height: CROP_ALTO }}
+          style={altoVideo ? { height: altoVideo } : { minHeight: 320 }}
         >
           <blockquote
             className="instagram-media"
             data-instgrm-permalink={url}
             data-instgrm-version="14"
-            style={{ background: "#000", border: 0, borderRadius: "1.5rem", margin: 0, width: EMBED_ANCHO }}
+            style={{ background: "#000", border: 0, borderRadius: "1.5rem", margin: 0, width: "100%", maxWidth: 400 }}
           />
         </div>
       </div>
