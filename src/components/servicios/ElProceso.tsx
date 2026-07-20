@@ -8,7 +8,7 @@ const pasos = [
     numero: "01",
     icono: LayoutDashboard,
     titulo: "Acceso a tu Portal Privado",
-    texto: "Al confirmar tu plan, se te habilita automáticamente un usuario en nuestra plataforma: tu centro de comando para gestionar tanto campañas de marketing como proyectos de desarrollo.",
+    texto: "Al confirmar tu plan, se te habilita automáticamente el usuario en nuestra plataforma: tu centro de comando para gestionar tanto campañas de marketing como proyectos de desarrollo.",
   },
   {
     numero: "02",

@@ -14,25 +14,25 @@ const SERVICIOS: ServicioDestacado[] = [
     icono: <Users className="w-6 h-6" />,
     titulo: "Gestión Integral de Redes",
     descripcion: "Convertimos tu perfil en una máquina de generar confianza y ventas, sin que tengas que ocuparte de publicar todos los días.",
-    href: "/servicios",
+    href: "/servicios/community-manager",
   },
   {
     icono: <Target className="w-6 h-6" />,
     titulo: "Publicidad Digital",
     descripcion: "Encontramos a tus clientes ideales antes que tu competencia y convertimos cada peso invertido en resultados medibles.",
-    href: "/servicios",
+    href: "/servicios/publicidad",
   },
   {
     icono: <PenTool className="w-6 h-6" />,
     titulo: "Creación de Contenido",
     descripcion: "Piezas visuales que detienen el scroll y comunican por qué tu marca es la mejor opción, no solo que existe.",
-    href: "/servicios",
+    href: "/servicios/creacion-edicion",
   },
   {
     icono: <Code2 className="w-6 h-6" />,
     titulo: "Desarrollo Web",
     descripcion: "Un sitio que vende mientras dormís: rápido, profesional y diseñado para convertir visitas en clientes.",
-    href: "/desarrollo-software#soluciones",
+    href: "/servicios/paginas-web",
   },
 ];
 

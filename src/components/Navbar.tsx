@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase';
 import { iniciales } from '@/lib/iniciales';
 import { CURSOS_HABILITADO } from '@/lib/feature-flags';
 import { useCart } from '@/lib/CartContext';
+import { SERVICIOS_NAV } from '@/lib/servicios-nav';
+import { ACCENTS } from '@/components/landings/accents';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
 import CartDrawer from '@/components/CartDrawer';
 
@@ -14,6 +16,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [usuario, setUsuario] = useState<User | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const { cantidadItems, toggleCarrito } = useCart();
@@ -61,6 +64,7 @@ export default function Navbar() {
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
     setIsResourcesOpen(false);
+    setIsServiciosOpen(false);
   };
 
   return (
@@ -81,8 +85,47 @@ export default function Navbar() {
         
         {/* Menú Desktop */}
         <div className="hidden md:flex items-center gap-8 font-medium">
-          <Link href="/servicios" className="hover:text-[#ccff00] transition-colors">Servicios</Link>
-          <Link href="/desarrollo-software" className="hover:text-[#ccff00] transition-colors">Software</Link>
+          {/* Mega-menu de Servicios */}
+          <div className="relative group py-4">
+            <button className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
+              <Link href="/servicios">Servicios</Link>
+              <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 w-[560px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-6">
+              <div className="grid grid-cols-2 gap-8">
+                {SERVICIOS_NAV.map(({ sector, acento, items }) => (
+                  <div key={sector}>
+                    <p className={`${ACCENTS[acento].text} text-xs font-bold uppercase tracking-wider mb-3`}>
+                      {sector}
+                    </p>
+                    <div className="space-y-1">
+                      {items.map(({ titulo, href, descripcion, icon: Icon }) => (
+                        <Link
+                          key={href}
+                          href={href}
+                          className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition-colors"
+                        >
+                          <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${ACCENTS[acento].text}`} strokeWidth={1.75} />
+                          <span>
+                            <span className="block font-semibold text-sm">{titulo}</span>
+                            <span className="block text-xs text-neutral-500">{descripcion}</span>
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-neutral-800 mt-4 pt-4">
+                <Link href="/servicios" className="text-sm font-bold text-white hover:text-[#ccff00] transition-colors">
+                  Ver todos los servicios →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {CURSOS_HABILITADO && (
             <Link href="/cursos" className="hover:text-[#ccff00] transition-colors">Cursos</Link>
           )}
@@ -197,21 +240,51 @@ export default function Navbar() {
           isMobileMenuOpen ? "opacity-100" : "opacity-0"
         }`}>
           
-          {/* Links principales */}
-          <Link
-            href="/servicios"
-            onClick={handleLinkClick}
-            className="block py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
-          >
-            Servicios
-          </Link>
-          <Link
-            href="/desarrollo-software"
-            onClick={handleLinkClick}
-            className="block py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
-          >
-            Software
-          </Link>
+          {/* Menú desplegable Servicios Mobile */}
+          <div>
+            <button
+              onClick={() => setIsServiciosOpen(!isServiciosOpen)}
+              className="w-full flex items-center justify-between py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
+            >
+              Servicios
+              <svg className={`w-4 h-4 transition-transform ${isServiciosOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+
+            <div className={`overflow-hidden transition-all duration-300 ${isServiciosOpen ? "max-h-[32rem]" : "max-h-0"}`}>
+              <div className="bg-neutral-900/50 rounded-lg mt-2 space-y-4 px-4 py-3">
+                {SERVICIOS_NAV.map(({ sector, acento, items }) => (
+                  <div key={sector}>
+                    <p className={`${ACCENTS[acento].text} text-xs font-bold uppercase tracking-wider mb-2`}>
+                      {sector}
+                    </p>
+                    <div className="space-y-1">
+                      {items.map(({ titulo, href, icon: Icon }) => (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={handleLinkClick}
+                          className="flex items-center gap-2 py-2 pl-2 text-sm hover:text-[#ccff00] transition-colors"
+                        >
+                          <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+                          {titulo}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <Link
+                  href="/servicios"
+                  onClick={handleLinkClick}
+                  className="block pt-2 border-t border-neutral-800 text-sm font-bold hover:text-[#ccff00] transition-colors"
+                >
+                  Ver todos los servicios →
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {CURSOS_HABILITADO && (
             <Link
               href="/cursos"
