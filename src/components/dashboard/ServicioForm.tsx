@@ -24,7 +24,7 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
   const esEdicion = !!servicioInicial;
 
   const [titulo, setTitulo] = useState(servicioInicial?.titulo ?? "");
-  const [categoria, setCategoria] = useState<string>(servicioInicial?.categoria ?? CATEGORIAS_SERVICIOS[0]);
+  const [categorias, setCategorias] = useState<string[]>(servicioInicial?.categorias ?? []);
   const [estado, setEstado] = useState<EstadoServicio>(servicioInicial?.estado ?? "Borrador");
   const [modulo, setModulo] = useState<ModuloServicio>(servicioInicial?.modulo ?? "otro");
 
@@ -54,14 +54,26 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
     setCaracteristicas((prev) => prev.filter((_, i) => i !== indice));
   };
 
+  const toggleCategoria = (categoria: string) => {
+    setCategorias((prev) =>
+      prev.includes(categoria) ? prev.filter((c) => c !== categoria) : [...prev, categoria]
+    );
+  };
+
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (categorias.length === 0) {
+      setError("Elegí al menos una categoría.");
+      return;
+    }
+
     setGuardando(true);
 
     const resultado = await onGuardar({
       titulo,
-      categoria,
+      categorias,
       estado,
       descripcion_corta: descripcionCorta,
       descripcion_detallada: descripcionDetallada,
@@ -107,19 +119,29 @@ export default function ServicioForm({ servicioInicial, onGuardar }: ServicioFor
                 placeholder="Ej: Desarrollo Web a Medida"
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">Categoría</label>
-              <select
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
-              >
-                {CATEGORIAS_SERVICIOS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">
+                Categorías (elegí una o varias)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIAS_SERVICIOS.map((c) => {
+                  const seleccionada = categorias.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleCategoria(c)}
+                      className={`px-4 py-2 rounded-full text-sm font-bold border transition-colors ${
+                        seleccionada
+                          ? "bg-[#ccff00] text-black border-[#ccff00]"
+                          : "bg-neutral-950 text-neutral-300 border-neutral-800 hover:border-neutral-600"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div>
               <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">Estado</label>

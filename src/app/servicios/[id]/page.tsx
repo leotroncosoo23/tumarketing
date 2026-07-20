@@ -53,11 +53,14 @@ export default async function ServicioDetallePage({ params }: { params: Promise<
           {/* COLUMNA PRINCIPAL */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-5 flex-wrap">
-              {servicio.categoria && (
-                <span className="bg-[#ccff00]/10 text-[#ccff00] border border-[#ccff00]/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                  {servicio.categoria}
+              {servicio.categorias?.map((c) => (
+                <span
+                  key={c}
+                  className="bg-[#ccff00]/10 text-[#ccff00] border border-[#ccff00]/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide"
+                >
+                  {c}
                 </span>
-              )}
+              ))}
               {servicio.destacado && (
                 <span className="bg-gradient-to-r from-[#ccff00] to-lime-400 text-black px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide">
                   ⭐ Destacado
@@ -121,9 +124,12 @@ export default async function ServicioDetallePage({ params }: { params: Promise<
                 <ContratarServicioButton servicio={servicio} />
 
                 <div className="border-t border-neutral-800 mt-6 pt-6 space-y-3 text-sm">
-                  {servicio.categoria && (
-                    <div className="flex items-center gap-3 text-neutral-400">
-                      <span>🏷️</span> Categoría: <span className="text-white font-bold">{servicio.categoria}</span>
+                  {(servicio.categorias?.length ?? 0) > 0 && (
+                    <div className="flex items-start gap-3 text-neutral-400">
+                      <span>🏷️</span>
+                      <span>
+                        Categorías: <span className="text-white font-bold">{servicio.categorias.join(", ")}</span>
+                      </span>
                     </div>
                   )}
                   {servicio.tiempo_entrega && (

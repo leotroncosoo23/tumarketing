@@ -1,4 +1,13 @@
-export const CATEGORIAS_SERVICIOS = ["Marketing Digital", "Software"] as const;
+export const CATEGORIAS_SERVICIOS = [
+  "Marketing Digital",
+  "Software",
+  "Página Web",
+  "eCommerce",
+  "Apps y Sistemas",
+  "Community Manager",
+  "Publicidad",
+  "Creación de Contenido",
+] as const;
 
 export type EstadoServicio = "Activo" | "Borrador";
 
@@ -17,7 +26,7 @@ export type ModuloServicio = (typeof MODULOS_SERVICIO)[number]["valor"];
 // Forma exacta de la tabla "servicios" en Supabase (sin id/created_at, que los pone la base).
 export type NuevoServicioPayload = {
   titulo: string;
-  categoria: string;
+  categorias: string[];
   estado: EstadoServicio;
   descripcion_corta: string;
   descripcion_detallada: string;

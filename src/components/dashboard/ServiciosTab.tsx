@@ -75,10 +75,17 @@ export default function ServiciosTab({ servicios }: ServiciosTabProps) {
                 servicios.map((servicio) => (
                   <tr key={servicio.id} className="hover:bg-neutral-800/40 transition-colors">
                     <td className="px-5 py-4 font-medium text-white whitespace-nowrap">{servicio.titulo}</td>
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      <span className="text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800 text-xs">
-                        {servicio.categoria}
-                      </span>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-wrap gap-1.5">
+                        {(servicio.categorias ?? []).map((c) => (
+                          <span
+                            key={c}
+                            className="text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800 text-xs whitespace-nowrap"
+                          >
+                            {c}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-[#ccff00] font-bold whitespace-nowrap">
                       ${Number(servicio.precio_ars || 0).toLocaleString("es-AR")}

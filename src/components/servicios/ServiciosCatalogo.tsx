@@ -19,7 +19,7 @@ export default function ServiciosCatalogo({ servicios }: ServiciosCatalogoProps)
     return servicios.filter((servicio) => {
       const coincideCategoria =
         categoriaActiva === "Todos" ||
-        servicio.categoria?.toLowerCase() === categoriaActiva.toLowerCase();
+        (servicio.categorias ?? []).some((c) => c.toLowerCase() === categoriaActiva.toLowerCase());
 
       const coincideBusqueda =
         !termino ||
