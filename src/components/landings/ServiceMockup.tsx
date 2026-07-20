@@ -251,11 +251,8 @@ function MockupReel({ acento }: { acento: Acento }) {
         <span className="text-white text-xs font-bold">Listo para publicar</span>
       </Badge>
 
-      <div className="mx-auto max-w-[240px] aspect-[9/16] bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl flex items-center justify-center relative overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-br ${c.gradientFrom}/20 to-transparent`} />
-        <span className={`relative w-16 h-16 rounded-full ${c.bg} border ${c.border} flex items-center justify-center`}>
-          <Play className={`w-6 h-6 ${c.text} translate-x-0.5`} fill="currentColor" />
-        </span>
+      <div className="mx-auto max-w-[240px] aspect-[9/16] bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl relative overflow-hidden">
+        <Image src="/hero-edicion.jpg" alt="Reel editado profesionalmente para redes sociales" fill sizes="240px" className="object-cover" />
       </div>
     </div>
   );
