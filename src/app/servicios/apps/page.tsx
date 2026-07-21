@@ -160,7 +160,7 @@ export default function AppsPage() {
         cargo="Líder de Desarrollo / Analista Programador"
         bio="Enfocado en el desarrollo Full Stack y la escalabilidad. Se encarga de diseñar la arquitectura, estructurar bases de datos y escribir código limpio para que el motor de tu sistema rinda al máximo sin limitaciones técnicas."
         skills={["React", "Next.js", "Node.js", "SQL"]}
-        imagen="/leotroncoso.jpg"
+        imagen="/leo-nosotros.png"
       />
 
       <LandingFAQ

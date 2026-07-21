@@ -234,7 +234,7 @@ export default function PaginasWebPage() {
         cargo="Líder de Desarrollo / Analista Programador"
         bio="Nuestra área tecnológica no improvisa. Combinamos sólida formación académica universitaria con el dominio de tecnologías Full Stack de vanguardia. Nos aseguramos de que tu página esté construida con código eficiente, para que no solo rinda al máximo hoy, sino que soporte todo el crecimiento de tu negocio mañana."
         skills={["React", "Next.js", "Node.js", "SQL"]}
-        imagen="/leotroncoso.jpg"
+        imagen="/leo-nosotros.png"
       />
 
       <LandingFAQ

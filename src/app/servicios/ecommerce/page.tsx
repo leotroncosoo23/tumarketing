@@ -264,7 +264,7 @@ export default function EcommercePage() {
         cargo="Líder de Desarrollo / Analista Programador"
         bio="Diseñamos la arquitectura de tu tienda pensando en el volumen de ventas que vas a tener mañana, no solo en el de hoy: bases de datos robustas para tu catálogo y stock, y un código eficiente que soporta picos de tráfico sin caerse."
         skills={["React", "Next.js", "Node.js", "SQL"]}
-        imagen="/leotroncoso.jpg"
+        imagen="/leo-nosotros.png"
       />
 
       <LandingFAQ
