@@ -87,12 +87,12 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-8 font-medium">
           {/* Mega-menu de Servicios */}
           <div className="relative group py-4">
-            <button className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
+            <div className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
               <Link href="/servicios">Servicios</Link>
               <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
               </svg>
-            </button>
+            </div>
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 w-[560px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 p-6">
               <div className="grid grid-cols-2 gap-8">
                 {SERVICIOS_NAV.map(({ sector, acento, items }) => (
@@ -132,12 +132,12 @@ export default function Navbar() {
           
           {/* Menú Desplegable de Recursos */}
           <div className="relative group py-4">
-            <button className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
-              <Link href="/recursos">Recursos</Link> 
+            <div className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
+              <Link href="/recursos">Recursos</Link>
               <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
               </svg>
-            </button>
+            </div>
             <div className="absolute top-full left-0 mt-0 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden">
               <Link href="/blog" className="px-5 py-3 hover:bg-neutral-800 hover:text-[#ccff00] transition-colors">Blog</Link>
               <Link href="/guias" className="px-5 py-3 hover:bg-neutral-800 hover:text-[#ccff00] transition-colors">Guías</Link>
@@ -221,6 +221,8 @@ export default function Navbar() {
           </button>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={isMobileMenuOpen}
             className="p-2 hover:bg-neutral-900/50 rounded-lg transition-colors"
           >
             <div className="flex flex-col gap-1.5 w-6">

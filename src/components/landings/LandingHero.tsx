@@ -72,15 +72,15 @@ export default function LandingHero({
   );
 
   return (
-    <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-x-hidden bg-neutral-950 text-white">
+    <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center bg-neutral-950 text-white">
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 40%, black 40%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black, transparent)",
         }}
       />
 

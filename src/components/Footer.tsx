@@ -43,7 +43,7 @@ export default function Footer() {
 
           {/* Columna 2: Contacto */}
           <div className="flex flex-col">
-            <h4 className="text-white font-bold text-lg mb-6">Contacto</h4>
+            <h3 className="text-white font-bold text-lg mb-6">Contacto</h3>
             <ul className="space-y-4">
               <li>
                 <a
@@ -74,7 +74,7 @@ export default function Footer() {
 
           {/* Columna 3: Servicios */}
           <div className="flex flex-col">
-            <h4 className="text-white font-bold text-lg mb-6">Servicios</h4>
+            <h3 className="text-white font-bold text-lg mb-6">Servicios</h3>
             <ul className="space-y-3">
               <li><Link href="/" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Inicio</Link></li>
               <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Google & Meta Ads</Link></li>
@@ -90,12 +90,12 @@ export default function Footer() {
 
         {/* Línea divisoria y Copyright */}
         <div className="border-t border-neutral-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-neutral-600 text-sm">
+          <p className="text-neutral-400 text-sm">
             Copyright © 2026 TuMarketing. Todos los derechos reservados.
           </p>
-          <div className="flex gap-6 text-sm text-neutral-600">
-            <a href="#" className="hover:text-neutral-400 transition-colors">Términos y Condiciones</a>
-            <a href="/politica-de-privacidad" className="hover:text-neutral-400 transition-colors">Política de Privacidad</a>
+          <div className="flex gap-6 text-sm text-neutral-400">
+            <a href="#" className="hover:text-neutral-200 transition-colors">Términos y Condiciones</a>
+            <a href="/politica-de-privacidad" className="hover:text-neutral-200 transition-colors">Política de Privacidad</a>
           </div>
         </div>
 

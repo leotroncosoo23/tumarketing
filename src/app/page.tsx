@@ -54,7 +54,7 @@ export default function Home() {
           </div>
 
           {/* Mini franja de confianza para sumar energía sin agregar altura */}
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-neutral-500 border-t border-neutral-900 pt-6 w-full">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-neutral-400 border-t border-neutral-900 pt-6 w-full">
             <span className="flex items-center gap-2">
               <span className="text-[#ccff00] font-black text-lg">+4M</span> views generadas
             </span>

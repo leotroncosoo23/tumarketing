@@ -64,7 +64,7 @@ export default function CartDrawer() {
       />
 
       {/* Panel lateral */}
-      <aside
+      <div
         role="dialog"
         aria-modal="true"
         aria-label="Carrito de compras"
@@ -201,7 +201,7 @@ export default function CartDrawer() {
             </>
           )}
         </div>
-      </aside>
+      </div>
     </>
   );
 }

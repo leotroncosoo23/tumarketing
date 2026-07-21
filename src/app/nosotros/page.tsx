@@ -8,7 +8,7 @@ import CTAContacto from "@/components/nosotros/CTAContacto";
 
 export default function NosotrosPage() {
   return (
-    <main className="min-h-screen bg-neutral-950 text-white font-sans overflow-x-hidden pt-28">
+    <main className="min-h-screen bg-zinc-950 text-white font-sans overflow-x-hidden pt-28">
       <Navbar />
 
       <HeroManifiesto />

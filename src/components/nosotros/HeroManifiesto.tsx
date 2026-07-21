@@ -14,7 +14,7 @@ const item: Variants = {
 
 export default function HeroManifiesto() {
   return (
-    <section className="relative bg-zinc-950 text-white min-h-[70vh] flex flex-col justify-center py-32 px-6 overflow-x-hidden">
+    <section className="relative bg-zinc-950 text-white min-h-[70vh] flex flex-col justify-center py-20 md:py-32 px-6">
       {/* Patrón de grilla sutil, desvanecido hacia los bordes */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
@@ -22,8 +22,8 @@ export default function HeroManifiesto() {
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
-          maskImage: "radial-gradient(ellipse 80% 60% at 50% 45%, black 30%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 45%, black 30%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black, transparent)",
+          WebkitMaskImage: "linear-gradient(to bottom, black, transparent)",
         }}
       />
 
@@ -38,7 +38,7 @@ export default function HeroManifiesto() {
       >
         <motion.h1
           variants={item}
-          className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] text-white mb-8"
+          className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] md:leading-[1.05] text-white mb-6 md:mb-8"
         >
           Estrategia <span className="text-[#D4EE26]">digital</span> y{" "}
           <span className="text-[#D4EE26]">software</span> de alto rendimiento, desde el{" "}
@@ -47,7 +47,7 @@ export default function HeroManifiesto() {
 
         <motion.p
           variants={item}
-          className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed"
         >
           No somos una agencia tradicional. Somos el departamento de crecimiento y tecnología que tu
           empresa necesita para escalar.

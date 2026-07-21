@@ -1,0 +1,70 @@
+[
+  {
+    "id": "aria-allowed-role",
+    "impact": "minor",
+    "help": "ARIA role should be appropriate for the element",
+    "nodes": [
+      {
+        "html": "<aside role=\"dialog\" aria-modal=\"true\" aria-label=\"Carrito de compras\" class=\"fixed top-0 right-0 z-[70] h-full w-full max-w-md bg-neutral-950 border-",
+        "summary": "Fix any of the following:\n  ARIA role dialog is not allowed for given element"
+      }
+    ]
+  },
+  {
+    "id": "color-contrast",
+    "impact": "serious",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "nodes": [
+      {
+        "html": "<span class=\"flex items-center gap-2\"><span class=\"text-[#ccff00] font-black text-lg\">+4M</span> views generadas</span>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #737373, background color: #0a0a0a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "html": "<span class=\"flex items-center gap-2\"><span class=\"text-[#ccff00] font-black text-lg\">+150</span> marcas atendidas</span>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #737373, background color: #0a0a0a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "html": "<span class=\"flex items-center gap-2\"><span class=\"text-[#ccff00] font-black text-lg\">360°</span> soluciones digitales</span>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.17 (foreground color: #737373, background color: #0a0a0a, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "html": "<p class=\"text-neutral-600 text-sm\">Copyright © 2026 TuMarketing. Todos los derechos reservados.</p>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.68 (foreground color: #525252, background color: #000000, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "html": "<a href=\"#\" class=\"hover:text-neutral-400 transition-colors\">Términos y Condiciones</a>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.68 (foreground color: #525252, background color: #000000, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "html": "<a href=\"/politica-de-privacidad\" class=\"hover:text-neutral-400 transition-colors\">Política de Privacidad</a>",
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.68 (foreground color: #525252, background color: #000000, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      }
+    ]
+  },
+  {
+    "id": "heading-order",
+    "impact": "moderate",
+    "help": "Heading levels should only increase by one",
+    "nodes": [
+      {
+        "html": "<h4 class=\"text-white font-bold text-lg mb-6\">Contacto</h4>",
+        "summary": "Fix any of the following:\n  Heading order invalid"
+      }
+    ]
+  },
+  {
+    "id": "nested-interactive",
+    "impact": "serious",
+    "help": "Interactive controls must not be nested",
+    "nodes": [
+      {
+        "html": "<button class=\"flex items-center gap-1 hover:text-[#ccff00] transition-colors\">",
+        "summary": "Fix any of the following:\n  Element has focusable descendants"
+      },
+      {
+        "html": "<button class=\"flex items-center gap-1 hover:text-[#ccff00] transition-colors\">",
+        "summary": "Fix any of the following:\n  Element has focusable descendants"
+      }
+    ]
+  }
+]
