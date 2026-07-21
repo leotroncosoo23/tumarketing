@@ -11,33 +11,21 @@ type ServiciosCatalogoProps = {
 
 export default function ServiciosCatalogo({ servicios }: ServiciosCatalogoProps) {
   const [busqueda, setBusqueda] = useState("");
-  const [categoriaActiva, setCategoriaActiva] = useState("Todos");
 
   const serviciosFiltrados = useMemo(() => {
     const termino = busqueda.trim().toLowerCase();
+    if (!termino) return servicios;
 
-    return servicios.filter((servicio) => {
-      const coincideCategoria =
-        categoriaActiva === "Todos" ||
-        (servicio.categorias ?? []).some((c) => c.toLowerCase() === categoriaActiva.toLowerCase());
-
-      const coincideBusqueda =
-        !termino ||
+    return servicios.filter(
+      (servicio) =>
         servicio.titulo?.toLowerCase().includes(termino) ||
-        servicio.descripcion_corta?.toLowerCase().includes(termino);
-
-      return coincideCategoria && coincideBusqueda;
-    });
-  }, [servicios, busqueda, categoriaActiva]);
+        servicio.descripcion_corta?.toLowerCase().includes(termino)
+    );
+  }, [servicios, busqueda]);
 
   return (
     <>
-      <ServiciosHero
-        busqueda={busqueda}
-        onBusquedaChange={setBusqueda}
-        categoriaActiva={categoriaActiva}
-        onCategoriaChange={setCategoriaActiva}
-      />
+      <ServiciosHero busqueda={busqueda} onBusquedaChange={setBusqueda} />
 
       <section className="max-w-7xl mx-auto px-6 py-12">
         {serviciosFiltrados.length === 0 ? (
