@@ -10,17 +10,27 @@ type ServiciosGridProps = {
   servicios: Servicio[];
 };
 
+type Orden = "asc" | "desc";
+
 export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
   const { moneda, setMoneda } = useCurrency();
   // Acordeón único: solo un servicio puede estar desplegado a la vez en toda
   // la grilla. Por eso el estado vive acá (no en cada tarjeta) — al abrir uno
   // nuevo, el anterior se cierra solo.
   const [abiertoId, setAbiertoId] = useState<string | null>(null);
+  // Por defecto ordenado de menor a mayor precio.
+  const [orden, setOrden] = useState<Orden>("asc");
+
+  const serviciosOrdenados = [...servicios].sort((a, b) => {
+    const precioA = Number((moneda === "ARS" ? a.precio_ars : a.precio_usd) || 0);
+    const precioB = Number((moneda === "ARS" ? b.precio_ars : b.precio_usd) || 0);
+    return orden === "asc" ? precioA - precioB : precioB - precioA;
+  });
 
   return (
     <>
       {/* Selector de moneda */}
-      <div className="flex flex-col items-center gap-3 mb-12">
+      <div className="flex flex-col items-center gap-3 mb-8">
         <span className="text-neutral-400 text-sm font-bold">Seleccioná tu moneda:</span>
         <div className="flex bg-neutral-900 p-1 rounded-xl border border-neutral-800">
           <button
@@ -42,14 +52,32 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
         </div>
       </div>
 
+      {/* Selector de orden por precio */}
+      <div className="flex justify-center sm:justify-end mb-8">
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-neutral-400 font-bold">Ordenar por:</span>
+          <div className="relative">
+            <select
+              value={orden}
+              onChange={(e) => setOrden(e.target.value as Orden)}
+              className="appearance-none bg-neutral-900 border border-neutral-800 text-white font-bold text-sm rounded-xl pl-4 pr-9 py-2.5 cursor-pointer hover:border-[#D4EE26]/50 focus:outline-none focus:ring-2 focus:ring-[#D4EE26]/40 transition-colors"
+            >
+              <option value="asc">Precio: menor a mayor</option>
+              <option value="desc">Precio: mayor a menor</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </label>
+      </div>
+
       {/* Grilla de servicios */}
-      {servicios.length === 0 ? (
+      {serviciosOrdenados.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-neutral-400 text-lg">Todavía no hay servicios publicados.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
-          {servicios.map((servicio) => (
+          {serviciosOrdenados.map((servicio) => (
             <ServicioCard
               key={servicio.id}
               servicio={servicio}
