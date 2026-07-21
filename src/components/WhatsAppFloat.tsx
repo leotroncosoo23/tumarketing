@@ -53,7 +53,7 @@ export default function WhatsAppFloat() {
   // Sin número cargado en Configuración todavía: no mostramos un botón roto.
   if (!numeroLimpio) return null;
 
-  const mensaje = encodeURIComponent("¡Hola! Tengo una consulta sobre los cursos y la plataforma 🙋");
+  const mensaje = encodeURIComponent("¡Hola! Quería consultar sobre un servicio 🙋");
   const link = `https://wa.me/${numeroLimpio}?text=${mensaje}`;
 
   return (
