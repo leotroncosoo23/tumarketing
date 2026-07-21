@@ -12,6 +12,10 @@ type ServiciosGridProps = {
 
 export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
   const { moneda, setMoneda } = useCurrency();
+  // Acordeón único: solo un servicio puede estar desplegado a la vez en toda
+  // la grilla. Por eso el estado vive acá (no en cada tarjeta) — al abrir uno
+  // nuevo, el anterior se cierra solo.
+  const [abiertoId, setAbiertoId] = useState<string | null>(null);
 
   return (
     <>
@@ -44,9 +48,15 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
           <p className="text-neutral-400 text-lg">Todavía no hay servicios publicados.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
           {servicios.map((servicio) => (
-            <ServicioCard key={servicio.id} servicio={servicio} moneda={moneda} />
+            <ServicioCard
+              key={servicio.id}
+              servicio={servicio}
+              moneda={moneda}
+              abierto={abiertoId === servicio.id}
+              onToggle={() => setAbiertoId((actual) => (actual === servicio.id ? null : servicio.id))}
+            />
           ))}
         </div>
       )}
@@ -54,14 +64,20 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
   );
 }
 
-function ServicioCard({ servicio, moneda }: { servicio: Servicio; moneda: Moneda }) {
-  const [abierto, setAbierto] = useState(false);
+type ServicioCardProps = {
+  servicio: Servicio;
+  moneda: Moneda;
+  abierto: boolean;
+  onToggle: () => void;
+};
+
+function ServicioCard({ servicio, moneda, abierto, onToggle }: ServicioCardProps) {
   const caracteristicas = Array.isArray(servicio.caracteristicas) ? servicio.caracteristicas : [];
   const precio = moneda === "ARS" ? servicio.precio_ars : servicio.precio_usd;
 
   return (
     <div
-      className={`relative bg-neutral-900/40 border rounded-3xl overflow-hidden transition-all duration-300 flex flex-col h-full ${
+      className={`relative bg-neutral-900/40 border rounded-3xl overflow-hidden transition-all duration-300 flex flex-col ${
         servicio.destacado
           ? "border-[#D4EE26]/60 shadow-[0_0_30px_rgba(212,238,38,0.15)]"
           : "border-neutral-800 hover:border-[#D4EE26]/50 hover:shadow-[0_0_30px_rgba(212,238,38,0.1)]"
@@ -73,7 +89,10 @@ function ServicioCard({ servicio, moneda }: { servicio: Servicio; moneda: Moneda
         </div>
       )}
 
-      <div className={`p-6 flex flex-col flex-grow ${servicio.destacado ? "pt-12" : ""}`}>
+      {/* pt-12 fijo siempre (no solo si es destacado): así el contenido
+          arranca a la misma altura en todas las tarjetas de la fila, tenga o
+          no la cinta de "Destacado" arriba. */}
+      <div className="p-6 pt-12 flex flex-col flex-grow">
         {(servicio.categorias?.length ?? 0) > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {servicio.categorias.map((c) => (
@@ -99,7 +118,7 @@ function ServicioCard({ servicio, moneda }: { servicio: Servicio; moneda: Moneda
             <>
               <button
                 type="button"
-                onClick={() => setAbierto((v) => !v)}
+                onClick={onToggle}
                 className="flex items-center gap-1.5 text-sm font-bold text-[#D4EE26] hover:text-lime-300 transition-colors"
               >
                 {abierto ? "Ver menos" : "Ver qué incluye"}
