@@ -4,13 +4,22 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { useCurrency, type Moneda } from "@/lib/CurrencyContext";
-import type { Servicio } from "@/lib/servicios";
+import { CATEGORIAS_SERVICIOS, type Servicio } from "@/lib/servicios";
 
 type ServiciosGridProps = {
   servicios: Servicio[];
 };
 
-type Orden = "asc" | "desc";
+type Orden = "precio-asc" | "precio-desc";
+const TODAS_ETIQUETAS = "todas";
+
+// Posición de cada categoría según el orden ya definido en CATEGORIAS_SERVICIOS.
+// Un servicio sin categorías reconocidas queda al final.
+function posicionEtiqueta(servicio: Servicio): number {
+  const posiciones = (servicio.categorias ?? []).map((c) => CATEGORIAS_SERVICIOS.indexOf(c as (typeof CATEGORIAS_SERVICIOS)[number]));
+  const validas = posiciones.filter((p) => p !== -1);
+  return validas.length > 0 ? Math.min(...validas) : CATEGORIAS_SERVICIOS.length;
+}
 
 export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
   const { moneda, setMoneda } = useCurrency();
@@ -19,12 +28,26 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
   // nuevo, el anterior se cierra solo.
   const [abiertoId, setAbiertoId] = useState<string | null>(null);
   // Por defecto ordenado de menor a mayor precio.
-  const [orden, setOrden] = useState<Orden>("asc");
+  const [orden, setOrden] = useState<Orden>("precio-asc");
+  // Filtro adicional e independiente del orden: además de elegir cómo ordenar,
+  // el usuario puede acotar la grilla a una sola etiqueta.
+  const [etiquetaFiltro, setEtiquetaFiltro] = useState<string>(TODAS_ETIQUETAS);
 
-  const serviciosOrdenados = [...servicios].sort((a, b) => {
+  const serviciosFiltrados =
+    etiquetaFiltro === TODAS_ETIQUETAS
+      ? servicios
+      : servicios.filter((s) => s.categorias?.includes(etiquetaFiltro));
+
+  const serviciosOrdenados = [...serviciosFiltrados].sort((a, b) => {
+    // Siempre agrupado por etiqueta primero (Marketing Digital, Software, ...
+    // en el orden de CATEGORIAS_SERVICIOS); el precio solo desempata dentro
+    // de cada grupo.
+    const diferenciaEtiqueta = posicionEtiqueta(a) - posicionEtiqueta(b);
+    if (diferenciaEtiqueta !== 0) return diferenciaEtiqueta;
+
     const precioA = Number((moneda === "ARS" ? a.precio_ars : a.precio_usd) || 0);
     const precioB = Number((moneda === "ARS" ? b.precio_ars : b.precio_usd) || 0);
-    return orden === "asc" ? precioA - precioB : precioB - precioA;
+    return orden === "precio-asc" ? precioA - precioB : precioB - precioA;
   });
 
   return (
@@ -52,8 +75,8 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
         </div>
       </div>
 
-      {/* Selector de orden por precio */}
-      <div className="flex justify-center sm:justify-end mb-8">
+      {/* Selectores de orden y filtro por etiqueta */}
+      <div className="flex flex-col sm:flex-row flex-wrap justify-center sm:justify-end gap-4 mb-8">
         <label className="flex items-center gap-2 text-sm">
           <span className="text-neutral-400 font-bold">Ordenar por:</span>
           <div className="relative">
@@ -62,8 +85,27 @@ export default function ServiciosGrid({ servicios }: ServiciosGridProps) {
               onChange={(e) => setOrden(e.target.value as Orden)}
               className="appearance-none bg-neutral-900 border border-neutral-800 text-white font-bold text-sm rounded-xl pl-4 pr-9 py-2.5 cursor-pointer hover:border-[#D4EE26]/50 focus:outline-none focus:ring-2 focus:ring-[#D4EE26]/40 transition-colors"
             >
-              <option value="asc">Precio: menor a mayor</option>
-              <option value="desc">Precio: mayor a menor</option>
+              <option value="precio-asc">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+            </select>
+            <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <span className="text-neutral-400 font-bold">Etiqueta:</span>
+          <div className="relative">
+            <select
+              value={etiquetaFiltro}
+              onChange={(e) => setEtiquetaFiltro(e.target.value)}
+              className="appearance-none bg-neutral-900 border border-neutral-800 text-white font-bold text-sm rounded-xl pl-4 pr-9 py-2.5 cursor-pointer hover:border-[#D4EE26]/50 focus:outline-none focus:ring-2 focus:ring-[#D4EE26]/40 transition-colors"
+            >
+              <option value={TODAS_ETIQUETAS}>Todas</option>
+              {CATEGORIAS_SERVICIOS.map((categoria) => (
+                <option key={categoria} value={categoria}>
+                  {categoria}
+                </option>
+              ))}
             </select>
             <ChevronDown className="w-4 h-4 text-neutral-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
