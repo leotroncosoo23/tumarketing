@@ -72,7 +72,7 @@ export default function LandingHero({
   );
 
   return (
-    <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-hidden bg-neutral-950 text-white">
+    <section className="relative min-h-0 md:min-h-[85vh] flex items-center justify-center overflow-x-hidden bg-neutral-950 text-white">
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
         style={{

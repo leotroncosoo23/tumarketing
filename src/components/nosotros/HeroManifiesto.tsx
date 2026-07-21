@@ -14,7 +14,7 @@ const item: Variants = {
 
 export default function HeroManifiesto() {
   return (
-    <section className="relative bg-zinc-950 text-white min-h-[70vh] flex flex-col justify-center py-32 px-6 overflow-hidden">
+    <section className="relative bg-zinc-950 text-white min-h-[70vh] flex flex-col justify-center py-32 px-6 overflow-x-hidden">
       {/* Patrón de grilla sutil, desvanecido hacia los bordes */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"
