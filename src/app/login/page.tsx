@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -17,15 +18,20 @@ const fontDisplay = Space_Grotesk({ variable: "--font-display", subsets: ["latin
 const fontBody = Inter({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export default function LoginUsuarios() {
+  const router = useRouter();
+  const [modo, setModo] = useState<"login" | "registro">("login");
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
+  const [mensajeExito, setMensajeExito] = useState("");
 
-  // Fase 1: solo maqueta visual. Los inputs tienen estado local para que se
-  // vean y se sientan reales, pero todavía no están conectados a Supabase —
-  // eso es la Fase 2, a la espera de tu OK.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
+
+  // Solo para el registro:
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
 
   useEffect(() => {
     // window no existe en el servidor: este chequeo tiene que esperar a que
@@ -53,8 +59,98 @@ export default function LoginUsuarios() {
     }
   }, []);
 
+  // Mismo criterio de redirección que auth/callback/route.ts (Google): sin
+  // perfil todavía -> completar alta en /auth/bienvenida; cuenta desactivada
+  // -> afuera; si no, admin/editor al panel, el resto al portal de cliente.
+  const redirigirSegunPerfil = async (userId: string) => {
+    const { data: perfil, error: errorPerfil } = await supabase
+      .from("usuarios")
+      .select("rol, activo")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (errorPerfil) {
+      setError("No pudimos leer tu perfil en 'usuarios': " + errorPerfil.message);
+      setCargando(false);
+      return;
+    }
+    if (!perfil) {
+      router.replace("/auth/bienvenida");
+      return;
+    }
+    if (!perfil.activo) {
+      await supabase.auth.signOut();
+      setError("Tu acceso fue revocado. Contactanos si creés que es un error.");
+      setCargando(false);
+      return;
+    }
+    router.replace(perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios");
+  };
+
+  const handleLoginPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMensajeExito("");
+    setCargando(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      setError(error ? "No pudimos iniciar sesión: " + error.message : "No pudimos iniciar sesión.");
+      setCargando(false);
+      return;
+    }
+    await redirigirSegunPerfil(data.user.id);
+  };
+
+  const handleRegistro = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setMensajeExito("");
+
+    if (!nombre.trim() || !apellido.trim()) {
+      setError("Completá nombre y apellido.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("La contraseña tiene que tener al menos 6 caracteres.");
+      return;
+    }
+    if (password !== confirmarPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    setCargando(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { nombre: nombre.trim(), apellido: apellido.trim() } },
+    });
+
+    if (error) {
+      setError("No pudimos crear la cuenta: " + error.message);
+      setCargando(false);
+      return;
+    }
+
+    if (!data.session) {
+      // El proyecto tiene confirmación de email activada: todavía no hay
+      // sesión, hay que esperar a que confirme desde el mail.
+      setMensajeExito("¡Casi! Te mandamos un email para confirmar tu cuenta. Confirmalo y después iniciá sesión acá.");
+      setCargando(false);
+      setModo("login");
+      return;
+    }
+
+    // Sesión activa de una (confirmación de email desactivada en el proyecto):
+    // falta el mismo paso de términos/newsletter que ya usa el login con
+    // Google, así que reusamos esa misma pantalla en vez de duplicar lógica.
+    router.replace("/auth/bienvenida");
+  };
+
   const handleLoginGoogle = async () => {
     setError("");
+    setMensajeExito("");
     setCargando(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -67,6 +163,12 @@ export default function LoginUsuarios() {
       setCargando(false);
     }
     // Si no hay error, el navegador redirige a Google y no seguimos acá.
+  };
+
+  const cambiarModo = (nuevoModo: "login" | "registro") => {
+    setModo(nuevoModo);
+    setError("");
+    setMensajeExito("");
   };
 
   return (
@@ -107,10 +209,10 @@ export default function LoginUsuarios() {
       <div className="flex w-full flex-col items-center justify-center p-8 md:w-1/2 lg:p-16">
         <div className="w-full max-w-sm">
           <h2 className="tm-display font-bold uppercase text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
-            Bienvenido de vuelta
+            {modo === "login" ? "Bienvenido de vuelta" : "Creá tu cuenta"}
           </h2>
           <p className="mt-2 mb-8 text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">
-            Iniciá sesión para ver tus resultados.
+            {modo === "login" ? "Iniciá sesión para ver tus resultados." : "Es rápido: solo necesitamos algunos datos."}
           </p>
 
           {error && (
@@ -118,12 +220,41 @@ export default function LoginUsuarios() {
               {error}
             </div>
           )}
+          {mensajeExito && (
+            <div className="mb-6 rounded-[var(--radius-m)] border border-[var(--accent)]/50 bg-[var(--accent)]/10 px-4 py-3 text-center font-medium text-[var(--accent)] [font-size:var(--fs-body-s)]">
+              {mensajeExito}
+            </div>
+          )}
 
-          <div className="flex flex-col gap-4">
+          <form onSubmit={modo === "login" ? handleLoginPassword : handleRegistro} className="flex flex-col gap-4">
+            {modo === "registro" && (
+              <div className="grid grid-cols-2 gap-4">
+                <label className="flex flex-col gap-2">
+                  <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Nombre</span>
+                  <input
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Juana"
+                    className="w-full rounded-[var(--radius-s)] border border-[var(--border-subtle)] bg-[var(--black-2)] px-[16px] py-[14px] text-[var(--text-primary)] outline-none [font-size:var(--fs-body-m)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)]"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Apellido</span>
+                  <input
+                    value={apellido}
+                    onChange={(e) => setApellido(e.target.value)}
+                    placeholder="Pérez"
+                    className="w-full rounded-[var(--radius-s)] border border-[var(--border-subtle)] bg-[var(--black-2)] px-[16px] py-[14px] text-[var(--text-primary)] outline-none [font-size:var(--fs-body-m)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)]"
+                  />
+                </label>
+              </div>
+            )}
+
             <label className="flex flex-col gap-2">
               <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Email</span>
               <input
                 type="email"
+                required
                 placeholder="tu@negocio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -134,13 +265,16 @@ export default function LoginUsuarios() {
             <label className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Contraseña</span>
-                <Link href="/login" className="font-semibold text-[var(--accent)] [font-size:var(--fs-body-s)] hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </Link>
+                {modo === "login" && (
+                  <Link href="/login" className="font-semibold text-[var(--accent)] [font-size:var(--fs-body-s)] hover:underline">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                )}
               </div>
               <div className="relative">
                 <input
                   type={mostrarPassword ? "text" : "password"}
+                  required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -157,10 +291,24 @@ export default function LoginUsuarios() {
               </div>
             </label>
 
-            <Button type="button" className="mt-2 w-full">
-              Entrar
+            {modo === "registro" && (
+              <label className="flex flex-col gap-2">
+                <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Verificar contraseña</span>
+                <input
+                  type={mostrarPassword ? "text" : "password"}
+                  required
+                  placeholder="••••••••"
+                  value={confirmarPassword}
+                  onChange={(e) => setConfirmarPassword(e.target.value)}
+                  className="w-full rounded-[var(--radius-s)] border border-[var(--border-subtle)] bg-[var(--black-2)] px-[16px] py-[14px] text-[var(--text-primary)] outline-none [font-size:var(--fs-body-m)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)]"
+                />
+              </label>
+            )}
+
+            <Button type="submit" disabled={cargando} className="mt-2 w-full">
+              {cargando ? "Un momento..." : modo === "login" ? "Entrar" : "Crear cuenta"}
             </Button>
-          </div>
+          </form>
 
           <div className="my-6 flex items-center gap-3">
             <span className="h-px flex-1 bg-[var(--border-subtle)]" />
@@ -179,10 +327,21 @@ export default function LoginUsuarios() {
           </Button>
 
           <p className="mt-6 text-center text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">
-            ¿No tenés cuenta?{" "}
-            <Link href="/servicios" className="font-semibold text-[var(--accent)] hover:underline">
-              Registrate acá
-            </Link>
+            {modo === "login" ? (
+              <>
+                ¿No tenés cuenta?{" "}
+                <button type="button" onClick={() => cambiarModo("registro")} className="font-semibold text-[var(--accent)] hover:underline">
+                  Registrate acá
+                </button>
+              </>
+            ) : (
+              <>
+                ¿Ya tenés cuenta?{" "}
+                <button type="button" onClick={() => cambiarModo("login")} className="font-semibold text-[var(--accent)] hover:underline">
+                  Iniciá sesión
+                </button>
+              </>
+            )}
           </p>
         </div>
       </div>

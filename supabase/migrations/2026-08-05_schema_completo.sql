@@ -22,10 +22,14 @@ create table if not exists usuarios (
   id uuid primary key references auth.users(id) on delete cascade
 );
 alter table usuarios add column if not exists nombre text;
+alter table usuarios add column if not exists apellido text;
 alter table usuarios add column if not exists email text not null;
 alter table usuarios add column if not exists rol text not null default 'usuario';
 alter table usuarios add column if not exists activo boolean not null default true;
 alter table usuarios add column if not exists estado_cuenta text not null default 'activo';
+alter table usuarios add column if not exists acepta_terminos boolean not null default false;
+alter table usuarios add column if not exists terminos_aceptados_en timestamptz;
+alter table usuarios add column if not exists acepta_newsletter boolean not null default false;
 alter table usuarios add column if not exists creado_en timestamptz not null default now();
 
 alter table usuarios drop constraint if exists usuarios_rol_check;
@@ -61,6 +65,12 @@ create policy "usuarios_lectura" on usuarios for select
 drop policy if exists "usuarios_edicion_admin" on usuarios;
 create policy "usuarios_edicion_admin" on usuarios for update
   using (usuarios_rol_actual() in ('admin', 'editor'));
+
+-- Sin esto, crearPerfilUsuario() (alta después de aceptar términos, tanto
+-- para Google como para email+contraseña) no puede insertar su propia fila.
+drop policy if exists "usuarios_alta_propia" on usuarios;
+create policy "usuarios_alta_propia" on usuarios for insert
+  with check (id = auth.uid());
 
 -- ============================================================================
 -- 2. configuracion (singleton id=1: whatsapp, banner, redes)
@@ -125,7 +135,7 @@ create policy "servicios_escritura_admin" on servicios for all
 create table if not exists servicios_contratados (
   id uuid primary key default gen_random_uuid()
 );
-alter table servicios_contratados add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade;
+alter table servicios_contratados add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade on update cascade;
 alter table servicios_contratados add column if not exists servicio_id uuid not null references servicios(id);
 alter table servicios_contratados add column if not exists estado text not null default 'Esperando información';
 alter table servicios_contratados add column if not exists suspendido boolean not null default false;
@@ -201,7 +211,7 @@ create policy "cupones_escritura_admin" on cupones for all
 create table if not exists facturas (
   id uuid primary key default gen_random_uuid()
 );
-alter table facturas add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade;
+alter table facturas add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade on update cascade;
 alter table facturas add column if not exists servicio_contratado_id uuid references servicios_contratados(id) on delete set null;
 alter table facturas add column if not exists concepto text not null;
 alter table facturas add column if not exists monto numeric not null;
@@ -442,7 +452,7 @@ create policy "reportes_escritura_admin" on reportes for all
 create table if not exists briefings (
   id uuid primary key default gen_random_uuid()
 );
-alter table briefings add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade;
+alter table briefings add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade on update cascade;
 alter table briefings add column if not exists servicio_contratado_id uuid references servicios_contratados(id) on delete set null;
 alter table briefings add column if not exists plan text not null;
 alter table briefings add column if not exists whatsapp text not null;
@@ -602,7 +612,7 @@ create policy "recursos_escritura_admin" on recursos for all
 create table if not exists accesos_recursos (
   id uuid primary key default gen_random_uuid()
 );
-alter table accesos_recursos add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade;
+alter table accesos_recursos add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade on update cascade;
 alter table accesos_recursos add column if not exists recurso_id uuid not null references recursos(id) on delete cascade;
 alter table accesos_recursos add column if not exists creado_en timestamptz not null default now();
 
@@ -684,7 +694,7 @@ create policy "comunicados_admin" on comunicados for all
 -- 22. preferencias_notificacion (1:1 con usuarios, configurable desde el portal)
 -- ============================================================================
 create table if not exists preferencias_notificacion (
-  usuario_id uuid primary key references usuarios(id) on delete cascade
+  usuario_id uuid primary key references usuarios(id) on delete cascade on update cascade
 );
 alter table preferencias_notificacion add column if not exists novedades_proyecto boolean not null default true;
 alter table preferencias_notificacion add column if not exists mensajes_equipo boolean not null default true;
@@ -702,7 +712,7 @@ create policy "preferencias_notificacion_propia" on preferencias_notificacion fo
 create table if not exists paypal_ordenes_pendientes (
   orden_id text primary key
 );
-alter table paypal_ordenes_pendientes add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade;
+alter table paypal_ordenes_pendientes add column if not exists usuario_id uuid not null references usuarios(id) on delete cascade on update cascade;
 alter table paypal_ordenes_pendientes add column if not exists items_json text not null;
 alter table paypal_ordenes_pendientes add column if not exists creado_en timestamptz not null default now();
 

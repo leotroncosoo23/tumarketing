@@ -39,7 +39,21 @@ export default function BienvenidaUsuario() {
       await crearPerfilUsuario(user, aceptaNewsletter);
       router.replace("/usuarios");
     } catch (e) {
-      const mensaje = e instanceof Error ? e.message : "Error desconocido";
+      // Los errores de Supabase (PostgrestError, AuthError) no son instancias
+      // de Error de JS — con solo "instanceof Error" el mensaje real quedaba
+      // tapado detrás de "Error desconocido".
+      const crudo =
+        e instanceof Error
+          ? e.message
+          : e && typeof e === "object" && "message" in e
+            ? String((e as { message: unknown }).message)
+            : "Error desconocido";
+      // Ya existe una fila en "usuarios" con ese email (otra cuenta, o un
+      // cliente cargado a mano) — mensaje accionable en vez del texto crudo
+      // del constraint de Postgres.
+      const mensaje = crudo.includes("usuarios_email_key")
+        ? "Ya existe una cuenta con este email. Iniciá sesión en vez de crear una nueva."
+        : crudo;
       setError("No pudimos crear tu cuenta: " + mensaje);
       setGuardando(false);
     }
