@@ -12,13 +12,8 @@ const URL_BASE = process.env.NEXTAUTH_URL || "http://localhost:3000";
 type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
 
 // Igual que buscarPrecioArsReal en mercadopago.ts: nunca confiamos en el precio_usd
-// que manda el cliente (el carrito vive en localStorage). Solo "servicio" tiene
-// columna precio_usd en Supabase hoy; los cursos no soportan pago en dólares.
+// que manda el cliente (el carrito vive en localStorage).
 async function buscarPrecioUsdReal(supabase: SupabaseServerClient, item: ItemCarrito): Promise<number> {
-  if (item.tipo !== "servicio") {
-    throw new Error(`"${item.titulo}" no está disponible para pago en dólares todavía.`);
-  }
-
   const { data, error } = await supabase.from("servicios").select("precio_usd").eq("id", item.id).single();
   if (error || !data) throw new Error(`No encontramos el servicio "${item.titulo}".`);
   return data.precio_usd;

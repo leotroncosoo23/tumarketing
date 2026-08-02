@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { iniciales } from '@/lib/iniciales';
-import { CURSOS_HABILITADO } from '@/lib/feature-flags';
 import { useCart } from '@/lib/CartContext';
 import { SERVICIOS_NAV } from '@/lib/servicios-nav';
 import { ACCENTS } from '@/components/landings/accents';
@@ -37,7 +36,7 @@ export default function Navbar() {
 
   // Muestra el usuario logueado y se mantiene al día con login/logout.
   // También trae el rol para saber si "Plataforma" tiene que llevar al
-  // panel de admin o al portal de alumnos.
+  // panel de admin o al portal de usuarios.
   useEffect(() => {
     const cargarUsuario = async (user: User | null) => {
       setUsuario(user);
@@ -58,7 +57,7 @@ export default function Navbar() {
     return () => subscripcion.subscription.unsubscribe();
   }, []);
 
-  const destinoPlataforma = rol === "admin" ? "/admin/dashboard" : "/alumnos";
+  const destinoPlataforma = rol === "admin" || rol === "editor" ? "/admin" : "/usuarios";
 
   // Cerrar el menú cuando se hace clic en un enlace
   const handleLinkClick = () => {
@@ -126,10 +125,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {CURSOS_HABILITADO && (
-            <Link href="/cursos" className="hover:text-[#ccff00] transition-colors">Cursos</Link>
-          )}
-          
           {/* Menú Desplegable de Recursos */}
           <div className="relative group py-4">
             <div className="flex items-center gap-1 hover:text-[#ccff00] transition-colors">
@@ -286,16 +281,6 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-
-          {CURSOS_HABILITADO && (
-            <Link
-              href="/cursos"
-              onClick={handleLinkClick}
-              className="block py-3 px-4 hover:bg-neutral-900 hover:text-[#ccff00] rounded-lg transition-colors font-medium"
-            >
-              Cursos
-            </Link>
-          )}
 
           {/* Menú desplegable Recursos Mobile */}
           <div>

@@ -114,7 +114,7 @@ export default function CartDrawer() {
                   />
                   <div className="flex-1 min-w-0">
                     <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#ccff00]/80 mb-0.5">
-                      {item.tipo === "curso" ? "Curso" : "Servicio"}
+                      Servicio
                     </span>
                     <p className="text-sm font-semibold text-white truncate">{item.titulo}</p>
                     <p className="text-xs text-neutral-400 mt-0.5">

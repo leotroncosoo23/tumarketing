@@ -1,5 +1,5 @@
 # Contexto del Proyecto
-Plataforma Full Stack orientada a marketing digital, venta de cursos, servicios, recursos y blogs. Incluye un panel de administración y un portal de alumnos.
+Plataforma Full Stack orientada a marketing digital, venta de servicios, recursos y blogs. Incluye un panel de administración y un portal de usuarios.
 
 # Stack Tecnológico Principal
 - Frontend: React, Next.js
@@ -18,5 +18,5 @@ Para tareas específicas, DEBES consultar OBLIGATORIAMENTE los archivos dentro d
 - Backend y API: `@rules/backend-api.md`
 - Base de Datos: `@rules/database-sql.md`
 - Panel de Administrador: `@rules/admin-panel.md`
-- Portal de Alumnos y Carrito: `@rules/student-portal.md`
+- Portal de Usuarios y Carrito: `@rules/user-portal.md`
 - Contenido y SEO (Blogs/Guías): `@rules/marketing-seo.md`

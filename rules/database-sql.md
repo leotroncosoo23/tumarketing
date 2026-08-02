@@ -6,20 +6,20 @@
 - Cliente: `@supabase/supabase-js` (o `@supabase/ssr` en Next.js para Server Components).
 
 ## Reglas de Arquitectura con Supabase
-- **Autenticación:** Utilizar siempre Supabase Auth para el manejo de sesiones de administradores y alumnos.
-- **Seguridad (RLS):** Toda consulta a la base de datos debe tener en cuenta el Row Level Security (RLS) de Supabase. El código debe asumir que un alumno solo puede leer los cursos que compró y el administrador tiene acceso total.
+- **Autenticación:** Utilizar siempre Supabase Auth para el manejo de sesiones de administradores y usuarios.
+- **Seguridad (RLS):** Toda consulta a la base de datos debe tener en cuenta el Row Level Security (RLS) de Supabase. El código debe asumir que un usuario solo puede leer los servicios que contrató y el administrador tiene acceso total.
 - **Storage:** Para los recursos gratuitos, blogs y guías, utilizar Supabase Storage. Generar URLs públicas para recursos gratuitos y URLs firmadas (signed URLs) para los recursos de pago.
 
 ## Convenciones de Nombrado
-- Tablas: Usar minúsculas y plural (ej. `usuarios`, `cursos`, `compras`).
+- Tablas: Usar minúsculas y plural (ej. `usuarios`, `servicios`, `facturas`).
 - Columnas: Usar snake_case (ej. `fecha_creacion`, `usuario_id`).
 
-## Estructura Core del Negocio (Marketing y Cursos)
+## Estructura Core del Negocio (Marketing y Servicios)
 Tener en cuenta este modelo mental al generar consultas:
-1. **Usuarios:** Gestionados principalmente por Supabase Auth, pero con una tabla pública `perfiles` o `usuarios` atada al `auth.uid()` para guardar el rol (`admin` o `alumno`).
-2. **Productos:** Tabla para cursos y guías (`tipo: 'curso' | 'guia_gratis' | 'guia_pago'`). 
+1. **Usuarios:** Gestionados principalmente por Supabase Auth, pero con una tabla pública `usuarios` atada al `auth.uid()` para guardar el rol (`admin` o `usuario`).
+2. **Productos:** Tabla para servicios y guías (`tipo: 'servicio' | 'guia_gratis' | 'guia_pago'`).
 3. **Compras/Accesos:** Tabla puente vital. Relaciona el ID del usuario con el ID del producto.
-4. **Progreso:** Tabla para rastrear qué módulos completó el alumno (necesario para certificados).
+4. **Progreso:** Tabla para rastrear el estado de cada servicio contratado por el usuario.
 
 ## Calidad de Código
 - Manejar siempre los errores de Supabase explícitamente (ej. `if (error) throw new Error(...)`).

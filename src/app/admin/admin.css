@@ -1,0 +1,127 @@
+/*
+ * Tema del panel de administración (oscuro + acento lima).
+ * Scopeado a `.tm-admin-theme` a propósito: `globals.css` es compartido por
+ * todo el sitio público y el portal de cliente, así que estos tokens no
+ * deben filtrarse fuera de /admin.
+ */
+
+.tm-admin-theme {
+  --black-0: #000000;
+  --black-1: #0a0a0a;
+  --black-2: #121212;
+  --black-3: #1a1a1a;
+  --black-4: #242424;
+  --black-5: #2f2f2f;
+  --white-0: #ffffff;
+  --gray-1: #e8e8e8;
+  --gray-2: #b8b8b8;
+  --gray-3: #8a8a8a;
+  --gray-4: #5c5c5c;
+  --lime-0: #c8ff33;
+  --lime-1: #b4ff00;
+  --lime-2: #9de000;
+  --lime-3: #87c400;
+  --red-signal: #ff4d4d;
+
+  --surface-page: var(--black-1);
+  --surface-raised: var(--black-3);
+  --surface-sunken: var(--black-0);
+  --surface-card: var(--black-3);
+  --surface-card-hover: var(--black-4);
+  --surface-inverse: var(--white-0);
+
+  --text-primary: var(--white-0);
+  --text-secondary: var(--gray-2);
+  --text-tertiary: var(--gray-3);
+  --text-on-lime: var(--black-0);
+  --text-link: var(--lime-1);
+
+  --border-subtle: var(--black-5);
+  --border-strong: var(--gray-4);
+  --border-focus: var(--lime-1);
+
+  --accent: var(--lime-1);
+  --accent-hover: var(--lime-0);
+  --accent-active: var(--lime-2);
+  --accent-contrast: var(--black-0);
+
+  --signal-error: var(--red-signal);
+
+  --fs-display-xl: clamp(3rem, 7vw, 6.5rem);
+  --fs-display-l: clamp(2.4rem, 5vw, 4.5rem);
+  --fs-display-m: clamp(1.8rem, 3.4vw, 3rem);
+  --fs-heading-l: 2rem;
+  --fs-heading-m: 1.5rem;
+  --fs-heading-s: 1.15rem;
+  --fs-body-l: 1.25rem;
+  --fs-body-m: 1rem;
+  --fs-body-s: 0.875rem;
+  --fs-eyebrow: 0.8rem;
+
+  --lh-tight: 1.02;
+  --lh-heading: 1.1;
+  --lh-body: 1.55;
+
+  --ls-tight: -0.02em;
+  --ls-eyebrow: 0.14em;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+  --space-11: 180px;
+
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --radius-pill: 999px;
+
+  --container-max: 1200px;
+  --container-pad: clamp(20px, 5vw, 64px);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+  --shadow-lift: 0 30px 60px -24px rgba(0, 0, 0, 0.7);
+  --glow-lime: 0 0 0 1px rgba(180, 255, 0, 0.4), 0 0 40px rgba(180, 255, 0, 0.18);
+
+  --grad-fade-bottom: linear-gradient(180deg, transparent 0%, var(--surface-page) 100%);
+  --grad-lime-sheen: linear-gradient(115deg, var(--lime-1) 0%, var(--lime-0) 50%, var(--lime-2) 100%);
+
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-body, "Inter", system-ui, sans-serif);
+  min-height: 100vh;
+}
+
+.tm-admin-theme h1,
+.tm-admin-theme h2,
+.tm-admin-theme h3,
+.tm-admin-theme .tm-display {
+  font-family: var(--font-display, "Space Grotesk", system-ui, sans-serif);
+  letter-spacing: -0.02em;
+}
+
+.tm-admin-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.tm-admin-theme ::-webkit-scrollbar-thumb {
+  background: var(--black-5);
+  border-radius: 4px;
+}

@@ -212,7 +212,7 @@ export default function ConfiguracionTab() {
                 setConfig({ ...config, banner_texto: e.target.value })
               }
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
-              placeholder="🔥 CyberMonday: 30% OFF en todos los cursos"
+              placeholder="🔥 CyberMonday: 30% OFF en todos los servicios"
             />
             <p className="text-xs text-neutral-500 mt-2">
               {config.banner_activo
@@ -228,10 +228,10 @@ export default function ConfiguracionTab() {
             )}
           </div>
 
-          {/* COMUNIDAD DE ALUMNOS */}
+          {/* COMUNIDAD DE USUARIOS */}
           <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-2xl shadow-xl">
             <h3 className="text-xl font-bold text-[#ccff00] border-b border-neutral-800 pb-4 mb-6">
-              👥 Comunidad de Alumnos
+              👥 Comunidad de Usuarios
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -264,7 +264,7 @@ export default function ConfiguracionTab() {
               </div>
             </div>
             <p className="text-xs text-neutral-500 mt-4">
-              Estos links aparecen en la sección &quot;Soporte / Comunidad&quot; de la plataforma de alumnos. Dejalo vacío para que ese botón no se muestre.
+              Estos links aparecen en la sección &quot;Soporte / Comunidad&quot; de la plataforma de usuarios. Dejalo vacío para que ese botón no se muestre.
             </p>
           </div>
 

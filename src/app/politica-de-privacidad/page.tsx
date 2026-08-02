@@ -20,17 +20,17 @@ export default function PoliticaDePrivacidad() {
           <section>
             <h2 className="text-xl font-bold text-white mb-3">1. Qué datos recopilamos</h2>
             <p>
-              Cuando iniciás sesión con Google, recibimos tu nombre y tu dirección de email. Si te inscribís en un
-              curso, guardamos tu progreso dentro de ese curso. Si aceptás recibir novedades, guardamos tu email en
-              nuestra lista de novedades.
+              Cuando iniciás sesión con Google, recibimos tu nombre y tu dirección de email. Si contratás un
+              servicio, guardamos el estado y el progreso de ese servicio. Si aceptás recibir novedades, guardamos
+              tu email en nuestra lista de novedades.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-bold text-white mb-3">2. Para qué los usamos</h2>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Darte acceso a la plataforma de alumnos y a los cursos en los que te inscribiste.</li>
-              <li>Mostrarte tu progreso dentro de cada curso.</li>
+              <li>Darte acceso a la plataforma de usuarios y a los servicios que contrataste.</li>
+              <li>Mostrarte el estado y progreso de cada servicio contratado.</li>
               <li>Enviarte novedades, promociones o contenido nuevo, solo si aceptaste recibirlas.</li>
               <li>Contactarte por WhatsApp o email si hacés una consulta o una compra.</li>
             </ul>

@@ -1,9 +1,9 @@
 // Pipeline único de estado para "servicios_contratados", compartido entre el
-// portal de alumnos y el panel de admin para que no se desincronicen.
+// portal de usuarios y el panel de admin para que no se desincronicen.
 //
 // El primer valor sigue guardándose como "Esperando información" (no lo
 // renombramos) porque de eso depende la lógica de desbloqueo de chat en
-// src/app/alumnos/page.tsx (tieneBriefing) — solo cambia cómo se etiqueta
+// src/app/usuarios/page.tsx (tieneBriefing) — solo cambia cómo se etiqueta
 // en pantalla, se muestra como "Briefing".
 export const ESTADOS_SERVICIO_CONTRATADO = [
   "Esperando información",

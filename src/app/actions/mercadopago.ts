@@ -13,15 +13,9 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createSupabaseServerClient
 // Busca el precio real en Supabase en vez de confiar en el que manda el cliente,
 // porque el carrito vive en localStorage y cualquiera podría editarlo antes de pagar.
 async function buscarPrecioArsReal(supabase: SupabaseServerClient, item: ItemCarrito): Promise<number> {
-  if (item.tipo === "servicio") {
-    const { data, error } = await supabase.from("servicios").select("precio_ars").eq("id", item.id).single();
-    if (error || !data) throw new Error(`No encontramos el servicio "${item.titulo}".`);
-    return data.precio_ars;
-  }
-
-  const { data, error } = await supabase.from("cursos").select("precio, precio_descuento").eq("id", item.id).single();
-  if (error || !data) throw new Error(`No encontramos el curso "${item.titulo}".`);
-  return data.precio_descuento ?? data.precio;
+  const { data, error } = await supabase.from("servicios").select("precio_ars").eq("id", item.id).single();
+  if (error || !data) throw new Error(`No encontramos el servicio "${item.titulo}".`);
+  return data.precio_ars;
 }
 
 export async function crearPreferenciaPago(itemsCarrito: ItemCarrito[]): Promise<ResultadoPreferencia> {

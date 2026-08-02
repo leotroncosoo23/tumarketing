@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { crearPerfilAlumno } from "@/lib/alumnos";
+import { crearPerfilUsuario } from "@/lib/usuarios";
 
-export default function BienvenidaAlumno() {
+export default function BienvenidaUsuario() {
   const router = useRouter();
   const [cargandoSesion, setCargandoSesion] = useState(true);
   const [email, setEmail] = useState("");
@@ -36,8 +36,8 @@ export default function BienvenidaAlumno() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Se perdió la sesión, iniciá sesión de nuevo.");
-      await crearPerfilAlumno(user, aceptaNewsletter);
-      router.replace("/alumnos");
+      await crearPerfilUsuario(user, aceptaNewsletter);
+      router.replace("/usuarios");
     } catch (e) {
       const mensaje = e instanceof Error ? e.message : "Error desconocido";
       setError("No pudimos crear tu cuenta: " + mensaje);

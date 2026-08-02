@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-export type ItemComprado = { id: string; tipo: "curso" | "servicio" };
+export type ItemComprado = { id: string; tipo: "servicio" };
 export type PagoVerificado = { usuarioId: string; items: ItemComprado[] };
 
 // Nunca confiamos en datos que vengan del cliente (ni el body de un webhook ni
@@ -41,14 +41,10 @@ export function crearClienteSupabaseAdmin(): SupabaseClient | null {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-// TABLA: inscripciones (usuario_id, curso_id, progreso, mercadopago_payment_id)
 // TABLA: servicios_contratados (usuario_id, servicio_id, estado, mercadopago_payment_id, paypal_order_id)
-// El índice único (mercadopago_payment_id, curso_id / servicio_id) -o su equivalente
-// para paypal_order_id- hace que insertar dos veces el mismo pago no duplique el
-// acceso: la segunda inserción falla con el código 23505 (unique_violation) y lo
-// tratamos como éxito silencioso.
-// "proveedor" solo importa para servicios: los cursos todavía no soportan pago con
-// PayPal (no tienen precio_usd), así que ese flujo siempre llega con "mercadopago".
+// El índice único (mercadopago_payment_id / paypal_order_id, servicio_id) hace que
+// insertar dos veces el mismo pago no duplique el acceso: la segunda inserción
+// falla con el código 23505 (unique_violation) y lo tratamos como éxito silencioso.
 export async function otorgarAcceso(
   supabaseAdmin: SupabaseClient,
   usuarioId: string,
@@ -56,21 +52,10 @@ export async function otorgarAcceso(
   paymentId: string,
   proveedor: "mercadopago" | "paypal" = "mercadopago"
 ) {
-  if (item.tipo === "curso") {
-    const { error } = await supabaseAdmin
-      .from("inscripciones")
-      .insert([{ usuario_id: usuarioId, curso_id: item.id, progreso: 0, mercadopago_payment_id: paymentId }]);
-
-    if (error && error.code !== "23505") {
-      console.error(`No pudimos dar acceso al curso ${item.id} para ${usuarioId}:`, error.message);
-    }
-    return;
-  }
-
   const columnaPago = proveedor === "paypal" ? "paypal_order_id" : "mercadopago_payment_id";
 
   // Estado inicial "Esperando información": es el mismo texto que ya lee
-  // el panel de alumnos (src/app/alumnos/page.tsx).
+  // el portal de usuarios (src/app/usuarios/page.tsx).
   const { data: insertado, error } = await supabaseAdmin
     .from("servicios_contratados")
     .insert([{ usuario_id: usuarioId, servicio_id: item.id, estado: "Esperando información", [columnaPago]: paymentId }])

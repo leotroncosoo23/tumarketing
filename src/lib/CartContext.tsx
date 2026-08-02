@@ -4,9 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from "react";
 import type { Moneda } from "@/lib/CurrencyContext";
 
-export type TipoItemCarrito = "curso" | "servicio";
+export type TipoItemCarrito = "servicio";
 
-// Forma de un ítem dentro del carrito. Sirve tanto para cursos como para servicios.
+// Forma de un ítem dentro del carrito.
 export type ItemCarrito = {
   id: string;
   titulo: string;

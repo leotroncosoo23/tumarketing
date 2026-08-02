@@ -11,11 +11,16 @@ export async function POST(req: NextRequest) {
     // nunca en un componente "use client".
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-    const { email, nombre, password } = await req.json();
+    const { email, nombre, password, rol } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Faltan datos: email y password son requeridos." }, { status: 400 });
     }
+
+    // Por defecto se dan de alta clientes ("usuario"). El panel de Configuración
+    // > Equipo manda "admin" o "editor" al invitar un miembro del equipo interno;
+    // cualquier otro valor cae al default seguro.
+    const rolFinal = rol === "admin" || rol === "editor" ? rol : "usuario";
 
     const { data: creado, error: errorAuth } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -27,7 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorAuth?.message || "No pudimos crear el usuario." }, { status: 500 });
     }
 
-    // Mismas columnas que crearPerfilAlumno (src/lib/alumnos.ts): acá el admin está
+    // Mismas columnas que crearPerfilUsuario (src/lib/usuarios.ts): acá el admin está
     // dando de alta la cuenta en nombre del cliente como parte de la contratación,
     // así que se registran los términos como aceptados igual que en el alta normal.
     const { error: errorPerfil } = await supabaseAdmin.from("usuarios").insert([
@@ -35,7 +40,7 @@ export async function POST(req: NextRequest) {
         id: creado.user.id,
         email,
         nombre: nombre || null,
-        rol: "alumno",
+        rol: rolFinal,
         activo: true,
         acepta_terminos: true,
         terminos_aceptados_en: new Date().toISOString(),

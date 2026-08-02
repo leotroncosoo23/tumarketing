@@ -146,7 +146,7 @@ export default function PaginasWebPage() {
           {
             icon: GraduationCap,
             titulo: "Formación universitaria",
-            texto: "Analista programador con formación académica en desarrollo de software, no un curso online de fin de semana.",
+            texto: "Analista programador con formación académica en desarrollo de software, no algo aprendido de forma improvisada.",
           },
           {
             icon: ShieldCheck,

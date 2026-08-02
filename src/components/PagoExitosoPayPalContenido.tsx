@@ -39,7 +39,7 @@ export default function PagoExitosoPayPalContenido() {
         return;
       }
       setEstado("listo");
-      router.push("/alumnos");
+      router.push("/usuarios");
     });
   }, [ordenId, router]);
 
@@ -55,7 +55,7 @@ export default function PagoExitosoPayPalContenido() {
         {estado === "error" && (error || "Algo no salió como esperábamos.")}
       </p>
       <Link
-        href="/alumnos"
+        href="/usuarios"
         className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-8 py-4 rounded-full font-black text-lg hover:bg-[#b8e600] transition-colors"
       >
         Ir a mis servicios

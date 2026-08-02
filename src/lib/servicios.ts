@@ -11,7 +11,7 @@ export const CATEGORIAS_SERVICIOS = [
 
 export type EstadoServicio = "Activo" | "Borrador";
 
-// Decide qué panel extra ve el cliente en el portal de alumnos para este
+// Decide qué panel extra ve el cliente en el portal de usuarios para este
 // servicio (ver ModuloProyecto.tsx). "otro" no muestra ninguna sección extra.
 export const MODULOS_SERVICIO = [
   { valor: "otro", etiqueta: "Ninguno" },

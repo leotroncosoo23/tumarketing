@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 // Protege todo lo que esté bajo /admin: sin sesión -> /login,
-// cuenta desactivada -> /login, logueado pero no admin -> /alumnos.
+// cuenta desactivada -> /login, logueado pero no admin -> /usuarios.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -22,8 +22,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login?revocado=1");
   }
 
-  if (perfil.rol !== "admin") {
-    redirect("/alumnos");
+  if (perfil.rol !== "admin" && perfil.rol !== "editor") {
+    redirect("/usuarios");
   }
 
   return <>{children}</>;

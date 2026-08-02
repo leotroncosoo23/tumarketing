@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { NuevoServicioPayload } from "@/lib/servicios";
@@ -16,8 +15,9 @@ export async function crearServicio(payload: NuevoServicioPayload): Promise<Resu
     return { error: "No pudimos guardar el servicio: " + error.message };
   }
 
-  revalidatePath("/admin/servicios");
-  redirect("/admin/servicios");
+  revalidatePath("/admin");
+  revalidatePath("/servicios");
+  return {};
 }
 
 export async function actualizarServicio(id: string, payload: NuevoServicioPayload): Promise<ResultadoAccion> {
@@ -29,9 +29,10 @@ export async function actualizarServicio(id: string, payload: NuevoServicioPaylo
     return { error: "No pudimos actualizar el servicio: " + error.message };
   }
 
-  revalidatePath("/admin/servicios");
+  revalidatePath("/admin");
+  revalidatePath("/servicios");
   revalidatePath(`/servicios/${id}`);
-  redirect("/admin/servicios");
+  return {};
 }
 
 export async function eliminarServicio(id: string): Promise<ResultadoAccion> {
@@ -43,6 +44,7 @@ export async function eliminarServicio(id: string): Promise<ResultadoAccion> {
     return { error: "No pudimos eliminar el servicio: " + error.message };
   }
 
-  revalidatePath("/admin/servicios");
+  revalidatePath("/admin");
+  revalidatePath("/servicios");
   return {};
 }

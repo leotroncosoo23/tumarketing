@@ -107,7 +107,7 @@ export default function EmailMarketingTab() {
             value={asunto}
             onChange={(e) => setAsunto(e.target.value)}
             className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
-            placeholder="Ej: ¡Nuevo curso disponible!"
+            placeholder="Ej: ¡Nuevo servicio disponible!"
           />
         </div>
 

@@ -45,5 +45,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?revocado=1`);
   }
 
-  return NextResponse.redirect(`${origin}${perfil.rol === "admin" ? "/admin/dashboard" : "/alumnos"}`);
+  return NextResponse.redirect(`${origin}${perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios"}`);
 }

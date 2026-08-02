@@ -8,7 +8,7 @@
 
 ## Reglas de Diseño y Estética (Tailwind CSS)
 - **Mobile-First:** Diseñar SIEMPRE pensando primero en dispositivos móviles. Usar las clases base para móvil y luego aplicar breakpoints (`sm:`, `md:`, `lg:`, `xl:`) para adaptar el diseño a pantallas más grandes.
-- **Responsividad Absoluta:** Garantizar que todos los componentes (banners, carruseles, tarjetas de cursos) sean fluidos. Evitar anchos o altos fijos (`w-px`, `h-px`) que rompan el diseño; priorizar porcentajes, flexbox (`flex`) y grid (`grid`).
+- **Responsividad Absoluta:** Garantizar que todos los componentes (banners, carruseles, tarjetas de servicios) sean fluidos. Evitar anchos o altos fijos (`w-px`, `h-px`) que rompan el diseño; priorizar porcentajes, flexbox (`flex`) y grid (`grid`).
 - **Consistencia Visual:** Utilizar la escala de espaciado (`p-4`, `m-2`, `gap-6`) y tipografía (`text-sm`, `text-2xl`, `font-bold`) estándar de Tailwind para mantener una estética limpia, moderna y profesional orientada a conversiones (Marketing).
 - **Interactividad:** Añadir estados sutiles pero efectivos (ej. `hover:bg-blue-600`, `focus:ring`, `transition-all duration-300`) para mejorar la experiencia del usuario (UX).
 

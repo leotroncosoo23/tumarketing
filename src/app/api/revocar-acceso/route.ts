@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Actualizamos el perfil: esto bloquea el acceso al CONTENIDO del curso
+    // 1. Actualizamos el perfil: esto bloquea el acceso a la cuenta del usuario
     const { error: errorPerfil } = await supabaseAdmin
       .from("usuarios")
       .update({ activo: activar })

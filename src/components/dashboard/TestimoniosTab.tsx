@@ -3,20 +3,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Curso = {
-  id: string;
-  titulo: string;
-};
-
 type Testimonio = {
   id: string;
-  curso_id: string;
   nombre_alumno: string;
   comentario: string;
   calificacion: number;
   aprobado: boolean;
   creado_en?: string;
-  cursos?: { titulo: string } | null;
 };
 
 type ComentarioBlog = {
@@ -29,7 +22,6 @@ type ComentarioBlog = {
 
 export default function TestimoniosTab() {
   const [testimonios, setTestimonios] = useState<Testimonio[]>([]);
-  const [cursos, setCursos] = useState<Curso[]>([]);
   const [comentariosBlog, setComentariosBlog] = useState<ComentarioBlog[]>([]);
   const [cargandoComentarios, setCargandoComentarios] = useState(false);
   const [cargando, setCargando] = useState(false);
@@ -37,7 +29,6 @@ export default function TestimoniosTab() {
   const [guardando, setGuardando] = useState(false);
 
   const [nuevoTestimonio, setNuevoTestimonio] = useState({
-    curso_id: "",
     nombre_alumno: "",
     comentario: "",
     calificacion: 5,
@@ -47,20 +38,9 @@ export default function TestimoniosTab() {
   const fetchData = async () => {
     setCargando(true);
 
-    // Traemos los cursos para el selector
-    const { data: dataCursos, error: errorCursos } = await supabase
-      .from("cursos")
-      .select("id, titulo");
-
-    if (errorCursos) {
-      console.error("Error al traer cursos:", errorCursos.message);
-    }
-    setCursos(dataCursos || []);
-
-    // Traemos los testimonios cruzando datos con la tabla cursos para tener el nombre del curso
     const { data: dataTestimonios, error: errorTestimonios } = await supabase
       .from("testimonios")
-      .select(`*, cursos (titulo)`)
+      .select("*")
       .order("creado_en", { ascending: false });
 
     if (errorTestimonios) {
@@ -105,10 +85,6 @@ export default function TestimoniosTab() {
 
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nuevoTestimonio.curso_id) {
-      alert("Por favor, seleccioná un curso.");
-      return;
-    }
 
     setGuardando(true);
     const { error } = await supabase.from("testimonios").insert([
@@ -124,7 +100,6 @@ export default function TestimoniosTab() {
       alert("¡Testimonio guardado con éxito!");
       setShowForm(false);
       setNuevoTestimonio({
-        curso_id: "",
         nombre_alumno: "",
         comentario: "",
         calificacion: 5,
@@ -184,50 +159,23 @@ export default function TestimoniosTab() {
             Nuevo Testimonio
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">
-                Alumno (Ej: María Gómez)
-              </label>
-              <input
-                type="text"
-                required
-                value={nuevoTestimonio.nombre_alumno}
-                onChange={(e) =>
-                  setNuevoTestimonio({
-                    ...nuevoTestimonio,
-                    nombre_alumno: e.target.value,
-                  })
-                }
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
-                placeholder="Nombre del alumno..."
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">
-                ¿Sobre qué curso opina?
-              </label>
-              <select
-                required
-                value={nuevoTestimonio.curso_id}
-                onChange={(e) =>
-                  setNuevoTestimonio({
-                    ...nuevoTestimonio,
-                    curso_id: e.target.value,
-                  })
-                }
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
-              >
-                <option value="" disabled>
-                  Seleccioná un curso...
-                </option>
-                {cursos.map((curso) => (
-                  <option key={curso.id} value={curso.id}>
-                    {curso.titulo}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="mb-6">
+            <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">
+              Cliente (Ej: María Gómez)
+            </label>
+            <input
+              type="text"
+              required
+              value={nuevoTestimonio.nombre_alumno}
+              onChange={(e) =>
+                setNuevoTestimonio({
+                  ...nuevoTestimonio,
+                  nombre_alumno: e.target.value,
+                })
+              }
+              className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00]"
+              placeholder="Nombre del cliente..."
+            />
           </div>
 
           <div className="mb-6">
@@ -244,7 +192,7 @@ export default function TestimoniosTab() {
                 })
               }
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white outline-none focus:border-[#ccff00] h-24 resize-none"
-              placeholder="¡Me encantó el curso! Aprendí un montón sobre..."
+              placeholder="¡Excelente atención! El equipo entendió justo lo que necesitábamos..."
             ></textarea>
           </div>
 
@@ -356,9 +304,6 @@ export default function TestimoniosTab() {
                   <p className="text-sm text-neutral-400 italic mb-2">
                     &quot;{testimonio.comentario}&quot;
                   </p>
-                  <span className="text-xs text-neutral-500 font-bold bg-neutral-950 px-2 py-1 rounded border border-neutral-800">
-                    Curso: {testimonio.cursos?.titulo || "Curso eliminado"}
-                  </span>
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto justify-end items-center mt-4 md:mt-0">
