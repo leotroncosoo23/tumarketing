@@ -1,19 +1,55 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { Space_Grotesk, Inter } from "next/font/google";
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { Button, StatCard } from "@/components/dashboard/ui";
+import "@/app/admin/admin.css";
+
+// admin.css espera --font-display/--font-body, pero nunca se cargaban de
+// verdad en ningún lado (solo tenían un fallback string en la propia hoja de
+// estilos) — sin esto, "Space Grotesk"/"Inter" caían silenciosamente a la
+// fuente del sistema. Acá los cargamos y exponemos como esas mismas variables.
+const fontDisplay = Space_Grotesk({ variable: "--font-display", subsets: ["latin"], weight: ["500", "700"] });
+const fontBody = Inter({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export default function LoginUsuarios() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState("");
 
+  // Fase 1: solo maqueta visual. Los inputs tienen estado local para que se
+  // vean y se sientan reales, pero todavía no están conectados a Supabase —
+  // eso es la Fase 2, a la espera de tu OK.
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mostrarPassword, setMostrarPassword] = useState(false);
+
   useEffect(() => {
     // window no existe en el servidor: este chequeo tiene que esperar a que
     // el componente esté montado en el cliente, por eso va en un efecto.
-    if (new URLSearchParams(window.location.search).get("revocado") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("revocado") === "1") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Tu acceso fue revocado. Contactanos si creés que es un error.");
+      return;
+    }
+    // auth/callback/route.ts manda acá el motivo exacto cuando el login con
+    // Google falla, en vez de rebotar en silencio (ver mensaje al usuario más
+    // abajo: no dice "arreglado", muestra la razón real para poder diagnosticar).
+    const errorOAuth = params.get("error");
+    if (errorOAuth) {
+      const razon = params.get("razon");
+      const mensajes: Record<string, string> = {
+        oauth_sin_code: "Google no devolvió un código de autorización" + (razon ? `: ${razon}` : "."),
+        oauth_exchange: `No pudimos canjear el código por una sesión: ${razon || "error desconocido"}.`,
+        oauth_sin_user: "La sesión no quedó creada después del canje.",
+        oauth_perfil: `No pudimos leer tu perfil en 'usuarios': ${razon || "error desconocido"}.`,
+      };
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setError(mensajes[errorOAuth] || `No pudimos completar el login con Google (${errorOAuth}).`);
     }
   }, []);
 
@@ -34,44 +70,120 @@ export default function LoginUsuarios() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-950 flex items-center justify-center p-6 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-neutral-950 -z-10"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#ccff00]/10 blur-[120px] rounded-full pointer-events-none"></div>
-
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <Link href="/" className="text-3xl font-bold tracking-tighter inline-block hover:scale-105 transition-transform">
-            Tu<span className="text-[#ccff00]">Marketing</span>
-          </Link>
-          <p className="text-neutral-500 text-sm mt-2 font-medium tracking-widest uppercase">
-            Plataforma de Clientes
-          </p>
+    <main className={`tm-admin-theme ${fontDisplay.variable} ${fontBody.variable} flex min-h-screen bg-[var(--surface-page)]`}>
+      {/* Columna izquierda: branding, oculta en móvil */}
+      <div className="hidden w-1/2 flex-col justify-between border-r border-[var(--border-subtle)] p-10 md:flex lg:p-16">
+        <div className="flex items-center gap-3">
+          <Image src="/logo-mark.jpg" alt="Tu Marketing" width={56} height={56} className="rounded-full" />
+          <span className="tm-display font-bold uppercase tracking-[var(--ls-tight)] text-[var(--text-primary)] [font-size:15px]">
+            Tu Marketing.
+          </span>
         </div>
 
-        <div className="bg-neutral-900/60 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 md:p-10 shadow-2xl relative z-10">
-          <h2 className="text-2xl font-bold text-white mb-2 text-center">
-            Entrá a tu cuenta
+        <div className="max-w-lg">
+          <span className="font-bold uppercase text-[var(--accent)] [font-size:var(--fs-eyebrow)] tracking-[var(--ls-eyebrow)]">
+            Panel de acceso
+          </span>
+          <h1 className="tm-display mt-3 font-bold leading-[var(--lh-tight)] text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
+            Entrá y mirá <span className="text-[var(--accent)]">tus resultados.</span>
+          </h1>
+          <p className="mt-4 text-[var(--text-secondary)] [font-size:var(--fs-body-m)]">
+            Un solo acceso para todo: tu dashboard de campañas si sos cliente, o el panel de administración si sos
+            parte del equipo.
+          </p>
+
+          <div className="mt-10 grid grid-cols-2 gap-4">
+            <StatCard label="Vistas generadas" value="+80K" />
+            <StatCard label="Campañas activas" value="+200" />
+          </div>
+        </div>
+
+        <p className="text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
+          Convertimos marcas en negocios digitales reales.
+        </p>
+      </div>
+
+      {/* Columna derecha: formulario */}
+      <div className="flex w-full flex-col items-center justify-center p-8 md:w-1/2 lg:p-16">
+        <div className="w-full max-w-sm">
+          <h2 className="tm-display font-bold uppercase text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
+            Bienvenido de vuelta
           </h2>
-          <p className="text-neutral-400 text-sm text-center mb-8">
-            Iniciá sesión para ver tus servicios y beneficios.
+          <p className="mt-2 mb-8 text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">
+            Iniciá sesión para ver tus resultados.
           </p>
 
           {error && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-xl text-sm font-medium text-center">
+            <div className="mb-6 rounded-[var(--radius-m)] border border-[var(--signal-error)]/50 bg-[var(--signal-error)]/10 px-4 py-3 text-center font-medium text-[var(--signal-error)] [font-size:var(--fs-body-s)]">
               {error}
             </div>
           )}
 
-          <button
-            onClick={handleLoginGoogle}
-            disabled={cargando}
-            className="w-full flex items-center justify-center gap-3 bg-white text-neutral-900 font-bold text-base py-3.5 rounded-xl hover:bg-neutral-200 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.9 3.4 14.7 2.4 12 2.4 6.9 2.4 2.7 6.6 2.7 12S6.9 21.6 12 21.6c6.9 0 9.3-4.9 9.3-7.4 0-.5-.1-.9-.1-1.3H12z"/>
+          <div className="flex flex-col gap-4">
+            <label className="flex flex-col gap-2">
+              <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Email</span>
+              <input
+                type="email"
+                placeholder="tu@negocio.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-[var(--radius-s)] border border-[var(--border-subtle)] bg-[var(--black-2)] px-[16px] py-[14px] text-[var(--text-primary)] outline-none [font-size:var(--fs-body-m)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)]"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Contraseña</span>
+                <Link href="/login" className="font-semibold text-[var(--accent)] [font-size:var(--fs-body-s)] hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  type={mostrarPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-[var(--radius-s)] border border-[var(--border-subtle)] bg-[var(--black-2)] px-[16px] py-[14px] pr-11 text-[var(--text-primary)] outline-none [font-size:var(--fs-body-m)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword((v) => !v)}
+                  aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
+                >
+                  {mostrarPassword ? <EyeOff className="h-[18px] w-[18px]" /> : <Eye className="h-[18px] w-[18px]" />}
+                </button>
+              </div>
+            </label>
+
+            <Button type="button" className="mt-2 w-full">
+              Entrar
+            </Button>
+          </div>
+
+          <div className="my-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-[var(--border-subtle)]" />
+            <span className="text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">o</span>
+            <span className="h-px flex-1 bg-[var(--border-subtle)]" />
+          </div>
+
+          <Button variant="secondary" onClick={handleLoginGoogle} disabled={cargando} className="w-full">
+            <svg className="h-5 w-5" viewBox="0 0 24 24">
+              <path
+                fill="#EA4335"
+                d="M12 10.2v3.9h5.5c-.24 1.4-1.7 4.1-5.5 4.1-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.9 3.4 14.7 2.4 12 2.4 6.9 2.4 2.7 6.6 2.7 12S6.9 21.6 12 21.6c6.9 0 9.3-4.9 9.3-7.4 0-.5-.1-.9-.1-1.3H12z"
+              />
             </svg>
             {cargando ? "Conectando..." : "Continuar con Google"}
-          </button>
+          </Button>
+
+          <p className="mt-6 text-center text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">
+            ¿No tenés cuenta?{" "}
+            <Link href="/servicios" className="font-semibold text-[var(--accent)] hover:underline">
+              Registrate acá
+            </Link>
+          </p>
         </div>
       </div>
     </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, Button, Input, Textarea, Select, Badge, StatCard } from "@/components/dashboard/ui";
 import type { Blog } from "@/components/dashboard/AdminShell";
@@ -39,6 +39,8 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
   const [draft, setDraft] = useState(VACIO);
   const [guardando, setGuardando] = useState(false);
   const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const [subiendoImagenContenido, setSubiendoImagenContenido] = useState(false);
+  const contenidoRef = useRef<HTMLTextAreaElement>(null);
 
   const [comentarios, setComentarios] = useState<ComentarioBlog[]>([]);
   const [cargandoComentarios, setCargandoComentarios] = useState(false);
@@ -106,6 +108,49 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
     setSubiendoImagen(false);
   };
 
+  // Inserta texto en "Contenido" en la posición del cursor (no al final),
+  // igual que ya funcionaba en RecursoTab.tsx para "descripcion_larga".
+  const insertarEnContenido = (texto: string) => {
+    const textarea = contenidoRef.current;
+    if (!textarea) {
+      setDraft((prev) => ({ ...prev, contenido: prev.contenido + texto }));
+      return;
+    }
+    const inicio = textarea.selectionStart;
+    const fin = textarea.selectionEnd;
+    setDraft((prev) => ({
+      ...prev,
+      contenido: prev.contenido.slice(0, inicio) + texto + prev.contenido.slice(fin),
+    }));
+    requestAnimationFrame(() => {
+      const pos = inicio + texto.length;
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+    });
+  };
+
+  const handleInsertarImagenContenido = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendoImagenContenido(true);
+    const fileName = `${Math.random()}.${file.name.split(".").pop()}`;
+    const { error } = await supabase.storage.from("imagenes-blog").upload(fileName, file);
+    if (error) {
+      alert("Error subiendo imagen: " + error.message);
+    } else {
+      const { data } = supabase.storage.from("imagenes-blog").getPublicUrl(fileName);
+      insertarEnContenido(`\n[img]${data.publicUrl}[/img]\n`);
+    }
+    setSubiendoImagenContenido(false);
+    e.target.value = "";
+  };
+
+  const handleInsertarVideo = () => {
+    const url = prompt("Pegá la URL del video (YouTube o Vimeo):");
+    if (!url?.trim()) return;
+    insertarEnContenido(`\n[video]${url.trim()}[/video]\n`);
+  };
+
   const guardar = async () => {
     setGuardando(true);
     const payload = {
@@ -166,12 +211,41 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
               value={draft.resumen}
               onChange={(e) => setDraft({ ...draft, resumen: e.target.value })}
             />
-            <Textarea
-              label="Contenido"
-              rows={12}
-              value={draft.contenido}
-              onChange={(e) => setDraft({ ...draft, contenido: e.target.value })}
-            />
+            <div>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Contenido</span>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleInsertarImagenContenido}
+                    disabled={subiendoImagenContenido}
+                    className="hidden"
+                    id="imagen-contenido-blog"
+                  />
+                  <label
+                    htmlFor="imagen-contenido-blog"
+                    className="cursor-pointer rounded-[var(--radius-s)] bg-[var(--black-4)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--black-5)]"
+                  >
+                    {subiendoImagenContenido ? "Subiendo..." : "🖼️ Insertar imagen"}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleInsertarVideo}
+                    className="rounded-[var(--radius-s)] bg-[var(--black-4)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] hover:bg-[var(--black-5)]"
+                  >
+                    🎬 Insertar video
+                  </button>
+                </div>
+              </div>
+              <Textarea
+                ref={contenidoRef}
+                rows={12}
+                value={draft.contenido}
+                onChange={(e) => setDraft({ ...draft, contenido: e.target.value })}
+                placeholder="Dejá una línea en blanco entre párrafos. Usá los botones de arriba para insertar imágenes o videos en cualquier punto."
+              />
+            </div>
             <div className="border-t border-[var(--border-subtle)] pt-4">
               <h3 className="tm-display mb-3 font-bold text-[var(--text-primary)]">SEO</h3>
               <div className="flex flex-col gap-4">

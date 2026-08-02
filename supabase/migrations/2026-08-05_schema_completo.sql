@@ -33,16 +33,34 @@ alter table usuarios add constraint usuarios_rol_check check (rol in ('admin', '
 alter table usuarios drop constraint if exists usuarios_estado_cuenta_check;
 alter table usuarios add constraint usuarios_estado_cuenta_check check (estado_cuenta in ('activo', 'pausado', 'riesgo'));
 
+-- OJO: la política de "usuarios" NO puede hacer "exists (select 1 from
+-- usuarios ...)" contra sí misma — Postgres la vuelve a evaluar para esa
+-- subconsulta y entra en recursión infinita ("infinite recursion detected in
+-- policy for relation usuarios"), lo que además rompe en cascada la RLS de
+-- TODAS las demás tablas (todas consultan "usuarios" para saber el rol).
+-- Por eso el chequeo de rol vive en esta función SECURITY DEFINER, que
+-- corre bypaseando la RLS de "usuarios" y no recursiona.
+create or replace function usuarios_rol_actual()
+returns text
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select rol from usuarios where id = auth.uid();
+$$;
+grant execute on function usuarios_rol_actual() to authenticated;
+
 alter table usuarios enable row level security;
 drop policy if exists "usuarios_lectura" on usuarios;
 create policy "usuarios_lectura" on usuarios for select
   using (
     id = auth.uid()
-    or exists (select 1 from usuarios u where u.id = auth.uid() and u.rol in ('admin', 'editor'))
+    or usuarios_rol_actual() in ('admin', 'editor')
   );
 drop policy if exists "usuarios_edicion_admin" on usuarios;
 create policy "usuarios_edicion_admin" on usuarios for update
-  using (exists (select 1 from usuarios u where u.id = auth.uid() and u.rol in ('admin', 'editor')));
+  using (usuarios_rol_actual() in ('admin', 'editor'));
 
 -- ============================================================================
 -- 2. configuracion (singleton id=1: whatsapp, banner, redes)

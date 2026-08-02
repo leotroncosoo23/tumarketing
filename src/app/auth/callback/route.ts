@@ -9,20 +9,24 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
+  // Si el propio Google/Supabase ya volvió con un error (ej. bad_oauth_state),
+  // no llega ni "code" — mostramos ese motivo en vez de rebotar en silencio.
+  const errorProveedor = searchParams.get("error_description") || searchParams.get("error");
   if (!code) {
-    return NextResponse.redirect(`${origin}/login`);
+    const razon = errorProveedor ? `&razon=${encodeURIComponent(errorProveedor)}` : "";
+    return NextResponse.redirect(`${origin}/login?error=oauth_sin_code${razon}`);
   }
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(`${origin}/login?error=oauth_exchange&razon=${encodeURIComponent(error.message)}`);
   }
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(`${origin}/login?error=oauth_sin_user`);
   }
 
   const { data: perfil, error: errorPerfil } = await supabase
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (errorPerfil) {
-    return NextResponse.redirect(`${origin}/login`);
+    return NextResponse.redirect(`${origin}/login?error=oauth_perfil&razon=${encodeURIComponent(errorPerfil.message)}`);
   }
 
   if (!perfil) {
