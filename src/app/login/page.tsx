@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Space_Grotesk, Inter } from "next/font/google";
@@ -56,6 +55,11 @@ export default function LoginUsuarios() {
       };
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError(mensajes[errorOAuth] || `No pudimos completar el login con Google (${errorOAuth}).`);
+      return;
+    }
+    if (params.get("reset") === "1") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMensajeExito("Tu contraseña quedó actualizada. Iniciá sesión con la nueva.");
     }
   }, []);
 
@@ -146,6 +150,25 @@ export default function LoginUsuarios() {
     // falta el mismo paso de términos/newsletter que ya usa el login con
     // Google, así que reusamos esa misma pantalla en vez de duplicar lógica.
     router.replace("/auth/bienvenida");
+  };
+
+  const handleOlvidoPassword = async () => {
+    setError("");
+    setMensajeExito("");
+    if (!email.trim()) {
+      setError("Escribí tu email arriba primero, y después tocá \"¿Olvidaste tu contraseña?\".");
+      return;
+    }
+    setCargando(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth/actualizar-password`,
+    });
+    setCargando(false);
+    if (error) {
+      setError("No pudimos enviar el email: " + error.message);
+      return;
+    }
+    setMensajeExito(`Te mandamos un email a ${email.trim()} con un link para restablecer tu contraseña.`);
   };
 
   const handleLoginGoogle = async () => {
@@ -266,9 +289,13 @@ export default function LoginUsuarios() {
               <div className="flex items-center justify-between">
                 <span className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)]">Contraseña</span>
                 {modo === "login" && (
-                  <Link href="/login" className="font-semibold text-[var(--accent)] [font-size:var(--fs-body-s)] hover:underline">
+                  <button
+                    type="button"
+                    onClick={handleOlvidoPassword}
+                    className="font-semibold text-[var(--accent)] [font-size:var(--fs-body-s)] hover:underline"
+                  >
                     ¿Olvidaste tu contraseña?
-                  </Link>
+                  </button>
                 )}
               </div>
               <div className="relative">
