@@ -22,6 +22,7 @@ export default function PagoExitosoPayPalContenido() {
   const [error, setError] = useState<string | null>(
     ordenId ? null : "No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano."
   );
+  const [sinSesion, setSinSesion] = useState(false);
 
   // Si llegamos acá es porque PayPal redirigió tras la aprobación: vaciamos
   // el carrito ya mismo, sin esperar la confirmación del servidor.
@@ -36,6 +37,7 @@ export default function PagoExitosoPayPalContenido() {
       if (!resultado.ok) {
         setEstado("error");
         setError(resultado.error);
+        setSinSesion(Boolean(resultado.sinSesion));
         return;
       }
       setEstado("listo");
@@ -54,12 +56,21 @@ export default function PagoExitosoPayPalContenido() {
         {estado === "listo" && "Ya tenés acceso. Te llevamos a tu plataforma..."}
         {estado === "error" && (error || "Algo no salió como esperábamos.")}
       </p>
-      <Link
-        href="/usuarios"
-        className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-8 py-4 rounded-full font-black text-lg hover:bg-[#b8e600] transition-colors"
-      >
-        Ir a mis servicios
-      </Link>
+      {sinSesion ? (
+        <Link
+          href={`/login?next=${encodeURIComponent(`/pago-exitoso-paypal?${searchParams.toString()}`)}`}
+          className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-8 py-4 rounded-full font-black text-lg hover:bg-[#b8e600] transition-colors"
+        >
+          Iniciar sesión y confirmar mi compra
+        </Link>
+      ) : (
+        <Link
+          href="/usuarios"
+          className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-8 py-4 rounded-full font-black text-lg hover:bg-[#b8e600] transition-colors"
+        >
+          Ir a mis servicios
+        </Link>
+      )}
     </div>
   );
 }

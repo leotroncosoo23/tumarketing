@@ -27,6 +27,11 @@ export default function LoginUsuarios() {
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
 
+  // Si vinimos de un link tipo /login?next=/pago-exitoso?..., después de
+  // loguearnos hay que volver ahí (ej: la sesión se perdió a mitad del ida y
+  // vuelta a Mercado Pago) en vez de mandar siempre al destino fijo por rol.
+  const [siguiente, setSiguiente] = useState<string | null>(null);
+
   // Solo para el registro:
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
@@ -36,6 +41,11 @@ export default function LoginUsuarios() {
     // window no existe en el servidor: este chequeo tiene que esperar a que
     // el componente esté montado en el cliente, por eso va en un efecto.
     const params = new URLSearchParams(window.location.search);
+    const next = params.get("next");
+    if (next && next.startsWith("/")) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSiguiente(next);
+    }
     if (params.get("revocado") === "1") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Tu acceso fue revocado. Contactanos si creés que es un error.");
@@ -88,7 +98,7 @@ export default function LoginUsuarios() {
       setCargando(false);
       return;
     }
-    router.replace(perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios");
+    router.replace(siguiente || (perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios"));
   };
 
   const handleLoginPassword = async (e: React.FormEvent) => {
@@ -175,10 +185,13 @@ export default function LoginUsuarios() {
     setError("");
     setMensajeExito("");
     setCargando(true);
+    const callbackUrl = siguiente
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(siguiente)}`
+      : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     });
     if (error) {

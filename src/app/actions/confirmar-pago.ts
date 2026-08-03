@@ -3,7 +3,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { verificarPagoAprobado, crearClienteSupabaseAdmin, otorgarAcceso } from "@/lib/mercadopago-server";
 
-type ResultadoConfirmacion = { ok: true } | { ok: false; error: string };
+type ResultadoConfirmacion = { ok: true } | { ok: false; error: string; sinSesion?: boolean };
 
 // Esto es un atajo de UX (activa el acceso al toque para que el usuario no
 // tenga que esperar a que llegue el webhook), NO el mecanismo de seguridad
@@ -19,7 +19,10 @@ export async function confirmarPagoYOtorgarAcceso(paymentId: string): Promise<Re
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { ok: false, error: "Iniciá sesión para ver tu compra." };
+      // Puede pasar si la sesión venció mientras el usuario estaba afuera
+      // pagando en Mercado Pago: no perdemos el pago, solo hace falta volver
+      // a loguearse para que este mismo botón reintente la confirmación.
+      return { ok: false, error: "Tu sesión se cerró mientras pagabas. Iniciá sesión de nuevo para confirmar tu compra.", sinSesion: true };
     }
 
     // Nunca confiamos en el "status" que viene en la URL (cualquiera podría

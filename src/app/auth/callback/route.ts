@@ -8,6 +8,8 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const next = searchParams.get("next");
+  const destinoSiguiente = next && next.startsWith("/") ? next : null;
 
   // Si el propio Google/Supabase ya volvió con un error (ej. bad_oauth_state),
   // no llega ni "code" — mostramos ese motivo en vez de rebotar en silencio.
@@ -49,5 +51,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?revocado=1`);
   }
 
-  return NextResponse.redirect(`${origin}${perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios"}`);
+  return NextResponse.redirect(
+    `${origin}${destinoSiguiente || (perfil.rol === "admin" || perfil.rol === "editor" ? "/admin" : "/usuarios")}`
+  );
 }

@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { capturarOrdenPayPal } from "@/lib/paypal-server";
 import { crearClienteSupabaseAdmin, otorgarAcceso, type ItemComprado } from "@/lib/mercadopago-server";
 
-type ResultadoConfirmacion = { ok: true } | { ok: false; error: string };
+type ResultadoConfirmacion = { ok: true } | { ok: false; error: string; sinSesion?: boolean };
 
 // Atajo de UX (activa el acceso al toque cuando el comprador vuelve de PayPal), NO el
 // mecanismo de seguridad principal: el webhook (src/app/api/webhooks/paypal/route.ts)
@@ -20,7 +20,10 @@ export async function confirmarCapturaPayPal(ordenId: string): Promise<Resultado
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      return { ok: false, error: "Iniciá sesión para ver tu compra." };
+      // Puede pasar si la sesión venció mientras el usuario estaba afuera
+      // pagando en PayPal: no perdemos el pago, solo hace falta volver a
+      // loguearse para que este mismo botón reintente la confirmación.
+      return { ok: false, error: "Tu sesión se cerró mientras pagabas. Iniciá sesión de nuevo para confirmar tu compra.", sinSesion: true };
     }
 
     const supabaseAdmin = crearClienteSupabaseAdmin();
