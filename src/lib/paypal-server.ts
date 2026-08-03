@@ -6,8 +6,12 @@ export type OrdenPayPalCreada = { ok: true; ordenId: string; linkAprobacion: str
 // PayPal no usa API key fija: hay que pedir un access token OAuth2 (client_credentials)
 // en cada operación. No lo cacheamos entre requests porque las Server Actions de
 // Next.js no comparten memoria de forma confiable entre invocaciones.
-async function obtenerAccessToken(): Promise<string | null> {
-  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) return null;
+type AccessTokenResult = { ok: true; token: string } | { ok: false; error: string };
+
+async function obtenerAccessToken(): Promise<AccessTokenResult> {
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+    return { ok: false, error: "Falta PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET en el servidor." };
+  }
 
   const credenciales = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64");
   const respuesta = await fetch(`${API_BASE}/v1/oauth2/token`, {
@@ -19,17 +23,25 @@ async function obtenerAccessToken(): Promise<string | null> {
     body: "grant_type=client_credentials",
   });
 
-  if (!respuesta.ok) return null;
+  if (!respuesta.ok) {
+    // No devolvemos el body crudo al cliente (podría filtrar detalles internos
+    // de la cuenta de PayPal), pero sí lo logueamos server-side para poder
+    // diagnosticar credenciales inválidas/vencidas sin adivinar.
+    const detalle = await respuesta.text().catch(() => "");
+    console.error(`PayPal OAuth token falló (status ${respuesta.status}):`, detalle);
+    return { ok: false, error: `PayPal rechazó las credenciales configuradas (status ${respuesta.status}).` };
+  }
   const data = await respuesta.json();
-  return data.access_token as string;
+  return { ok: true, token: data.access_token as string };
 }
 
 // Crea la orden en PayPal (intent CAPTURE: recién se cobra cuando llamemos a
 // capturarOrdenPayPal más adelante, no en este paso). El total y los ítems ya
 // vienen calculados con precios reales de Supabase, nunca con lo que mande el cliente.
 export async function crearOrdenPayPal(items: ItemOrdenPayPal[], urlBase: string): Promise<OrdenPayPalCreada> {
-  const accessToken = await obtenerAccessToken();
-  if (!accessToken) return { ok: false, error: "PayPal no está configurado en el servidor." };
+  const resultadoToken = await obtenerAccessToken();
+  if (!resultadoToken.ok) return { ok: false, error: resultadoToken.error };
+  const accessToken = resultadoToken.token;
 
   const totalUsd = items.reduce((suma, item) => suma + item.precioUsd, 0);
 
@@ -80,8 +92,9 @@ export async function crearOrdenPayPal(items: ItemOrdenPayPal[], urlBase: string
 // Captura de verdad el dinero de una orden ya aprobada por el comprador. Antes de
 // esto no hubo ningún cobro: la aprobación en PayPal solo autoriza, no cobra.
 export async function capturarOrdenPayPal(ordenId: string): Promise<boolean> {
-  const accessToken = await obtenerAccessToken();
-  if (!accessToken) return false;
+  const resultadoToken = await obtenerAccessToken();
+  if (!resultadoToken.ok) return false;
+  const accessToken = resultadoToken.token;
 
   const respuesta = await fetch(`${API_BASE}/v2/checkout/orders/${ordenId}/capture`, {
     method: "POST",
@@ -109,8 +122,9 @@ export async function capturarOrdenPayPal(ordenId: string): Promise<boolean> {
 // llega al webhook, siempre le volvemos a preguntar a la API de PayPal si la firma
 // es válida antes de otorgar acceso.
 export async function verificarFirmaWebhook(headers: Headers, bodyCrudo: string): Promise<boolean> {
-  const accessToken = await obtenerAccessToken();
-  if (!accessToken || !process.env.PAYPAL_WEBHOOK_ID) return false;
+  const resultadoToken = await obtenerAccessToken();
+  if (!resultadoToken.ok || !process.env.PAYPAL_WEBHOOK_ID) return false;
+  const accessToken = resultadoToken.token;
 
   const respuesta = await fetch(`${API_BASE}/v1/notifications/verify-webhook-signature`, {
     method: "POST",
