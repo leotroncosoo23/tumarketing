@@ -115,11 +115,16 @@ alter table servicios add column if not exists miniatura_url text;
 alter table servicios add column if not exists caracteristicas text[] not null default '{}';
 alter table servicios add column if not exists destacado boolean not null default false;
 alter table servicios add column if not exists modulo text not null default 'otro';
+alter table servicios add column if not exists tagline text;
+alter table servicios add column if not exists tipo_pago text not null default 'unico';
+alter table servicios add column if not exists beneficios jsonb not null default '[]';
 
 alter table servicios drop constraint if exists servicios_estado_check;
 alter table servicios add constraint servicios_estado_check check (estado in ('Activo', 'Borrador'));
 alter table servicios drop constraint if exists servicios_modulo_check;
 alter table servicios add constraint servicios_modulo_check check (modulo in ('otro', 'web', 'social', 'ads', 'branding'));
+alter table servicios drop constraint if exists servicios_tipo_pago_check;
+alter table servicios add constraint servicios_tipo_pago_check check (tipo_pago in ('unico', 'mensual'));
 
 alter table servicios enable row level security;
 drop policy if exists "servicios_lectura_publica" on servicios;

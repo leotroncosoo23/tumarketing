@@ -2,15 +2,17 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus, X } from "lucide-react";
 import { Card, Button, Input, Textarea, Select, Badge, StatCard } from "@/components/dashboard/ui";
 import { crearServicio, actualizarServicio, eliminarServicio } from "@/lib/servicios-actions";
+import { ICONOS_BENEFICIO } from "@/lib/beneficioIconos";
 import {
   CATEGORIAS_SERVICIOS,
   MODULOS_SERVICIO,
   type Servicio,
   type NuevoServicioPayload,
   type EstadoServicio,
+  type BeneficioServicio,
 } from "@/lib/servicios";
 
 const VACIO: NuevoServicioPayload = {
@@ -26,6 +28,9 @@ const VACIO: NuevoServicioPayload = {
   caracteristicas: [],
   destacado: false,
   modulo: "otro",
+  tagline: "",
+  tipo_pago: "unico",
+  beneficios: [],
 };
 
 function servicioADraft(s: Servicio): NuevoServicioPayload {
@@ -42,8 +47,13 @@ function servicioADraft(s: Servicio): NuevoServicioPayload {
     caracteristicas: s.caracteristicas,
     destacado: s.destacado,
     modulo: s.modulo,
+    tagline: s.tagline || "",
+    tipo_pago: s.tipo_pago || "unico",
+    beneficios: s.beneficios || [],
   };
 }
+
+const BENEFICIO_VACIO: BeneficioServicio = { icono: "objetivo", titulo: "", descripcion: "" };
 
 export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
   const router = useRouter();
@@ -102,6 +112,21 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
     }));
   };
 
+  const agregarBeneficio = () => {
+    setDraft((d) => ({ ...d, beneficios: [...d.beneficios, { ...BENEFICIO_VACIO }] }));
+  };
+
+  const actualizarBeneficio = (indice: number, cambios: Partial<BeneficioServicio>) => {
+    setDraft((d) => ({
+      ...d,
+      beneficios: d.beneficios.map((b, i) => (i === indice ? { ...b, ...cambios } : b)),
+    }));
+  };
+
+  const quitarBeneficio = (indice: number) => {
+    setDraft((d) => ({ ...d, beneficios: d.beneficios.filter((_, i) => i !== indice) }));
+  };
+
   if (vista === "editor") {
     return (
       <div>
@@ -119,6 +144,11 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
               value={draft.titulo}
               onChange={(e) => setDraft({ ...draft, titulo: e.target.value })}
             />
+            <Input
+              label="Tagline (frase gancho debajo del título, ej: 'Contenido que vende, sin que muevas un dedo.')"
+              value={draft.tagline}
+              onChange={(e) => setDraft({ ...draft, tagline: e.target.value })}
+            />
             <Textarea
               label="Descripción corta"
               rows={2}
@@ -131,8 +161,64 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
               value={draft.descripcion_detallada}
               onChange={(e) => setDraft({ ...draft, descripcion_detallada: e.target.value })}
             />
+
+            <div className="border-t border-[var(--border-subtle)] pt-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="tm-display font-bold text-[var(--text-primary)]">Lo que ganás</h3>
+                  <p className="text-xs text-[var(--text-tertiary)]">
+                    Beneficios con ícono que aparecen arriba de &quot;Qué incluye&quot; en la página del servicio.
+                  </p>
+                </div>
+                <Button type="button" variant="secondary" className="shrink-0 text-xs" onClick={agregarBeneficio}>
+                  <Plus className="h-3.5 w-3.5" /> Agregar
+                </Button>
+              </div>
+              <div className="flex flex-col gap-3">
+                {draft.beneficios.map((beneficio, i) => (
+                  <div key={i} className="flex gap-2 rounded-[var(--radius-m)] border border-[var(--border-subtle)] p-3">
+                    <Select
+                      value={beneficio.icono}
+                      onChange={(e) => actualizarBeneficio(i, { icono: e.target.value })}
+                      className="w-[140px] shrink-0"
+                    >
+                      {Object.entries(ICONOS_BENEFICIO).map(([key, { label }]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </Select>
+                    <div className="flex flex-1 flex-col gap-2">
+                      <Input
+                        placeholder="Título del beneficio"
+                        value={beneficio.titulo}
+                        onChange={(e) => actualizarBeneficio(i, { titulo: e.target.value })}
+                      />
+                      <Textarea
+                        rows={2}
+                        placeholder="Descripción breve"
+                        value={beneficio.descripcion}
+                        onChange={(e) => actualizarBeneficio(i, { descripcion: e.target.value })}
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => quitarBeneficio(i)}
+                      aria-label="Quitar beneficio"
+                      className="h-fit shrink-0 rounded-[var(--radius-s)] p-1.5 text-[var(--text-tertiary)] hover:bg-[var(--signal-error)]/10 hover:text-[var(--signal-error)]"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                {draft.beneficios.length === 0 && (
+                  <p className="text-sm text-[var(--text-tertiary)]">Todavía no agregaste ningún beneficio.</p>
+                )}
+              </div>
+            </div>
+
             <Textarea
-              label="Características (una por línea)"
+              label="Qué incluye (una por línea)"
               rows={5}
               value={draft.caracteristicas.join("\n")}
               onChange={(e) => setDraft({ ...draft, caracteristicas: e.target.value.split("\n").filter(Boolean) })}
@@ -179,6 +265,14 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
                 onChange={(e) => setDraft({ ...draft, tiempo_entrega: e.target.value })}
                 placeholder="Ej: 7 días hábiles"
               />
+              <Select
+                label="Tipo de pago"
+                value={draft.tipo_pago}
+                onChange={(e) => setDraft({ ...draft, tipo_pago: e.target.value as NuevoServicioPayload["tipo_pago"] })}
+              >
+                <option value="unico">Pago único</option>
+                <option value="mensual">Mensual</option>
+              </Select>
               <Input
                 label="Precio ARS"
                 type="number"

@@ -107,11 +107,15 @@ export default function CartDrawer() {
                   key={item.id}
                   className="flex items-center gap-4 bg-neutral-900/50 border border-neutral-800 rounded-2xl p-3"
                 >
-                  <img
-                    src={item.miniatura_url}
-                    alt={item.titulo}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0 bg-neutral-800"
-                  />
+                  {item.miniatura_url ? (
+                    <img
+                      src={item.miniatura_url}
+                      alt={item.titulo}
+                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-neutral-800"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl shrink-0 bg-neutral-800" aria-hidden="true" />
+                  )}
                   <div className="flex-1 min-w-0">
                     <span className="inline-block text-[10px] font-bold uppercase tracking-wide text-[#ccff00]/80 mb-0.5">
                       Servicio

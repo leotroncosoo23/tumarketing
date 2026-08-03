@@ -23,6 +23,17 @@ export const MODULOS_SERVICIO = [
 
 export type ModuloServicio = (typeof MODULOS_SERVICIO)[number]["valor"];
 
+export type TipoPagoServicio = "unico" | "mensual";
+
+// Un ítem de "Lo que ganás" en la página del servicio: ícono (de
+// ICONOS_BENEFICIO, ver beneficioIconos.tsx) + título corto + descripción.
+// Distinto de "caracteristicas" (lista simple de "Qué incluye").
+export type BeneficioServicio = {
+  icono: string;
+  titulo: string;
+  descripcion: string;
+};
+
 // Forma exacta de la tabla "servicios" en Supabase (sin id/created_at, que los pone la base).
 export type NuevoServicioPayload = {
   titulo: string;
@@ -37,6 +48,9 @@ export type NuevoServicioPayload = {
   caracteristicas: string[];
   destacado: boolean;
   modulo: ModuloServicio;
+  tagline: string;
+  tipo_pago: TipoPagoServicio;
+  beneficios: BeneficioServicio[];
 };
 
 export type Servicio = NuevoServicioPayload & {

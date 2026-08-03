@@ -1,8 +1,11 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ServiciosHero from "@/components/servicios/ServiciosHero";
+import ProblemasSection from "@/components/servicios/ProblemasSection";
 import ServiciosCatalogo from "@/components/servicios/ServiciosCatalogo";
 import ElProceso from "@/components/servicios/ElProceso";
 import FAQAcordeon from "@/components/servicios/FAQAcordeon";
+import LandingSocialProofCasos from "@/components/landings/LandingSocialProofCasos";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { Servicio } from "@/lib/servicios";
 
@@ -49,9 +52,20 @@ export default async function ServiciosPage() {
       <Navbar />
 
       <div className="relative z-10">
-        <ServiciosCatalogo servicios={servicios} />
+        <ServiciosHero />
+
+        <ProblemasSection />
 
         <ElProceso />
+
+        <ServiciosCatalogo servicios={servicios} />
+
+        <LandingSocialProofCasos
+          titulo="Resultados que hablan por nosotros"
+          subtitulo="Números reales de clientes reales. Nada de vanity metrics."
+          casos={["alojamiento", "calzado", "camping"]}
+          acento="lime"
+        />
 
         {/* Preguntas Frecuentes */}
         <section className="max-w-4xl mx-auto px-6 py-16 md:py-24">
