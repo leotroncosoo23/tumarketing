@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.tumarketingar.com"),
   title: "Tu Agencia | Marketing y Desarrollo",
   description: "Potenciamos tu marca con desarrollo web y marketing digital.",
 };

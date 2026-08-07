@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { notificarSuscriptores } from "@/lib/notificar-suscriptores";
+import { notificarSuscriptores, obtenerUrlBase } from "@/lib/notificar-suscriptores";
 
 export async function POST(request: NextRequest) {
   try {
     const { titulo, descripcion, imagen_url, id, esNuevo } = await request.json();
-    const urlBase = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const urlBase = obtenerUrlBase();
     const urlServicio = id ? `${urlBase}/servicios/${id}` : `${urlBase}/servicios`;
 
     const resultado = await notificarSuscriptores({
