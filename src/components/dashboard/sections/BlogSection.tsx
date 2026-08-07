@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Mail } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Card, Button, Input, Textarea, Select, Badge, StatCard } from "@/components/dashboard/ui";
 import type { Blog } from "@/components/dashboard/AdminShell";
@@ -42,6 +43,14 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
   const [subiendoImagenContenido, setSubiendoImagenContenido] = useState(false);
   const contenidoRef = useRef<HTMLTextAreaElement>(null);
 
+  // Aviso por mail a los suscriptores del newsletter (tabla "suscriptores",
+  // vía /api/enviar-notificacion-blog, que ya existía pero no se llamaba desde
+  // ningún lado). Se resetea a false en cada apertura del editor a propósito:
+  // no querés que un simple ajuste de texto en un post ya publicado vuelva a
+  // disparar el mail sin que el admin lo tilde de nuevo.
+  const [notificarSuscriptores, setNotificarSuscriptores] = useState(false);
+  const [enviandoNewsletter, setEnviandoNewsletter] = useState(false);
+
   const [comentarios, setComentarios] = useState<ComentarioBlog[]>([]);
   const [cargandoComentarios, setCargandoComentarios] = useState(false);
 
@@ -65,6 +74,7 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
   const abrirNuevo = () => {
     setEditando(null);
     setDraft(VACIO);
+    setNotificarSuscriptores(false);
     setVista("editor");
   };
 
@@ -85,6 +95,7 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
       tags: b.tags || "",
       fecha_programada: b.fecha_programada || "",
     });
+    setNotificarSuscriptores(false);
     setVista("editor");
   };
 
@@ -162,10 +173,36 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
       : await supabase.from("blogs").insert([payload]);
     if (error) {
       alert("Error al guardar: " + error.message);
-    } else {
-      setVista("lista");
-      await refrescarBlogs();
+      setGuardando(false);
+      return;
     }
+
+    // El aviso por mail solo tiene sentido si el post queda Publicado ahora
+    // mismo: uno Programado o en Borrador todavía no tiene nada para leer.
+    if (notificarSuscriptores && draft.estado === "Publicado") {
+      setEnviandoNewsletter(true);
+      try {
+        const res = await fetch("/api/enviar-notificacion-blog", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ titulo: draft.titulo, descripcion: draft.resumen, imagen_url: draft.imagen_url, slug: draft.slug }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert("No pudimos avisar a los suscriptores: " + (data.error || "error desconocido"));
+        } else if (data.errores?.length) {
+          alert(`📧 ${data.message}\n\nErrores:\n` + data.errores.join("\n"));
+        } else {
+          alert(`📧 ${data.message}`);
+        }
+      } catch (err) {
+        alert("No pudimos avisar a los suscriptores: " + (err instanceof Error ? err.message : "error de red"));
+      }
+      setEnviandoNewsletter(false);
+    }
+
+    setVista("lista");
+    await refrescarBlogs();
     setGuardando(false);
   };
 
@@ -291,6 +328,30 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
                 />
               )}
             </Card>
+
+            <Card>
+              <label
+                className={`flex cursor-pointer items-start gap-3 rounded-[var(--radius-m)] border p-3 transition-colors ${
+                  notificarSuscriptores ? "border-[var(--accent)] bg-[var(--accent)]/5" : "border-[var(--border-subtle)]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={notificarSuscriptores}
+                  onChange={(e) => setNotificarSuscriptores(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                />
+                <span className="flex items-center gap-2 text-[var(--text-primary)] [font-size:var(--fs-body-s)]">
+                  <Mail className="h-4 w-4 shrink-0 text-[var(--accent)]" />
+                  Enviar a suscriptores del newsletter
+                </span>
+              </label>
+              {notificarSuscriptores && draft.estado !== "Publicado" && (
+                <p className="mt-2 text-[var(--text-tertiary)] [font-size:12px]">
+                  Solo se envía si el estado queda en &quot;Publicado&quot; al guardar.
+                </p>
+              )}
+            </Card>
             <Card>
               <h3 className="mb-3 text-sm font-bold text-[var(--text-primary)]">Portada</h3>
               <div className="mb-3 flex aspect-video items-center justify-center overflow-hidden rounded-[var(--radius-m)] bg-[var(--surface-sunken)]">
@@ -310,7 +371,7 @@ export default function BlogSection({ initial }: { initial: Blog[] }) {
               </label>
             </Card>
             <Button onClick={guardar} disabled={guardando || !draft.titulo.trim()}>
-              {guardando ? "Guardando..." : "Guardar entrada"}
+              {enviandoNewsletter ? "Avisando a suscriptores..." : guardando ? "Guardando..." : "Guardar entrada"}
             </Button>
           </div>
         </div>

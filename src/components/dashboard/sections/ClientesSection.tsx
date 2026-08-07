@@ -60,6 +60,15 @@ export default function ClientesSection({
   const [creando, setCreando] = useState(false);
   const [passwordGenerada, setPasswordGenerada] = useState<string | null>(null);
 
+  // Métricas de Instagram (carga manual del admin, sin API de Meta): valores
+  // en edición para el cliente seleccionado, separados del ClienteResumen para
+  // no disparar un guardado en cada tecla.
+  const [igSeguidores, setIgSeguidores] = useState("");
+  const [igAlcance, setIgAlcance] = useState("");
+  const [igInteracciones, setIgInteracciones] = useState("");
+  const [guardandoMetricas, setGuardandoMetricas] = useState(false);
+  const [metricasGuardadas, setMetricasGuardadas] = useState(false);
+
   useEffect(() => {
     supabase.from("recursos").select("id, titulo").then(({ data }) => setRecursos(data || []));
     supabase.from("servicios").select("id, titulo").then(({ data }) => setServicios(data || []));
@@ -99,6 +108,44 @@ export default function ClientesSection({
     if (seleccionadoId) cargarDetalle(seleccionadoId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seleccionadoId]);
+
+  // Al cambiar de cliente, los inputs de métricas se resetean a los valores
+  // guardados de ESE cliente (no arrastramos lo que se estaba tipeando para
+  // el anterior).
+  useEffect(() => {
+    const c = clientes.find((cl) => cl.id === seleccionadoId);
+    setIgSeguidores(c?.igSeguidores != null ? String(c.igSeguidores) : "");
+    setIgAlcance(c?.igAlcance != null ? String(c.igAlcance) : "");
+    setIgInteracciones(c?.igInteracciones != null ? String(c.igInteracciones) : "");
+    setMetricasGuardadas(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seleccionadoId]);
+
+  const guardarMetricas = async () => {
+    if (!seleccionado) return;
+    setGuardandoMetricas(true);
+    setMetricasGuardadas(false);
+
+    const valores = {
+      ig_seguidores: igSeguidores.trim() === "" ? null : Number(igSeguidores),
+      ig_alcance: igAlcance.trim() === "" ? null : Number(igAlcance),
+      ig_interacciones: igInteracciones.trim() === "" ? null : Number(igInteracciones),
+    };
+
+    const { error } = await supabase.from("usuarios").update(valores).eq("id", seleccionado.id);
+    setGuardandoMetricas(false);
+
+    if (error) return alert("Error al guardar las métricas: " + error.message);
+
+    setClientes((prev) =>
+      prev.map((c) =>
+        c.id === seleccionado.id
+          ? { ...c, igSeguidores: valores.ig_seguidores, igAlcance: valores.ig_alcance, igInteracciones: valores.ig_interacciones }
+          : c
+      )
+    );
+    setMetricasGuardadas(true);
+  };
 
   const filtrados = useMemo(
     () =>
@@ -175,6 +222,9 @@ export default function ClientesSection({
           plan: null,
           mrr: 0,
           proyectos: [],
+          igSeguidores: null,
+          igAlcance: null,
+          igInteracciones: null,
         },
         ...prev,
       ]);
@@ -322,6 +372,48 @@ export default function ClientesSection({
                 <p className="font-semibold text-[var(--text-primary)]">
                   {new Date(seleccionado.creadoEn).toLocaleDateString("es-AR")}
                 </p>
+              </div>
+            </div>
+
+            <div className="rounded-[var(--radius-m)] border border-[var(--border-subtle)] p-4">
+              <h4 className="mb-3 text-xs font-bold uppercase text-[var(--text-tertiary)]">Métricas de Instagram</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[var(--text-tertiary)] [font-size:12px]">Seguidores</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={igSeguidores}
+                    onChange={(e) => setIgSeguidores(e.target.value)}
+                    placeholder="0"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[var(--text-tertiary)] [font-size:12px]">Alcance mensual</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={igAlcance}
+                    onChange={(e) => setIgAlcance(e.target.value)}
+                    placeholder="0"
+                  />
+                </label>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[var(--text-tertiary)] [font-size:12px]">Interacciones</span>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={igInteracciones}
+                    onChange={(e) => setIgInteracciones(e.target.value)}
+                    placeholder="0"
+                  />
+                </label>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <Button variant="secondary" onClick={guardarMetricas} disabled={guardandoMetricas}>
+                  {guardandoMetricas ? "Guardando..." : "Guardar métricas"}
+                </Button>
+                {metricasGuardadas && <span className="text-[var(--accent)] [font-size:13px] font-semibold">Guardado ✓</span>}
               </div>
             </div>
 

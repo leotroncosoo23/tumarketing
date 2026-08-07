@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import type { NuevoServicioPayload } from "@/lib/servicios";
 
-type ResultadoAccion = { error?: string };
+type ResultadoAccion = { error?: string; id?: string };
 
 export async function crearServicio(payload: NuevoServicioPayload): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServerClient();
 
-  const { error } = await supabase.from("servicios").insert([payload]);
+  const { data, error } = await supabase.from("servicios").insert([payload]).select("id").single();
 
   if (error) {
     return { error: "No pudimos guardar el servicio: " + error.message };
@@ -17,7 +17,7 @@ export async function crearServicio(payload: NuevoServicioPayload): Promise<Resu
 
   revalidatePath("/admin");
   revalidatePath("/servicios");
-  return {};
+  return { id: data.id };
 }
 
 export async function actualizarServicio(id: string, payload: NuevoServicioPayload): Promise<ResultadoAccion> {

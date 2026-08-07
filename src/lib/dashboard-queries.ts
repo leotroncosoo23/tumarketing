@@ -28,6 +28,9 @@ export type ClienteResumen = {
   plan: string | null;
   mrr: number;
   proyectos: ProyectoResumen[];
+  igSeguidores: number | null;
+  igAlcance: number | null;
+  igInteracciones: number | null;
 };
 
 type ServicioContratadoRow = {
@@ -100,6 +103,11 @@ export async function getClientesConResumen(supabase: SupabaseClient): Promise<C
       plan: activos[0]?.servicioTitulo ?? null,
       mrr: activos.reduce((acc, p) => acc + p.precioArs, 0),
       proyectos: propios,
+      // "*" ya trae estas columnas si la migración fue corrida; si no existen
+      // todavía, quedan undefined y el ?? null las deja en null sin romper nada.
+      igSeguidores: (u.ig_seguidores as number | null) ?? null,
+      igAlcance: (u.ig_alcance as number | null) ?? null,
+      igInteracciones: (u.ig_interacciones as number | null) ?? null,
     };
   });
 }

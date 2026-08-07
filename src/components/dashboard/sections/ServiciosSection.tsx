@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, Plus, X } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Mail } from "lucide-react";
 import { Card, Button, Input, Textarea, Select, Badge, StatCard } from "@/components/dashboard/ui";
 import { crearServicio, actualizarServicio, eliminarServicio } from "@/lib/servicios-actions";
 import { ICONOS_BENEFICIO } from "@/lib/beneficioIconos";
@@ -65,28 +65,70 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  // Aviso por mail a suscriptores del newsletter (mismo mecanismo que ya
+  // existe en Blog). Se resetea a false en cada apertura del editor a
+  // propósito: no querés que un ajuste menor en un servicio ya publicado
+  // vuelva a disparar el mail sin que el admin lo tilde de nuevo.
+  const [notificarSuscriptores, setNotificarSuscriptores] = useState(false);
+  const [enviandoNewsletter, setEnviandoNewsletter] = useState(false);
+
   const filtrados = servicios.filter((s) => filtro === "todos" || s.estado === filtro);
 
   const abrirNuevo = () => {
     setEditandoId(null);
     setDraft(VACIO);
+    setNotificarSuscriptores(false);
     setVista("editor");
   };
 
   const abrirEdicion = (s: Servicio) => {
     setEditandoId(s.id);
     setDraft(servicioADraft(s));
+    setNotificarSuscriptores(false);
     setVista("editor");
   };
 
   const guardar = () => {
     setError(null);
+    const esNuevo = !editandoId;
     startTransition(async () => {
       const resultado = editandoId ? await actualizarServicio(editandoId, draft) : await crearServicio(draft);
       if (resultado?.error) {
         setError(resultado.error);
         return;
       }
+
+      // El aviso solo tiene sentido si el servicio queda Activo ahora mismo:
+      // uno en Borrador todavía no es visible para nadie en el sitio.
+      const servicioId = editandoId || resultado.id;
+      if (notificarSuscriptores && draft.estado === "Activo" && servicioId) {
+        setEnviandoNewsletter(true);
+        try {
+          const res = await fetch("/api/enviar-notificacion-servicio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              titulo: draft.titulo,
+              descripcion: draft.descripcion_corta,
+              imagen_url: draft.miniatura_url,
+              id: servicioId,
+              esNuevo,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert("No pudimos avisar a los suscriptores: " + (data.error || "error desconocido"));
+          } else if (data.errores?.length) {
+            alert(`📧 ${data.message}\n\nErrores:\n` + data.errores.join("\n"));
+          } else {
+            alert(`📧 ${data.message}`);
+          }
+        } catch (err) {
+          alert("No pudimos avisar a los suscriptores: " + (err instanceof Error ? err.message : "error de red"));
+        }
+        setEnviandoNewsletter(false);
+      }
+
       setVista("lista");
       router.refresh();
     });
@@ -308,9 +350,34 @@ export default function ServiciosSection({ initial }: { initial: Servicio[] }) {
                 Destacado en el sitio
               </label>
             </Card>
+
+            <Card>
+              <label
+                className={`flex cursor-pointer items-start gap-3 rounded-[var(--radius-m)] border p-3 transition-colors ${
+                  notificarSuscriptores ? "border-[var(--accent)] bg-[var(--accent)]/5" : "border-[var(--border-subtle)]"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={notificarSuscriptores}
+                  onChange={(e) => setNotificarSuscriptores(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                />
+                <span className="flex items-center gap-2 text-[var(--text-primary)] [font-size:var(--fs-body-s)]">
+                  <Mail className="h-4 w-4 shrink-0 text-[var(--accent)]" />
+                  Enviar a suscriptores del newsletter
+                </span>
+              </label>
+              {notificarSuscriptores && draft.estado !== "Activo" && (
+                <p className="mt-2 text-[var(--text-tertiary)] [font-size:12px]">
+                  Solo se envía si el estado queda en &quot;Activo&quot; al guardar.
+                </p>
+              )}
+            </Card>
+
             {error && <p className="text-sm text-[var(--signal-error)]">{error}</p>}
             <Button onClick={guardar} disabled={pending || !draft.titulo.trim()}>
-              {pending ? "Guardando..." : "Guardar servicio"}
+              {enviandoNewsletter ? "Avisando a suscriptores..." : pending ? "Guardando..." : "Guardar servicio"}
             </Button>
           </div>
         </div>

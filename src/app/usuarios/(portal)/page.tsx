@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useUsuarioPortal } from "./layout";
+import OnboardingCuentaPrincipal from "@/components/usuarios/OnboardingCuentaPrincipal";
 import { ESTADOS_SERVICIO_CONTRATADO, ETIQUETA_ESTADO, type EstadoServicioContratado } from "@/lib/estado-servicio";
 import type { ModuloServicio } from "@/lib/servicios";
 
@@ -505,6 +506,11 @@ export default function DashboardPage() {
   const [tabActivo, setTabActivo] = useState<string | null>(null);
   const [cargando, setCargando] = useState(true);
   const [metricasOverview, setMetricasOverview] = useState<MetricaRedMes | null>(null);
+  // Vista inicial (una sola vez): sin API de Meta ni OAuth, le pedimos al
+  // cliente que escriba a mano el @usuario de su cuenta principal. Estado
+  // local para poder destrabar el gate al instante al guardar, sin depender
+  // de que useUsuarioSession vuelva a pedir el perfil entero.
+  const [usuarioPrincipal, setUsuarioPrincipal] = useState(perfil.usuario_principal);
 
   useEffect(() => {
     const cargar = async () => {
@@ -593,6 +599,10 @@ export default function DashboardPage() {
   const servicioSeleccionado = serviciosDeCategoria.find((s) => s.id === tabActivo) || serviciosDeCategoria[0] || null;
   const servicioParaResumen = servicioSeleccionado || serviciosActivos[0] || null;
   const hayOverviewReal = metricasOverview != null;
+
+  if (!usuarioPrincipal) {
+    return <OnboardingCuentaPrincipal usuarioId={perfil.id} onCompletado={setUsuarioPrincipal} />;
+  }
 
   return (
     <>

@@ -3,18 +3,18 @@ import { notificarSuscriptores } from "@/lib/notificar-suscriptores";
 
 export async function POST(request: NextRequest) {
   try {
-    const { titulo, descripcion, imagen_url, slug } = await request.json();
+    const { titulo, descripcion, imagen_url, id, esNuevo } = await request.json();
     const urlBase = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const urlArticulo = slug ? `${urlBase}/blog/${slug}` : `${urlBase}/blog`;
+    const urlServicio = id ? `${urlBase}/servicios/${id}` : `${urlBase}/servicios`;
 
     const resultado = await notificarSuscriptores({
-      encabezado: "📝 ¡Nuevo Artículo en el Blog!",
-      asunto: `📝 Nuevo Artículo: ${titulo}`,
+      encabezado: esNuevo ? "🚀 ¡Nuevo Servicio Disponible!" : "✨ ¡Actualizamos uno de nuestros servicios!",
+      asunto: esNuevo ? `🚀 Nuevo servicio: ${titulo}` : `✨ Novedades en: ${titulo}`,
       titulo,
       descripcion,
       imagenUrl: imagen_url,
-      urlDestino: urlArticulo,
-      textoBoton: "Leer Artículo Completo",
+      urlDestino: urlServicio,
+      textoBoton: "Ver Servicio",
     });
 
     if (!resultado.ok) {

@@ -8,6 +8,7 @@ export type PerfilUsuario = {
   email: string;
   rol: string;
   activo: boolean;
+  usuario_principal: string | null;
 };
 
 // Solo busca. No crea nada: mientras el usuario no acepte los términos en /auth/bienvenida
@@ -15,7 +16,7 @@ export type PerfilUsuario = {
 export async function buscarPerfilUsuario(user: User): Promise<PerfilUsuario | null> {
   const { data, error } = await supabase
     .from("usuarios")
-    .select("id, nombre, apellido, email, rol, activo")
+    .select("id, nombre, apellido, email, rol, activo, usuario_principal")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -51,7 +52,7 @@ export async function crearPerfilUsuario(user: User, aceptaNewsletter: boolean):
       terminos_aceptados_en: new Date().toISOString(),
       acepta_newsletter: aceptaNewsletter,
     }])
-    .select("id, nombre, apellido, email, rol, activo")
+    .select("id, nombre, apellido, email, rol, activo, usuario_principal")
     .single();
 
   if (error) throw error;

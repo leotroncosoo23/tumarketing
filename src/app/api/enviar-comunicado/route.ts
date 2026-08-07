@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabase } from "@/lib/supabase";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const REMITENTE = process.env.RESEND_REMITENTE || "TuMarketing <onboarding@resend.dev>";
 
 function chunk<T>(arr: T[], size: number): T[][] {
@@ -21,6 +20,14 @@ function armarHtml(mensaje: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    // "new Resend(undefined)" tira una excepción al construirse: si esto
+    // viviera a nivel de módulo, una key faltante rompe TODO el route y
+    // Next.js devuelve su página de error HTML en vez de JSON.
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json({ error: "Falta RESEND_API_KEY en el servidor." }, { status: 500 });
+    }
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const { asunto, mensaje } = await req.json();
 
     if (!asunto?.trim() || !mensaje?.trim()) {
