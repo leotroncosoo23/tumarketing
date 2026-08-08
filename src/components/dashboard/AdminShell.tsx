@@ -13,6 +13,7 @@ import ServiciosSection from "./sections/ServiciosSection";
 import PromocionesSection from "./sections/PromocionesSection";
 import MensajesSection from "./sections/MensajesSection";
 import BlogSection from "./sections/BlogSection";
+import RecursosSection, { type Recurso } from "./sections/RecursosSection";
 import ReportesSection from "./sections/ReportesSection";
 import FacturacionSection from "./sections/FacturacionSection";
 import CalendarioSection from "./sections/CalendarioSection";
@@ -26,6 +27,7 @@ export type SectionId =
   | "promociones"
   | "mensajes"
   | "blog"
+  | "recursos"
   | "reportes"
   | "facturacion"
   | "calendario"
@@ -68,6 +70,7 @@ export type InitialAdminData = {
   servicios: Servicio[];
   cupones: Cupon[];
   blogs: Blog[];
+  recursos: Recurso[];
   facturacionMensual: FacturacionMensual;
 };
 
@@ -117,6 +120,7 @@ export default function AdminShell({ initial, usuario }: { initial: InitialAdmin
           {section === "promociones" && <PromocionesSection initial={initial.cupones} />}
           {section === "mensajes" && <MensajesSection />}
           {section === "blog" && <BlogSection initial={initial.blogs} />}
+          {section === "recursos" && <RecursosSection initial={initial.recursos} />}
           {section === "reportes" && <ReportesSection clientes={initial.clientes} proyectos={initial.proyectos} />}
           {section === "facturacion" && <FacturacionSection />}
           {section === "calendario" && <CalendarioSection />}
