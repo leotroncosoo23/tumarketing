@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion, useMotionValue, useMotionTemplate, type Variants } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+
+// Calendario real de asesoría de crecimiento (Cal.com). Antes este botón
+// abría WhatsApp; ahora agenda directo, sin ida y vuelta de mensajes.
+const LINK_CALENDARIO = "https://cal.com/natasha-hqosbf/15min";
 
 const contenedor: Variants = {
   oculto: {},
@@ -15,27 +18,11 @@ const item: Variants = {
 };
 
 export default function CTAContacto() {
-  const [whatsapp, setWhatsapp] = useState("");
   const [posBoton, setPosBoton] = useState({ x: 0, y: 0 });
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const spotlight = useMotionTemplate`radial-gradient(500px circle at ${mouseX}px ${mouseY}px, rgba(212,238,38,0.15), transparent 80%)`;
-
-  useEffect(() => {
-    supabase
-      .from("configuracion")
-      .select("whatsapp_numero")
-      .eq("id", 1)
-      .maybeSingle()
-      .then(({ data }) => setWhatsapp(data?.whatsapp_numero || ""));
-  }, []);
-
-  const whatsappLimpio = whatsapp.replace(/\D/g, "");
-  const mensaje = encodeURIComponent(
-    "¡Hola! Quiero agendar una sesión estratégica para potenciar mi marca y mi tecnología 🚀"
-  );
-  const linkWhatsapp = whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${mensaje}` : "#contacto";
 
   const manejarMovimientoTarjeta = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -108,7 +95,7 @@ export default function CTAContacto() {
 
           <motion.div variants={item}>
             <motion.a
-              href={linkWhatsapp}
+              href={LINK_CALENDARIO}
               target="_blank"
               rel="noopener noreferrer"
               onMouseMove={manejarMovimientoBoton}
@@ -118,7 +105,7 @@ export default function CTAContacto() {
               className="group/boton relative inline-flex items-center gap-3 bg-[#D4EE26] text-black font-extrabold text-lg px-10 py-5 rounded-full"
             >
               <span className="absolute inset-0 -z-10 rounded-full bg-[#D4EE26] blur-2xl opacity-0 group-hover/boton:opacity-70 scale-125 transition-opacity duration-500" />
-              Agendar una sesión estratégica
+              Agendá tu asesoría de crecimiento
             </motion.a>
           </motion.div>
         </div>

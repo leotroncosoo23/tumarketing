@@ -60,13 +60,13 @@ export default async function LinksPage() {
       emoji: "🎬",
       titulo: "20 Guiones Virales",
       descripcion: "Estructuras probadas para grabar reels que enganchan desde el segundo 1.",
-      mensaje: "¡Hola! Quiero los 20 guiones virales gratis 🎬",
+      link: "/recursos/20-estructuras-de-guiones-virales",
     },
     {
       emoji: "📘",
       titulo: "Mini Kit de Contenido Estratégico",
       descripcion: "La base para crear contenido que atrae clientes y prepara la venta.",
-      mensaje: "¡Hola! Quiero el Mini Kit de Contenido Estratégico gratis 📘",
+      link: "/recursos/mini-kit-de-contenido-estrat-gico",
     },
   ];
 
@@ -143,10 +143,8 @@ export default async function LinksPage() {
         </div>
 
         {/* Oferta principal */}
-        <a
-          href={linkWhatsapp("¡Hola! Quiero aprovechar el 40% OFF 🔥 (De creador/a a Dueño/a)")}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href="/de-creador-a-dueno"
           className="group block bg-[#ccff00] text-black rounded-2xl p-5 mb-4 shadow-[0_0_30px_rgba(204,255,0,0.25)] hover:shadow-[0_0_40px_rgba(204,255,0,0.4)] hover:-translate-y-0.5 transition-all"
         >
           <p className="text-xs font-black uppercase tracking-wide mb-1">🔥 Oferta por tiempo limitado</p>
@@ -155,7 +153,7 @@ export default async function LinksPage() {
             Acceso inmediato
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </p>
-        </a>
+        </Link>
 
         {/* Lead magnets */}
         <div className="mb-2 mt-8">
@@ -175,14 +173,12 @@ export default async function LinksPage() {
                 <p className="font-bold text-sm leading-snug">{item.titulo}</p>
                 <p className="text-neutral-500 text-xs mt-0.5 leading-snug">{item.descripcion}</p>
               </div>
-              <a
-                href={linkWhatsapp(item.mensaje)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href={item.link}
                 className="shrink-0 bg-[#ccff00] text-black text-xs font-black px-3.5 py-2 rounded-lg hover:bg-[#b8e600] transition-colors whitespace-nowrap"
               >
                 Gratis
-              </a>
+              </Link>
             </div>
           ))}
         </div>
