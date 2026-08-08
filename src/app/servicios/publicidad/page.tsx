@@ -15,7 +15,7 @@ import LandingComparativa from "@/components/landings/LandingComparativa";
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import AgendaSegmentada from "@/components/landings/AgendaSegmentada";
+import AgendaRedes from "@/components/landings/AgendaRedes";
 
 export default function PublicidadPage() {
   return (
@@ -205,7 +205,7 @@ export default function PublicidadPage() {
         ]}
       />
 
-      <AgendaSegmentada acento="fuchsia" />
+      <AgendaRedes />
 
       <Footer />
     </main>

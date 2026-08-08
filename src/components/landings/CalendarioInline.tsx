@@ -6,9 +6,14 @@ import { useEffect } from "react";
 // cal.com/.../embed) traducido a un efecto de React en vez de un <script>
 // suelto en el HTML — así el calendario se agenda DENTRO de la página, sin
 // mandar al visitante a cal.com en otra pestaña.
-const CAL_LINK = "leotroncosoo-kiwwvu/discovery-call-desarrollo-y-web";
-const NAMESPACE = "discovery-call-desarrollo-y-web";
-const CONTENEDOR_ID = "cal-inline-desarrollo";
+//
+// `namespace` tiene que ser único por calendario embebido en el sitio (Cal.com
+// los guarda todos en el mismo `window.Cal.ns`): iguales para dos calendarios
+// distintos pisaría uno con el otro.
+type CalendarioInlineProps = {
+  calLink: string;
+  namespace: string;
+};
 
 declare global {
   interface Window {
@@ -21,7 +26,9 @@ declare global {
   }
 }
 
-export default function CalendarioInline() {
+export default function CalendarioInline({ calLink, namespace }: CalendarioInlineProps) {
+  const contenedorId = `cal-inline-${namespace}`;
+
   useEffect(() => {
     (function (C: Window, A: string, L: string) {
       const p = (a: { q: unknown[] }, ar: unknown) => a.q.push(ar);
@@ -53,18 +60,19 @@ export default function CalendarioInline() {
         }) as Window["Cal"];
     })(window, "https://app.cal.com/embed/embed.js", "init");
 
-    window.Cal!("init", NAMESPACE, { origin: "https://cal.com" });
-    window.Cal!.ns[NAMESPACE]("inline", {
-      elementOrSelector: `#${CONTENEDOR_ID}`,
+    window.Cal!("init", namespace, { origin: "https://cal.com" });
+    window.Cal!.ns[namespace]("inline", {
+      elementOrSelector: `#${contenedorId}`,
       config: { layout: "month_view" },
-      calLink: CAL_LINK,
+      calLink,
     });
-    window.Cal!.ns[NAMESPACE]("ui", { hideEventTypeDetails: false, layout: "month_view" });
-  }, []);
+    window.Cal!.ns[namespace]("ui", { hideEventTypeDetails: false, layout: "month_view" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calLink, namespace]);
 
   return (
     <div
-      id={CONTENEDOR_ID}
+      id={contenedorId}
       className="w-full min-h-[700px] rounded-3xl overflow-hidden bg-neutral-900 border border-neutral-800"
     />
   );
