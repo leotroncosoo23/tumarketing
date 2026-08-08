@@ -38,7 +38,11 @@ async function obtenerAccessToken(): Promise<AccessTokenResult> {
 // Crea la orden en PayPal (intent CAPTURE: recién se cobra cuando llamemos a
 // capturarOrdenPayPal más adelante, no en este paso). El total y los ítems ya
 // vienen calculados con precios reales de Supabase, nunca con lo que mande el cliente.
-export async function crearOrdenPayPal(items: ItemOrdenPayPal[], urlBase: string): Promise<OrdenPayPalCreada> {
+export async function crearOrdenPayPal(
+  items: ItemOrdenPayPal[],
+  urlBase: string,
+  returnPath: string = "/pago-exitoso-paypal"
+): Promise<OrdenPayPalCreada> {
   const resultadoToken = await obtenerAccessToken();
   if (!resultadoToken.ok) return { ok: false, error: resultadoToken.error };
   const accessToken = resultadoToken.token;
@@ -70,7 +74,7 @@ export async function crearOrdenPayPal(items: ItemOrdenPayPal[], urlBase: string
         },
       ],
       application_context: {
-        return_url: `${urlBase}/pago-exitoso-paypal`,
+        return_url: `${urlBase}${returnPath}`,
         cancel_url: `${urlBase}/estado-pago`,
         user_action: "PAY_NOW",
       },

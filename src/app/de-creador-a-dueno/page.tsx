@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { Space_Grotesk, Inter } from "next/font/google";
-import { CheckCircle2, CircleAlert, ArrowRight } from "lucide-react";
-import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { CheckCircle2, CircleAlert, ArrowRight, X, Check } from "lucide-react";
 import { Accordion, type AccordionItem } from "@/components/dashboard/ui";
 import ContadorLanzamiento from "./ContadorLanzamiento";
+import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO, PRECIO_REGULAR } from "./precios";
 import "@/app/admin/admin.css";
 
 const fontDisplay = Space_Grotesk({ variable: "--font-display", subsets: ["latin"], weight: ["500", "700"] });
@@ -15,11 +16,13 @@ export const metadata: Metadata = {
   description: "Dejá de improvisar en redes. El sistema simple para ordenar tu contenido y empezar a vender desde hoy.",
 };
 
-const DOLORES = [
-  "Publicás todos los días… y no tenés idea de si sirve de algo",
-  "Tenés mil ideas dando vueltas en la cabeza, y ninguna ordenada",
-  "Creás contenido sin parar, pero las ventas no aparecen",
-  "Te paraliza tener que vender por DM o WhatsApp",
+// PASO 1 (Problema): plano, sin agitar todavía — solo nombrar el dolor tal
+// como lo vive la persona antes de tener el sistema.
+const PROBLEMA = [
+  "Publicás todos los días, pero no sabés si eso te está acercando a una venta o solo llenando el feed",
+  "Cada vez que te sentás a crear contenido, arrancás de cero: sin guion, sin estructura, sin saber qué decir",
+  "Tenés ideas dando vueltas en la cabeza, pero nunca las convertís en algo publicable",
+  "Cuando alguien te escribe por DM interesado, no sabés cómo cerrar sin sonar desesperado",
 ];
 
 const BENEFICIOS = [
@@ -58,30 +61,34 @@ const MODULOS = [
   },
 ];
 
-const BONOS = [
+const COMPARATIVA = [
   {
-    numero: "01",
-    titulo: "Guía de métricas",
-    descripcion: "Dejá de publicar a ciegas: aprendé a leer tus números y saber exactamente qué está funcionando.",
-    imagen: "/promptlistos.webp",
+    criterio: "Estructura clara",
+    tutoriales: false,
+    copiar: false,
+    agencia: true,
+    sistema: true,
   },
   {
-    numero: "02",
-    titulo: "Optimización de perfil nivel PRO",
-    descripcion: "Todo lo que necesitás para que, apenas alguien entre a tu perfil, quiera comprarte.",
-    imagen: "/optimizacion-de-perfil.webp",
+    criterio: "Pensado para vender (no solo para mostrar)",
+    tutoriales: false,
+    copiar: false,
+    agencia: true,
+    sistema: true,
   },
   {
-    numero: "03",
-    titulo: "Cierre de ventas por mensaje",
-    descripcion: "La próxima vez que te escriban, vas a saber exactamente qué responder para cerrar la venta.",
-    imagen: "/cerrar-ventas.webp",
+    criterio: "Lo aplicás vos mismo/a, a tu ritmo",
+    tutoriales: true,
+    copiar: true,
+    agencia: false,
+    sistema: true,
   },
   {
-    numero: "04",
-    titulo: 'Ebook "Pensar como dueño/a de Negocio"',
-    descripcion: "Una mirada más profunda sobre mentalidad, decisiones y estructura para escalar y empezar a delegar.",
-    imagen: "/pensa-como-dueño.webp",
+    criterio: "Pago único, sin mensualidades",
+    tutoriales: true,
+    copiar: true,
+    agencia: false,
+    sistema: true,
   },
 ];
 
@@ -89,6 +96,12 @@ const ES_PARA_VOS = [
   "Emprendés o vendés productos o servicios",
   "Querés orden, claridad y resultados — no otro curso más en la lista",
   "Querés usar tus redes para vender, no solo para mostrar",
+];
+
+const NO_ES_PARA_VOS = [
+  "Buscás una fórmula mágica sin ejecutar nada",
+  "Ya tenés un sistema de contenido que te está funcionando",
+  "No vendés nada todavía y solo querés \"aprender por curiosidad\"",
 ];
 
 const FAQ: AccordionItem[] = [
@@ -107,6 +120,10 @@ const FAQ: AccordionItem[] = [
   {
     q: "¿Es teoría o práctica?",
     a: "100% práctico. Vas a implementar cada módulo con tus propios datos desde el primer día — nada de clases teóricas que nunca aplicás.",
+  },
+  {
+    q: "¿Y si compro y no tengo tiempo de arrancar ahora?",
+    a: "El acceso es de por vida: podés arrancar cuando quieras, a tu ritmo. La única razón para comprar hoy es el precio de lanzamiento, no una fecha límite de acceso.",
   },
   {
     q: "¿Cómo accedo al material?",
@@ -133,52 +150,57 @@ function Divisor() {
   return <div className="h-[2px] w-full bg-[image:var(--grad-lime-sheen)] opacity-40" />;
 }
 
-export default async function DeCreadorADuenoPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: config } = await supabase.from("configuracion").select("whatsapp_numero").eq("id", 1).maybeSingle();
-  const whatsappLimpio = (config?.whatsapp_numero || "").replace(/\D/g, "");
-  const linkCompra = whatsappLimpio
-    ? `https://wa.me/${whatsappLimpio}?text=${encodeURIComponent(
-        "¡Hola! Quiero comprar \"De Creador/a a Dueño/a\" al precio de lanzamiento 🚀"
-      )}`
-    : "/servicios";
+const LINK_CHECKOUT = "/de-creador-a-dueno/checkout";
 
-  const BotonComprar = ({ texto = "Quiero mi acceso ahora", className = "" }: { texto?: string; className?: string }) => (
-    <a
-      href={linkCompra}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`tm-display inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[var(--accent)] px-[32px] py-[18px] text-[var(--fs-body-l)] font-bold tracking-[var(--ls-tight)] text-[var(--accent-contrast)] shadow-[var(--glow-lime)] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] ${className}`}
+// Vive afuera de la página a propósito: declarar un componente DENTRO del
+// cuerpo de otro componente hace que React lo trate como un tipo nuevo en
+// cada render (pierde estado, y con reactCompiler activado directamente
+// tira error). "[font-size:...]" en vez de "text-[...]" para el tamaño de
+// fuente, porque ambos comparten el prefijo "text-" y competían con
+// "text-[var(--accent-contrast)]" (el color) — el texto del botón se veía
+// casi invisible sobre el fondo lima.
+function BotonComprar({ texto = "Quiero mi acceso ahora", className = "" }: { texto?: string; className?: string }) {
+  return (
+    <Link
+      href={LINK_CHECKOUT}
+      className={`tm-display inline-flex items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[var(--accent)] px-[32px] py-[18px] [font-size:var(--fs-body-l)] font-bold tracking-[var(--ls-tight)] text-[var(--accent-contrast)] shadow-[var(--glow-lime)] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-[var(--accent-hover)] active:bg-[var(--accent-active)] ${className}`}
     >
       {texto}
       <ArrowRight className="h-5 w-5" />
-    </a>
+    </Link>
   );
+}
 
+export default function DeCreadorADuenoPage() {
   return (
     <main className={`tm-admin-theme ${fontDisplay.variable} ${fontBody.variable}`}>
-      {/* HERO — --black-0, el más oscuro y dramático de los dos tonos */}
+      {/* 1. HERO — --black-0 */}
       <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-10)] text-center">
         <div className="mx-auto max-w-[var(--container-max)]">
-          <Eyebrow>Sistema simple · Sin fórmulas mágicas</Eyebrow>
+          <Eyebrow>Para creadores que ya facturan pero sienten que están al techo</Eyebrow>
           <h1 className="tm-display mx-auto mt-[var(--space-4)] max-w-3xl font-bold leading-[var(--lh-tight)] text-[var(--text-primary)] [font-size:var(--fs-display-l)]">
-            De Creador<span className="text-[var(--accent)]">/a</span> a Dueño<span className="text-[var(--accent)]">/a</span>
+            Dejá de ser el motor de tu negocio.
+            <br />
+            Empezá a ser el <span className="text-[var(--accent)]">dueño/a</span>.
           </h1>
           <p className="mx-auto mt-[var(--space-5)] max-w-2xl text-[var(--text-secondary)] [font-size:var(--fs-body-l)] leading-[var(--lh-body)]">
-            Dejá de improvisar en redes. El sistema simple para ordenar tu contenido y empezar a vender desde hoy — sin
-            depender de la inspiración.
+            El sistema para transformar tu contenido en un activo que vende solo — mientras vos dejás de improvisar
+            cada publicación y empezás a tomar decisiones de dueño/a, no de creador/a.
           </p>
           <p className="mt-[var(--space-6)] font-bold text-[var(--accent)] [font-size:var(--fs-body-s)] uppercase tracking-[var(--ls-eyebrow)]">
-            🔥 Precio especial de lanzamiento — por tiempo limitado
+            🔥 Precio de lanzamiento — sube en cuanto termine la cuenta
           </p>
-          <div className="mt-[var(--space-4)]">
-            <BotonComprar />
+          <div className="mt-[var(--space-4)] flex justify-center">
+            <ContadorLanzamiento />
+          </div>
+          <div className="mt-[var(--space-6)]">
+            <BotonComprar texto="Quiero mi sistema ahora" />
           </div>
 
           <div className="relative mx-auto mt-[var(--space-8)] w-full max-w-lg">
             <div className="absolute inset-0 scale-90 rounded-[var(--radius-l)] bg-[var(--accent)] opacity-20 blur-[60px]" />
             <Image
-              src="/+15prompts.webp"
+              src="/+15prompts.png"
               alt="Todo lo que incluye el sistema: planillas, ebooks y +15 prompts listos para usar"
               width={500}
               height={500}
@@ -191,14 +213,14 @@ export default async function DeCreadorADuenoPage() {
 
       <Divisor />
 
-      {/* PUNTOS DE DOLOR — --black-3, bien diferenciado del negro puro del Hero */}
+      {/* 2. PROBLEMA — --black-3 */}
       <section className="bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-9)]">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
-            ¿Te suena conocido?
+            ¿Esto te suena conocido?
           </h2>
           <div className="mt-[var(--space-7)] flex flex-col gap-[var(--space-3)] text-left">
-            {DOLORES.map((item) => (
+            {PROBLEMA.map((item) => (
               <div
                 key={item}
                 className="flex items-start gap-[var(--space-3)] rounded-[var(--radius-m)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[var(--space-4)]"
@@ -208,18 +230,39 @@ export default async function DeCreadorADuenoPage() {
               </div>
             ))}
           </div>
-          <p className="mt-[var(--space-7)] font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-m)]">
-            No tenés un problema de esfuerzo.
+        </div>
+      </section>
+
+      <Divisor />
+
+      {/* 3. AGITACIÓN — --black-0 */}
+      <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
+            Esto no es falta de esfuerzo.
             <br />
-            Tenés un problema de <span className="text-[var(--accent)]">estructura</span>.
+            Es que estás construyendo sin planos.
+          </h2>
+          <p className="mt-[var(--space-6)] text-[var(--text-secondary)] [font-size:var(--fs-body-l)] leading-[var(--lh-body)]">
+            Cada día que pasa publicando sin sistema es un día más compitiendo contra vos mismo/a: contra el
+            creador/a de ayer que tampoco sabía qué decir. Mientras tanto, tu competencia — la que sí tiene un
+            sistema — está construyendo confianza con tu audiencia mientras vos seguís improvisando. No es que no
+            tengas potencial. Es que estás gastando tu energía en el lugar equivocado: en producir más contenido, en
+            vez de producir el contenido correcto.
+          </p>
+          <p className="mt-[var(--space-7)] font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-m)] leading-[var(--lh-heading)]">
+            No necesitás publicar más.
+            <br />
+            Necesitás un sistema que te diga <span className="text-[var(--accent)]">qué</span> publicar,{" "}
+            <span className="text-[var(--accent)]">por qué</span>, y cómo convertir eso en ventas.
           </p>
         </div>
       </section>
 
       <Divisor />
 
-      {/* BENEFICIOS — --black-0 */}
-      <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
+      {/* 4. BENEFICIOS (solución, primer vistazo) — --black-3 */}
+      <section className="bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-9)]">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
             Esto es lo que cambia con el sistema:
@@ -237,29 +280,33 @@ export default async function DeCreadorADuenoPage() {
 
       <Divisor />
 
-      {/* ENTREGABLES — --black-3 */}
-      <section className="bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-9)]">
+      {/* 5. MÉTODO / ENTREGABLES — --black-0 */}
+      <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
         <div className="mx-auto max-w-[var(--container-max)]">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
+            <Eyebrow>Por qué esto funciona cuando lo demás no</Eyebrow>
+            <h2 className="tm-display mt-[var(--space-3)] font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
               ¿Qué incluye?
             </h2>
             <p className="mt-[var(--space-3)] text-[var(--text-secondary)] [font-size:var(--fs-body-m)] leading-[var(--lh-body)]">
-              Un sistema completo para dejar de improvisar y empezar a usar tu contenido como lo que es: una
-              herramienta real de ventas.
+              La mayoría de los sistemas de contenido te enseñan a publicar más. Este te enseña a publicar con un
+              objetivo de negocio detrás de cada pieza — desde la estrategia hasta el cierre de la venta.
             </p>
           </div>
 
           <div className="mt-[var(--space-7)] grid grid-cols-1 gap-[var(--space-5)] md:grid-cols-2 lg:grid-cols-3">
-            {MODULOS.map((modulo) => (
+            {MODULOS.map((modulo, i) => (
               <div
                 key={modulo.titulo}
-                className="flex flex-col gap-[var(--space-3)] rounded-[var(--radius-l)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[var(--space-6)] shadow-[var(--shadow-card)]"
+                className="relative flex flex-col gap-[var(--space-3)] overflow-hidden rounded-[var(--radius-l)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[var(--space-6)] shadow-[var(--shadow-card)]"
               >
-                <h3 className="tm-display font-bold leading-[var(--lh-heading)] text-[var(--text-primary)] [font-size:var(--fs-heading-s)]">
+                <span className="tm-display absolute -right-1 -top-3 font-bold text-[var(--black-4)] [font-size:3.5rem] leading-none select-none">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h3 className="tm-display relative font-bold leading-[var(--lh-heading)] text-[var(--text-primary)] [font-size:var(--fs-heading-s)]">
                   {modulo.titulo}
                 </h3>
-                <p className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)] leading-[var(--lh-body)]">
+                <p className="relative text-[var(--text-secondary)] [font-size:var(--fs-body-s)] leading-[var(--lh-body)]">
                   {modulo.descripcion}
                 </p>
               </div>
@@ -268,11 +315,11 @@ export default async function DeCreadorADuenoPage() {
 
           <div className="mx-auto mt-[var(--space-7)] max-w-2xl rounded-[var(--radius-m)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-[var(--space-5)] text-center">
             <p className="font-bold text-[var(--text-primary)] [font-size:var(--fs-body-m)]">
-              ¿No sabés usar IA? No hace falta. Todo el sistema ya viene armado para funcionar cargando tus propios
-              datos.
+              Esto no es un PDF más para guardar y no abrir nunca. Es un sistema que ejecutás con tus propios datos,
+              esta misma semana.
             </p>
             <p className="mt-1 text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
-              Nada de teoría: es ejecutar rápido, con orden y sin perder tiempo.
+              Todo el sistema ya viene armado para funcionar con IA cargando tus propios datos.
             </p>
           </div>
         </div>
@@ -280,7 +327,69 @@ export default async function DeCreadorADuenoPage() {
 
       <Divisor />
 
-      {/* BONOS — --black-0 */}
+      {/* 6. COMPARATIVA — --black-3 */}
+      <section className="bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-9)]">
+        <div className="mx-auto max-w-[var(--container-max)]">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
+              ¿Por qué esto y no otra cosa?
+            </h2>
+          </div>
+
+          <div className="mt-[var(--space-7)] overflow-x-auto">
+            <table className="mx-auto w-full max-w-3xl border-separate border-spacing-y-[var(--space-2)]">
+              <thead>
+                <tr className="text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
+                  <th className="px-[var(--space-3)] py-[var(--space-2)] text-left font-medium">&nbsp;</th>
+                  <th className="px-[var(--space-3)] py-[var(--space-2)] text-center font-medium">Tutoriales gratis</th>
+                  <th className="px-[var(--space-3)] py-[var(--space-2)] text-center font-medium">Copiar a otros</th>
+                  <th className="px-[var(--space-3)] py-[var(--space-2)] text-center font-medium">Agencia</th>
+                  <th className="rounded-t-[var(--radius-m)] bg-[var(--accent)]/10 px-[var(--space-3)] py-[var(--space-2)] text-center font-bold text-[var(--accent)]">
+                    Este sistema
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARATIVA.map((fila) => (
+                  <tr key={fila.criterio} className="[font-size:var(--fs-body-s)]">
+                    <td className="rounded-l-[var(--radius-m)] bg-[var(--surface-card)] px-[var(--space-3)] py-[var(--space-4)] text-left font-medium text-[var(--text-primary)]">
+                      {fila.criterio}
+                    </td>
+                    <td className="bg-[var(--surface-card)] px-[var(--space-3)] py-[var(--space-4)] text-center">
+                      {fila.tutoriales ? (
+                        <Check className="mx-auto h-4 w-4 text-[var(--text-tertiary)]" />
+                      ) : (
+                        <X className="mx-auto h-4 w-4 text-[var(--signal-error)]/70" />
+                      )}
+                    </td>
+                    <td className="bg-[var(--surface-card)] px-[var(--space-3)] py-[var(--space-4)] text-center">
+                      {fila.copiar ? (
+                        <Check className="mx-auto h-4 w-4 text-[var(--text-tertiary)]" />
+                      ) : (
+                        <X className="mx-auto h-4 w-4 text-[var(--signal-error)]/70" />
+                      )}
+                    </td>
+                    <td className="bg-[var(--surface-card)] px-[var(--space-3)] py-[var(--space-4)] text-center">
+                      {fila.agencia ? (
+                        <Check className="mx-auto h-4 w-4 text-[var(--text-tertiary)]" />
+                      ) : (
+                        <X className="mx-auto h-4 w-4 text-[var(--signal-error)]/70" />
+                      )}
+                    </td>
+                    <td className="rounded-r-[var(--radius-m)] bg-[var(--accent)]/10 px-[var(--space-3)] py-[var(--space-4)] text-center">
+                      <Check className="mx-auto h-5 w-5 text-[var(--accent)]" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <Divisor />
+
+      {/* 7. BONOS — --black-0 */}
       <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
         <div className="mx-auto max-w-[var(--container-max)]">
           <div className="text-center">
@@ -298,6 +407,9 @@ export default async function DeCreadorADuenoPage() {
                 <div className="relative flex h-[200px] items-center justify-center overflow-hidden bg-[var(--black-3)]">
                   <span className="tm-display absolute left-3 top-3 z-10 font-bold text-[var(--black-5)] [font-size:4rem] leading-none select-none">
                     {bono.numero}
+                  </span>
+                  <span className="absolute right-3 top-3 z-10 rounded-[var(--radius-pill)] bg-[var(--black-0)]/80 px-[var(--space-3)] py-1 font-bold text-[var(--accent)] [font-size:12px]">
+                    Valor: ${bono.valor} USD
                   </span>
                   <Image
                     src={bono.imagen}
@@ -326,11 +438,9 @@ export default async function DeCreadorADuenoPage() {
 
       <Divisor />
 
-      {/* OFERTA / CIERRE — --black-3, con un halo lima detrás del precio para
-          que sea el punto de mayor peso visual de toda la página. */}
-      <section className="relative overflow-hidden bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-10)]">
-        <div className="pointer-events-none absolute left-1/2 top-[38%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--accent)] opacity-[0.12] blur-[100px]" />
-        <div className="relative mx-auto max-w-3xl">
+      {/* 8. ES PARA VOS / NO ES PARA VOS — --black-3 */}
+      <section className="bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-9)]">
+        <div className="mx-auto max-w-3xl">
           <div className="grid grid-cols-1 gap-[var(--space-6)] sm:grid-cols-2">
             <div className="rounded-[var(--radius-l)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[var(--space-6)]">
               <h3 className="tm-display font-bold text-[var(--accent)] [font-size:var(--fs-heading-s)]">
@@ -349,24 +459,73 @@ export default async function DeCreadorADuenoPage() {
               <h3 className="tm-display font-bold text-[var(--text-secondary)] [font-size:var(--fs-heading-s)]">
                 No es para vos si:
               </h3>
-              <p className="mt-[var(--space-4)] text-[var(--text-tertiary)] [font-size:var(--fs-body-s)] leading-[var(--lh-body)]">
-                Buscás una fórmula mágica sin mover un dedo, o no pensás ejecutar nada de lo que aprendas.
-              </p>
+              <div className="mt-[var(--space-4)] flex flex-col gap-[var(--space-3)]">
+                {NO_ES_PARA_VOS.map((item) => (
+                  <div key={item} className="flex items-start gap-[var(--space-2)]">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-tertiary)]" />
+                    <p className="text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Divisor />
+
+      {/* 9. GARANTÍA — --black-0, justo antes del precio a propósito: neutraliza
+          la objeción "¿y si no me sirve?" en el momento exacto de decidir. */}
+      <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-l)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-[var(--space-8)] text-center">
+          <Image src="/7-dias-garantia.jpg" alt="Sello de garantía de 7 días" width={110} height={110} className="rounded-full" />
+          <h2 className="tm-display mt-[var(--space-3)] font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
+            Probalo 7 días. Si no te sirve, no pagás por algo que no usás.
+          </h2>
+          <p className="text-[var(--text-secondary)] [font-size:var(--fs-body-m)] leading-[var(--lh-body)]">
+            Entrá, mirá el sistema completo, empezá a aplicarlo. Si en 7 días sentís que esto no es para vos, te
+            devolvemos cada peso — sin explicaciones, sin vueltas, sin letra chica.
+          </p>
+        </div>
+      </section>
+
+      <Divisor />
+
+      {/* 10. OFERTA / CIERRE — --black-3, con un halo lima detrás del precio
+          para que sea el punto de mayor peso visual de toda la página. */}
+      <section className="relative overflow-hidden bg-[var(--black-3)] px-[var(--container-pad)] py-[var(--space-10)]">
+        <div className="pointer-events-none absolute left-1/2 top-[38%] h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--accent)] opacity-[0.12] blur-[100px]" />
+        <div className="relative mx-auto max-w-2xl text-center">
+          <Eyebrow>Todo lo que recibís hoy</Eyebrow>
+          <h2 className="tm-display mt-[var(--space-3)] font-bold text-[var(--text-primary)] [font-size:var(--fs-display-m)]">
+            Todo el sistema + los 4 bonos, en un solo pago.
+          </h2>
+
+          <div className="mt-[var(--space-7)] flex flex-col gap-[var(--space-2)] rounded-[var(--radius-l)] border border-[var(--border-subtle)] bg-[var(--surface-card)] p-[var(--space-6)] text-left">
+            <div className="flex items-center justify-between [font-size:var(--fs-body-m)]">
+              <span className="text-[var(--text-secondary)]">Sistema completo (6 módulos)</span>
+              <span className="font-bold text-[var(--text-primary)]">${VALOR_SISTEMA} USD</span>
+            </div>
+            {BONOS.map((bono) => (
+              <div key={bono.numero} className="flex items-center justify-between [font-size:var(--fs-body-m)]">
+                <span className="text-[var(--text-secondary)]">
+                  Bono {bono.numero} — {bono.titulo}
+                </span>
+                <span className="font-bold text-[var(--text-primary)]">${bono.valor} USD</span>
+              </div>
+            ))}
+            <div className="mt-[var(--space-3)] flex items-center justify-between border-t border-[var(--border-subtle)] pt-[var(--space-3)] [font-size:var(--fs-body-m)]">
+              <span className="font-bold text-[var(--text-primary)]">Valor total</span>
+              <span className="font-bold text-[var(--text-tertiary)] line-through decoration-2">${VALOR_TOTAL} USD</span>
             </div>
           </div>
 
-          <div className="mt-[var(--space-9)] text-center">
-            <p className="font-bold uppercase text-[var(--text-primary)] [font-size:var(--fs-heading-s)]">
-              Todo el sistema + los 4 bonos, en un solo pago.
-            </p>
-            <p className="mt-[var(--space-5)] text-[var(--text-tertiary)] [font-size:var(--fs-body-m)] line-through decoration-2">
-              Precio regular: USD 27
-            </p>
-            <p className="tm-display mt-[var(--space-2)] font-bold text-[var(--accent)] [font-size:var(--fs-display-xl)] leading-[var(--lh-tight)]">
-              USD 16
-            </p>
+          <div className="mt-[var(--space-9)]">
             <p className="font-bold uppercase text-[var(--text-secondary)] [font-size:var(--fs-eyebrow)] tracking-[var(--ls-eyebrow)]">
               Precio de lanzamiento — hoy
+            </p>
+            <p className="tm-display mt-[var(--space-2)] font-bold text-[var(--accent)] [font-size:var(--fs-display-xl)] leading-[var(--lh-tight)]">
+              USD {PRECIO_LANZAMIENTO}
             </p>
           </div>
 
@@ -375,39 +534,29 @@ export default async function DeCreadorADuenoPage() {
             <p className="mt-[var(--space-4)] text-center text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
               Accedé ahora al precio de lanzamiento.
               <br />
-              Después de esto, el valor aumenta — sin excepciones.
+              Después de esto, el precio vuelve a ${PRECIO_REGULAR} y no hay vuelta atrás.
             </p>
           </div>
 
           <div className="mt-[var(--space-7)] flex justify-center">
-            <BotonComprar texto="Sí, quiero empezar hoy" />
+            <BotonComprar texto="Sí, quiero mi sistema al precio de lanzamiento" />
           </div>
+          <p className="mt-[var(--space-4)] text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
+            Pago único · Sin mensualidades · Acceso inmediato
+          </p>
         </div>
       </section>
 
       <Divisor />
 
-      {/* FOOTER — garantía + FAQ, --black-0 */}
+      {/* 11. FAQ + footer — --black-0 */}
       <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
         <div className="mx-auto max-w-2xl">
-          <div className="flex flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-l)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-[var(--space-6)] text-center">
-            <Image src="/7-dias-garantia.jpg" alt="Sello de garantía de 7 días" width={96} height={96} className="rounded-full" />
-            <h3 className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-m)]">
-              Probalo 7 días. Sin riesgo.
-            </h3>
-            <p className="text-[var(--text-secondary)] [font-size:var(--fs-body-s)] leading-[var(--lh-body)]">
-              Si sentís que no es para vos, te devolvemos cada peso hasta 7 días después de la compra. Sin preguntas,
-              sin peros.
-            </p>
-          </div>
-
-          <div className="mt-[var(--space-9)]">
-            <h3 className="tm-display text-center font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
-              Preguntas frecuentes
-            </h3>
-            <div className="mt-[var(--space-5)]">
-              <Accordion items={FAQ} />
-            </div>
+          <h3 className="tm-display text-center font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
+            Preguntas frecuentes
+          </h3>
+          <div className="mt-[var(--space-5)]">
+            <Accordion items={FAQ} />
           </div>
 
           <p className="mt-[var(--space-9)] text-center text-[var(--text-tertiary)] [font-size:12px]">
@@ -415,6 +564,35 @@ export default async function DeCreadorADuenoPage() {
           </p>
         </div>
       </section>
+
+      {/* Espaciador: sin esto, la barra fixed de abajo tapa las últimas
+          líneas del footer (FAQ/copyright) en vez de flotar sobre contenido
+          que ya tenía lugar de sobra. */}
+      <div className="h-24" />
+
+      {/* Barra de precio sticky: acompaña toda la landing, no solo la
+          sección de oferta — así siempre hay un "Comprar ahora" a mano sin
+          tener que volver a scrollear hasta el cierre. */}
+      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border-subtle)] bg-[var(--black-0)]/95 px-[var(--container-pad)] py-4 backdrop-blur-md">
+        <div className="mx-auto flex max-w-[var(--container-max)] items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="truncate font-bold uppercase text-[var(--accent)] [font-size:10px] tracking-[var(--ls-eyebrow)]">
+              Últimos cupos al precio de lanzamiento
+            </p>
+            <p className="truncate text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
+              <span className="font-bold text-[var(--text-primary)]">De Creador/a a Dueño/a</span> ·{" "}
+              <span className="font-bold text-[var(--accent)]">USD {PRECIO_LANZAMIENTO}</span>
+            </p>
+          </div>
+          <Link
+            href={LINK_CHECKOUT}
+            className="tm-display inline-flex shrink-0 items-center gap-2 rounded-[var(--radius-pill)] bg-[var(--accent)] px-[24px] py-[12px] [font-size:var(--fs-body-s)] font-bold text-[var(--accent-contrast)] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-[var(--accent-hover)]"
+          >
+            Comprar ahora
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }
