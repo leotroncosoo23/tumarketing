@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server";
-import { getClientesConResumen, getProyectosResumen, getConversaciones } from "@/lib/dashboard-queries";
+import { getClientesConResumen, getProyectosResumen, getConversaciones, getFacturacionMensual } from "@/lib/dashboard-queries";
 import AdminShell, { type InitialAdminData } from "@/components/dashboard/AdminShell";
 import "./admin.css";
 
@@ -7,11 +7,12 @@ export default async function AdminPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const [clientes, proyectos, conversaciones, { data: servicios }, { data: cupones }, { data: blogs }, { data: perfil }] =
+  const [clientes, proyectos, conversaciones, facturacionMensual, { data: servicios }, { data: cupones }, { data: blogs }, { data: perfil }] =
     await Promise.all([
       getClientesConResumen(supabase),
       getProyectosResumen(supabase),
       getConversaciones(supabase),
+      getFacturacionMensual(supabase),
       supabase.from("servicios").select("*").order("created_at", { ascending: false }),
       supabase.from("cupones").select("*").order("creado_en", { ascending: false }),
       supabase.from("blogs").select("*").order("creado_en", { ascending: false }),
@@ -25,6 +26,7 @@ export default async function AdminPage() {
     servicios: servicios || [],
     cupones: cupones || [],
     blogs: blogs || [],
+    facturacionMensual,
   };
 
   const usuario = {

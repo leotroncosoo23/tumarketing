@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AdminSidebarV2 } from "./AdminSidebarV2";
 import { TopBar } from "./TopBar";
 import { supabase } from "@/lib/supabase";
-import type { ClienteResumen, ConversacionResumen, ProyectoResumen } from "@/lib/dashboard-queries";
+import type { ClienteResumen, ConversacionResumen, ProyectoResumen, FacturacionMensual } from "@/lib/dashboard-queries";
 import type { Servicio } from "@/lib/servicios";
 import DashboardSection from "./sections/DashboardSection";
 import ClientesSection from "./sections/ClientesSection";
@@ -68,6 +68,7 @@ export type InitialAdminData = {
   servicios: Servicio[];
   cupones: Cupon[];
   blogs: Blog[];
+  facturacionMensual: FacturacionMensual;
 };
 
 export type UsuarioActual = {

@@ -13,7 +13,7 @@ import LandingComparativa from "@/components/landings/LandingComparativa";
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import LandingCTA from "@/components/landings/LandingCTA";
+import AgendaSegmentada from "@/components/landings/AgendaSegmentada";
 
 export default function CommunityManagerPage() {
   return (
@@ -176,13 +176,7 @@ export default function CommunityManagerPage() {
         ]}
       />
 
-      <LandingCTA
-        acento="fuchsia"
-        titulo="¿Listo para que tus redes trabajen para tu negocio?"
-        subtitulo="Agendá una consultoría gratuita de 15 minutos. Contanos cómo está tu marca hoy y te armamos la estrategia de contenido que necesita."
-        mensajeWhatsapp="¡Hola! Quiero cotizar la gestión de mis redes sociales (Community Manager) 🚀"
-        ctaLabel="Cotizar gestión de mis redes"
-      />
+      <AgendaSegmentada acento="fuchsia" />
 
       <Footer />
     </main>

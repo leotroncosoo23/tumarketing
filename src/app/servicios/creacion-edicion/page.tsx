@@ -13,7 +13,7 @@ import LandingComparativa from "@/components/landings/LandingComparativa";
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import LandingCTA from "@/components/landings/LandingCTA";
+import AgendaSegmentada from "@/components/landings/AgendaSegmentada";
 
 export default function CreacionEdicionPage() {
   return (
@@ -176,13 +176,7 @@ export default function CreacionEdicionPage() {
         ]}
       />
 
-      <LandingCTA
-        acento="fuchsia"
-        titulo="¿Listo para que tu marca se vea (y se sienta) distinta?"
-        subtitulo="Agendá una consultoría gratuita de 15 minutos. Contanos qué contenido necesitás y te armamos la propuesta de producción y edición."
-        mensajeWhatsapp="¡Hola! Quiero cotizar creación y edición de contenido para mis redes 🚀"
-        ctaLabel="Cotizar mi contenido"
-      />
+      <AgendaSegmentada acento="fuchsia" />
 
       <Footer />
     </main>

@@ -38,7 +38,7 @@ import LandingComparativaTabla from "@/components/landings/LandingComparativaTab
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import LandingCTA from "@/components/landings/LandingCTA";
+import AgendaDesarrollo from "@/components/landings/AgendaDesarrollo";
 
 export default function PaginasWebPage() {
   return (
@@ -275,13 +275,7 @@ export default function PaginasWebPage() {
         ]}
       />
 
-      <LandingCTA
-        acento="cyan"
-        titulo="¿Listo para tener una página que realmente venda?"
-        subtitulo="Agendá una consultoría gratuita de 15 minutos. Contanos qué necesita tu negocio y te armamos la propuesta exacta para tu página web."
-        mensajeWhatsapp="¡Hola! Quiero cotizar el diseño de una página web para mi negocio 🚀"
-        ctaLabel="Cotizar mi página web"
-      />
+      <AgendaDesarrollo />
 
       <Footer />
     </main>

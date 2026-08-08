@@ -112,6 +112,34 @@ export async function getClientesConResumen(supabase: SupabaseClient): Promise<C
   });
 }
 
+export type FacturacionMensual = { ars: number; usd: number };
+
+// "Facturación mensual" real: suma de facturas con estado "pagada" emitidas
+// este mes calendario — plata que efectivamente entró, no el precio de lista
+// de los servicios activos (eso ya lo muestra ClienteResumen.mrr, que es un
+// concepto distinto: cuánto factura CADA cliente por mes, no cuánto entró).
+export async function getFacturacionMensual(supabase: SupabaseClient): Promise<FacturacionMensual> {
+  const ahora = new Date();
+  const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1).toISOString();
+
+  const { data, error } = await supabase
+    .from("facturas")
+    .select("monto, moneda")
+    .eq("estado", "pagada")
+    .gte("fecha_emision", inicioMes);
+
+  if (error) throw new Error("No pudimos traer la facturación: " + error.message);
+
+  return (data || []).reduce(
+    (acc, f: { monto: number; moneda: string }) => {
+      if (f.moneda === "USD") acc.usd += Number(f.monto);
+      else acc.ars += Number(f.monto);
+      return acc;
+    },
+    { ars: 0, usd: 0 }
+  );
+}
+
 export type ConversacionResumen = {
   servicioContratadoId: string;
   clienteId: string;

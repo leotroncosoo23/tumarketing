@@ -41,7 +41,7 @@ import LandingComparativaCards from "@/components/landings/LandingComparativaCar
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import LandingCTA from "@/components/landings/LandingCTA";
+import AgendaDesarrollo from "@/components/landings/AgendaDesarrollo";
 
 export default function EcommercePage() {
   return (
@@ -300,13 +300,7 @@ export default function EcommercePage() {
         ]}
       />
 
-      <LandingCTA
-        acento="cyan"
-        titulo="¿Listo para tener una tienda que venda sin límites?"
-        subtitulo="Agendá una consultoría gratuita de 15 minutos. Contanos qué productos vendés y te armamos la arquitectura exacta de tu tienda online."
-        mensajeWhatsapp="¡Hola! Quiero cotizar una tienda online (eCommerce) para mi negocio 🚀"
-        ctaLabel="Cotizar mi tienda online"
-      />
+      <AgendaDesarrollo />
 
       <Footer />
     </main>

@@ -12,7 +12,7 @@ import LandingComparativa from "@/components/landings/LandingComparativa";
 import LandingProceso from "@/components/landings/LandingProceso";
 import LandingPerfil from "@/components/landings/LandingPerfil";
 import LandingFAQ from "@/components/landings/LandingFAQ";
-import LandingCTA from "@/components/landings/LandingCTA";
+import AgendaDesarrollo from "@/components/landings/AgendaDesarrollo";
 
 export default function AppsPage() {
   return (
@@ -191,13 +191,7 @@ export default function AppsPage() {
         ]}
       />
 
-      <LandingCTA
-        acento="cyan"
-        titulo="¿Listo para llevar tu operación al siguiente nivel?"
-        subtitulo="Agendá una consultoría gratuita de 15 minutos. Contanos qué proceso querés automatizar y te armamos la arquitectura exacta del sistema que necesitás."
-        mensajeWhatsapp="¡Hola! Quiero cotizar una app o sistema a medida para mi negocio 🚀"
-        ctaLabel="Cotizar mi sistema"
-      />
+      <AgendaDesarrollo />
 
       <Footer />
     </main>
