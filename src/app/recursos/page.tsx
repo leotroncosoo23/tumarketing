@@ -80,7 +80,7 @@ export default function RecursosPage() {
   );
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white font-sans overflow-x-hidden pt-28 pb-20">
+    <main className="min-h-screen bg-neutral-950 text-white font-sans overflow-x-hidden pt-28">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-6">
