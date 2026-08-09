@@ -291,6 +291,7 @@ export default function LoginUsuarios() {
               <input
                 type="email"
                 required
+                autoComplete="username"
                 placeholder="tu@negocio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -315,6 +316,7 @@ export default function LoginUsuarios() {
                 <input
                   type={mostrarPassword ? "text" : "password"}
                   required
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
