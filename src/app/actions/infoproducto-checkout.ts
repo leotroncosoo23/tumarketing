@@ -4,6 +4,7 @@ import { crearOrdenPayPal, capturarOrdenPayPal } from "@/lib/paypal-server";
 import { crearClienteSupabaseAdmin } from "@/lib/mercadopago-server";
 import { obtenerUrlBase } from "@/lib/notificar-suscriptores";
 import { PRECIO_LANZAMIENTO } from "@/app/de-creador-a-dueno/precios";
+import { enviarAccesoInfoproducto } from "@/lib/entrega-infoproducto";
 
 // Precio fijo del lanzamiento: a diferencia del carrito (que busca el precio
 // real en "servicios" para que nadie lo manipule desde el cliente), este
@@ -80,11 +81,27 @@ export async function confirmarCompraInfoproducto(ordenId: string): Promise<Resu
 
     const supabaseAdmin = crearClienteSupabaseAdmin();
     if (supabaseAdmin) {
-      const { error } = await supabaseAdmin
+      // Update condicional (.eq("estado", "pendiente")): esta función puede
+      // llamarse dos veces para la misma venta —una vez desde la página de
+      // "gracias" y otra desde el webhook real de PayPal—, y solo la
+      // transición pendiente→pagado debe disparar el envío del email. Si la
+      // fila ya estaba en "pagado", "data" vuelve vacío y no reenviamos nada.
+      const { data, error } = await supabaseAdmin
         .from("ventas_infoproductos")
         .update({ estado: "pagado" })
-        .eq("paypal_order_id", ordenId);
-      if (error) console.error("No pudimos actualizar la venta a 'pagado':", error.message);
+        .eq("paypal_order_id", ordenId)
+        .eq("estado", "pendiente")
+        .select("nombre, email")
+        .maybeSingle();
+
+      if (error) {
+        console.error("No pudimos actualizar la venta a 'pagado':", error.message);
+      } else if (data) {
+        const envio = await enviarAccesoInfoproducto({ email: data.email, nombre: data.nombre });
+        if (!envio.ok) {
+          console.error(`Venta ${ordenId} marcada como pagada pero el email de acceso falló:`, envio.error);
+        }
+      }
     }
 
     return { ok: true };

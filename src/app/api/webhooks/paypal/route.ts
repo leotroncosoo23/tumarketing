@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verificarFirmaWebhook, capturarOrdenPayPal } from "@/lib/paypal-server";
 import { crearClienteSupabaseAdmin, otorgarAcceso, type ItemComprado } from "@/lib/mercadopago-server";
+import { confirmarCompraInfoproducto } from "@/app/actions/infoproducto-checkout";
 
 // Siempre respondemos 200 (salvo que la notificación ni siquiera se pueda leer),
 // porque si le devolvemos error a PayPal reintenta el mismo aviso sin parar y un
@@ -40,7 +41,24 @@ export async function POST(req: NextRequest) {
       .eq("orden_id", ordenId)
       .single();
 
-    if (!ordenPendiente) return OK(); // Ya se procesó (la página de retorno la borró) o no existe.
+    if (!ordenPendiente) {
+      // No es una compra del carrito (servicios_contratados): puede ser una
+      // venta de infoproducto, que vive en otra tabla. confirmarCompraInfoproducto
+      // ya es idempotente (solo hace la transición pendiente→pagado y manda el
+      // email una única vez), así que es seguro invocarla acá aunque la página de
+      // "gracias" del comprador ya la haya llamado antes.
+      const { data: ventaInfoproducto } = await supabaseAdmin
+        .from("ventas_infoproductos")
+        .select("id")
+        .eq("paypal_order_id", ordenId)
+        .maybeSingle();
+
+      if (ventaInfoproducto) {
+        await confirmarCompraInfoproducto(ordenId);
+      }
+
+      return OK();
+    }
 
     const items: ItemComprado[] = JSON.parse(ordenPendiente.items_json);
     await Promise.all(

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Space_Grotesk, Inter } from "next/font/google";
-import { ArrowLeft, Lock, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { ArrowLeft, Lock, CheckCircle2, Zap } from "lucide-react";
 import { crearOrdenInfoproducto } from "@/app/actions/infoproducto-checkout";
 import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO } from "../precios";
 import "@/app/admin/admin.css";
@@ -118,11 +118,7 @@ export default function CheckoutInfoproductoPage() {
             </div>
           </div>
 
-          <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-3">
-            <div className="flex items-center gap-2 rounded-[var(--radius-m)] border border-[var(--border-subtle)] px-[var(--space-3)] py-[var(--space-3)]">
-              <ShieldCheck className="h-4 w-4 shrink-0 text-[var(--accent)]" />
-              <span className="text-[var(--text-secondary)] [font-size:12px]">Garantía de 7 días</span>
-            </div>
+          <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
             <div className="flex items-center gap-2 rounded-[var(--radius-m)] border border-[var(--border-subtle)] px-[var(--space-3)] py-[var(--space-3)]">
               <Zap className="h-4 w-4 shrink-0 text-[var(--accent)]" />
               <span className="text-[var(--text-secondary)] [font-size:12px]">Acceso inmediato</span>

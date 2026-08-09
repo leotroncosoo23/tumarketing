@@ -129,10 +129,6 @@ const FAQ: AccordionItem[] = [
     q: "¿Cómo accedo al material?",
     a: "Apenas se acredita tu compra te llega el acceso, para que arranques cuando quieras, sin esperas.",
   },
-  {
-    q: "¿Tiene garantía?",
-    a: "Sí. Tenés 7 días de garantía real: si sentís que no es para vos, te devolvemos el dinero sin preguntas.",
-  },
 ];
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -404,7 +400,7 @@ export default function DeCreadorADuenoPage() {
                 key={bono.numero}
                 className="relative overflow-hidden rounded-[var(--radius-l)] border border-[var(--accent)]/30 bg-[var(--surface-card)] shadow-[var(--shadow-card)]"
               >
-                <div className="relative flex h-[200px] items-center justify-center overflow-hidden bg-[var(--black-3)]">
+                <div className="relative flex h-[280px] items-center justify-center overflow-hidden bg-[var(--black-3)]">
                   <span className="tm-display absolute left-3 top-3 z-10 font-bold text-[var(--black-5)] [font-size:4rem] leading-none select-none">
                     {bono.numero}
                   </span>
@@ -414,9 +410,9 @@ export default function DeCreadorADuenoPage() {
                   <Image
                     src={bono.imagen}
                     alt={bono.titulo}
-                    width={260}
-                    height={260}
-                    className="relative z-[1] h-full w-auto object-contain p-[var(--space-4)]"
+                    width={340}
+                    height={340}
+                    className="relative z-[1] h-full w-auto object-contain p-[var(--space-2)]"
                   />
                 </div>
                 <div className="p-[var(--space-6)]">
@@ -469,23 +465,6 @@ export default function DeCreadorADuenoPage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      <Divisor />
-
-      {/* 9. GARANTÍA — --black-0, justo antes del precio a propósito: neutraliza
-          la objeción "¿y si no me sirve?" en el momento exacto de decidir. */}
-      <section className="bg-[var(--black-0)] px-[var(--container-pad)] py-[var(--space-9)]">
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-[var(--space-3)] rounded-[var(--radius-l)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-[var(--space-8)] text-center">
-          <Image src="/7-dias-garantia.jpg" alt="Sello de garantía de 7 días" width={110} height={110} className="rounded-full" />
-          <h2 className="tm-display mt-[var(--space-3)] font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-l)]">
-            Probalo 7 días. Si no te sirve, no pagás por algo que no usás.
-          </h2>
-          <p className="text-[var(--text-secondary)] [font-size:var(--fs-body-m)] leading-[var(--lh-body)]">
-            Entrá, mirá el sistema completo, empezá a aplicarlo. Si en 7 días sentís que esto no es para vos, te
-            devolvemos cada peso — sin explicaciones, sin vueltas, sin letra chica.
-          </p>
         </div>
       </section>
 
