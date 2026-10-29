@@ -77,12 +77,11 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-6">Servicios</h3>
             <ul className="space-y-3">
               <li><Link href="/" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Inicio</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Google & Meta Ads</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Redes Sociales</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Posicionamiento SEO</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">IA / GEO</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">E-commerce</Link></li>
-              <li><Link href="/servicios" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Diseño Web</Link></li>
+              <li><Link href="/servicios/community-manager" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Community Management</Link></li>
+              <li><Link href="/servicios/publicidad" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Pauta en Meta & Google</Link></li>
+              <li><Link href="/servicios/paginas-web" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Desarrollo Web & Apps</Link></li>
+              <li><Link href="/#portfolio" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Portfolio</Link></li>
+              <li><Link href="/links" className="text-neutral-400 hover:text-[#ccff00] transition-colors text-sm">Links</Link></li>
             </ul>
           </div>
 

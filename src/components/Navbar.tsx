@@ -5,11 +5,8 @@ import { useState, useEffect } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { iniciales } from '@/lib/iniciales';
-import { useCart } from '@/lib/CartContext';
 import { SERVICIOS_NAV } from '@/lib/servicios-nav';
-import { ACCENTS } from '@/components/landings/accents';
 import WhatsAppFloat from '@/components/WhatsAppFloat';
-import CartDrawer from '@/components/CartDrawer';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,7 +15,6 @@ export default function Navbar() {
   const [isServiciosOpen, setIsServiciosOpen] = useState(false);
   const [usuario, setUsuario] = useState<User | null>(null);
   const [rol, setRol] = useState<string | null>(null);
-  const { cantidadItems, toggleCarrito } = useCart();
 
   // Este efecto revisa si el usuario bajó más de 20 píxeles
   useEffect(() => {
@@ -96,17 +92,17 @@ export default function Navbar() {
               <div className="grid grid-cols-2 gap-8">
                 {SERVICIOS_NAV.map(({ sector, acento, items }) => (
                   <div key={sector}>
-                    <p className={`${ACCENTS[acento].text} text-xs font-bold uppercase tracking-wider mb-3`}>
+                    <p style={{ color: acento }} className="text-xs font-bold uppercase tracking-wider mb-3">
                       {sector}
                     </p>
                     <div className="space-y-1">
-                      {items.map(({ titulo, href, descripcion, icon: Icon }) => (
+                      {items.map(({ titulo, href, descripcion, icon: Icon, acento: color }) => (
                         <Link
                           key={href}
                           href={href}
                           className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-neutral-800 transition-colors"
                         >
-                          <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${ACCENTS[acento].text}`} strokeWidth={1.75} />
+                          <Icon style={{ color }} className="w-5 h-5 shrink-0 mt-0.5" strokeWidth={1.75} />
                           <span>
                             <span className="block font-semibold text-sm">{titulo}</span>
                             <span className="block text-xs text-neutral-500">{descripcion}</span>
@@ -145,25 +141,6 @@ export default function Navbar() {
 
         {/* Botones Desktop */}
         <div className="hidden md:flex items-center gap-3">
-          <button
-            onClick={toggleCarrito}
-            aria-label="Abrir carrito de compras"
-            className="relative p-2 hover:bg-neutral-900/50 rounded-lg transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.75"
-                d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H17M17 19a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM9 21a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
-              />
-            </svg>
-            {cantidadItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#ccff00] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                {cantidadItems}
-              </span>
-            )}
-          </button>
           {usuario ? (
             <Link href={destinoPlataforma} className="flex items-center gap-3 group">
               <span className="w-9 h-9 rounded-full bg-[#ccff00]/10 border border-[#ccff00]/30 flex items-center justify-center text-xs font-bold text-[#ccff00] overflow-hidden shrink-0">
@@ -184,36 +161,17 @@ export default function Navbar() {
               <Link href="/login" className="text-sm font-semibold hover:text-[#ccff00] transition-colors">
                 Iniciar sesión
               </Link>
-              <Link href="/servicios" className={`bg-[#ccff00] text-black rounded-full font-bold hover:bg-[#b8e600] transition-all ${
+              <Link href="/#agendar" className={`bg-[#ccff00] text-black rounded-full font-bold hover:bg-[#b8e600] transition-all ${
                 isScrolled ? "px-5 py-2 text-sm" : "px-6 py-2.5"
               }`}>
-                Empecemos
+                Agendar llamada
               </Link>
             </>
           )}
         </div>
 
-        {/* Carrito + Hamburguesa Mobile */}
+        {/* Hamburguesa Mobile */}
         <div className="md:hidden flex items-center gap-1">
-          <button
-            onClick={toggleCarrito}
-            aria-label="Abrir carrito de compras"
-            className="relative p-2 hover:bg-neutral-900/50 rounded-lg transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.75"
-                d="M3 3h2l.4 2M7 13h10l3.6-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H17M17 19a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM9 21a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
-              />
-            </svg>
-            {cantidadItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#ccff00] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
-                {cantidadItems}
-              </span>
-            )}
-          </button>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
@@ -253,18 +211,18 @@ export default function Navbar() {
               <div className="bg-neutral-900/50 rounded-lg mt-2 space-y-4 px-4 py-3">
                 {SERVICIOS_NAV.map(({ sector, acento, items }) => (
                   <div key={sector}>
-                    <p className={`${ACCENTS[acento].text} text-xs font-bold uppercase tracking-wider mb-2`}>
+                    <p style={{ color: acento }} className="text-xs font-bold uppercase tracking-wider mb-2">
                       {sector}
                     </p>
                     <div className="space-y-1">
-                      {items.map(({ titulo, href, icon: Icon }) => (
+                      {items.map(({ titulo, href, icon: Icon, acento: color }) => (
                         <Link
                           key={href}
                           href={href}
                           onClick={handleLinkClick}
                           className="flex items-center gap-2 py-2 pl-2 text-sm hover:text-[#ccff00] transition-colors"
                         >
-                          <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+                          <Icon style={{ color }} className="w-4 h-4 shrink-0" strokeWidth={1.75} />
                           {titulo}
                         </Link>
                       ))}
@@ -362,18 +320,17 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/servicios"
+                href="/#agendar"
                 onClick={handleLinkClick}
                 className="block w-full text-center bg-[#ccff00] text-black rounded-lg font-bold py-3 px-4 hover:bg-[#b8e600] transition-all text-sm mt-2"
               >
-                Empecemos
+                Agendar llamada
               </Link>
             </>
           )}
         </div>
       </div>
     </nav>
-    <CartDrawer />
     <WhatsAppFloat />
     </>
   );

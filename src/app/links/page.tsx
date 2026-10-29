@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail, ArrowRight } from "lucide-react";
+import { Mail, ArrowRight, TrendingUp } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { SERVICIOS_LANDING } from "@/lib/servicios-landing";
+import { METRICAS_GLOBALES } from "@/lib/casos-exito";
+import ContadorAnimado from "@/components/agencia/ContadorAnimado";
 
 export const metadata: Metadata = {
   title: "tumarketing — Todos nuestros links",
-  description: "Agencia de Marketing Digital. Potenciamos tu negocio.",
+  description: "Servicios, oferta y recursos gratuitos de TuMarketing.",
 };
 
 // Esta versión de lucide-react sacó los íconos de marca (Instagram, YouTube,
@@ -39,6 +42,38 @@ function IconoYoutube({ className }: { className?: string }) {
   );
 }
 
+// Recursos gratuitos (lead magnets cargados desde el panel de admin en Recursos).
+// "Tu negocio en digital": cargar la guía en el panel con este slug.
+const RECURSOS = [
+  {
+    emoji: "🎬",
+    titulo: "20 Guiones Virales",
+    descripcion: "Estructuras probadas para grabar reels que enganchan desde el segundo 1.",
+    link: "/recursos/20-estructuras-de-guiones-virales",
+  },
+  {
+    emoji: "📘",
+    titulo: "Guía: Tu negocio en digital",
+    descripcion: "Los pasos clave para llevar tu negocio al mundo digital y empezar a vender online.",
+    link: "/recursos/tu-negocio-en-digital",
+  },
+];
+
+function TituloGrupo({ numero, color, children }: { numero: number; color: string; children: React.ReactNode }) {
+  return (
+    <p style={{ color }} className="mb-3 flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.14em]">
+      <span
+        style={{ background: color, boxShadow: `0 0 16px -2px ${color}` }}
+        className="grid h-6 w-6 place-items-center rounded-full text-xs font-black text-black"
+      >
+        {numero}
+      </span>
+      {children}
+    </p>
+  );
+}
+
+// Link in bio de Instagram. Orden pedido: 1) Servicios 2) Oferta 3) Recursos gratuitos.
 export default async function LinksPage() {
   const supabase = await createSupabaseServerClient();
   const { data: config } = await supabase
@@ -53,156 +88,164 @@ export default async function LinksPage() {
   // vino el clic, para que el equipo sepa de entrada qué le interesó al lead
   // sin tener que preguntar — arranca la conversación más cerca de la venta.
   const linkWhatsapp = (mensaje: string) =>
-    whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${encodeURIComponent(mensaje)}` : "/servicios#contacto";
+    whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${encodeURIComponent(mensaje)}` : "/#agendar";
 
-  const leadMagnets = [
-    {
-      emoji: "🎬",
-      titulo: "20 Guiones Virales",
-      descripcion: "Estructuras probadas para grabar reels que enganchan desde el segundo 1.",
-      link: "/recursos/20-estructuras-de-guiones-virales",
-    },
-    {
-      emoji: "📘",
-      titulo: "Mini Kit de Contenido Estratégico",
-      descripcion: "La base para crear contenido que atrae clientes y prepara la venta.",
-      link: "/recursos/mini-kit-de-contenido-estrat-gico",
-    },
-  ];
+  const redes = [
+    { href: "/newsletter", label: "Email", icono: <Mail className="h-4 w-4" />, externo: false },
+    config?.tiktok_url && { href: config.tiktok_url, label: "TikTok", icono: <IconoTikTok className="h-4 w-4" />, externo: true },
+    config?.instagram_url && { href: config.instagram_url, label: "Instagram", icono: <IconoInstagram className="h-4 w-4" />, externo: true },
+    config?.youtube_url && { href: config.youtube_url, label: "YouTube", icono: <IconoYoutube className="h-4 w-4" />, externo: true },
+  ].filter(Boolean) as { href: string; label: string; icono: React.ReactNode; externo: boolean }[];
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-white font-sans flex justify-center px-4 py-10 sm:py-16">
-      {/* Halo de fondo: la misma atmósfera lima que ya usamos en /servicios,
-          para que esta página se sienta parte del mismo sitio y no un
-          template genérico de link-in-bio pegado con cinta. */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#D4EE26]/10 blur-[140px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#D4EE26]/[0.08] blur-[120px] rounded-full" />
-      </div>
+    <main className="relative isolate flex min-h-screen justify-center overflow-hidden bg-black px-4 py-10 font-sans text-white sm:py-14">
+      {/* Brillos de fondo en los colores de la marca y de cada servicio */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(520px_340px_at_50%_-80px,rgba(204,255,0,0.18),transparent_70%),radial-gradient(420px_360px_at_0%_38%,rgba(255,79,216,0.14),transparent_70%),radial-gradient(420px_360px_at_100%_48%,rgba(169,112,255,0.14),transparent_70%),radial-gradient(460px_360px_at_50%_100%,rgba(59,157,255,0.14),transparent_70%)]" />
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="w-full max-w-md">
         {/* Perfil */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="relative mb-4">
-            <div className="absolute inset-0 rounded-full bg-[#ccff00] blur-xl opacity-30" />
-            <Image
-              src="/logo-mark.jpg"
-              alt="tumarketing"
-              width={88}
-              height={88}
-              className="relative rounded-full border-2 border-[#ccff00]/40 object-cover"
-            />
+        <div className="mb-2 flex flex-col items-center text-center">
+          <Image
+            src="/logo-mark.jpg"
+            alt="tumarketing"
+            width={92}
+            height={92}
+            className="mb-4 rounded-full border-2 border-[#ccff00] object-cover shadow-[0_0_0_6px_rgba(204,255,0,0.08),0_0_44px_-6px_#ccff00]"
+          />
+          <h1 className="text-2xl font-black tracking-tight">
+            Tu<span className="text-[#ccff00]">Marketing</span>
+          </h1>
+          <p className="mt-1.5 text-sm text-neutral-400">Hacemos que tu marca se vea, se escuche y venda.</p>
+
+          <div className="mt-4 flex items-center gap-3">
+            {redes.map((r) => (
+              <a
+                key={r.label}
+                href={r.href}
+                aria-label={r.label}
+                {...(r.externo ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="grid h-10 w-10 place-items-center rounded-full border border-neutral-800 bg-neutral-900 text-neutral-300 transition-colors hover:border-[#ccff00]/40 hover:text-[#ccff00]"
+              >
+                {r.icono}
+              </a>
+            ))}
           </div>
-          <h1 className="text-2xl font-black tracking-tight">tumarketing</h1>
-          <p className="text-neutral-400 text-sm mt-1.5 max-w-xs">
-            Agencia de Marketing Digital. Potenciamos tu negocio 🚀
-          </p>
 
-          <div className="flex items-center gap-3 mt-5">
-            <a
-              href="/newsletter"
-              aria-label="Email"
-              className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-[#ccff00] hover:border-[#ccff00]/40 transition-colors"
-            >
-              <Mail className="w-4 h-4" />
-            </a>
-            {config?.tiktok_url && (
-              <a
-                href={config.tiktok_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-[#ccff00] hover:border-[#ccff00]/40 transition-colors"
-              >
-                <IconoTikTok className="w-4 h-4" />
-              </a>
-            )}
-            {config?.instagram_url && (
-              <a
-                href={config.instagram_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-[#ccff00] hover:border-[#ccff00]/40 transition-colors"
-              >
-                <IconoInstagram className="w-4 h-4" />
-              </a>
-            )}
-            {config?.youtube_url && (
-              <a
-                href={config.youtube_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-                className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-300 hover:text-[#ccff00] hover:border-[#ccff00]/40 transition-colors"
-              >
-                <IconoYoutube className="w-4 h-4" />
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Oferta principal */}
-        <Link
-          href="/de-creador-a-dueno"
-          className="group block bg-[#ccff00] text-black rounded-2xl p-5 mb-4 shadow-[0_0_30px_rgba(204,255,0,0.25)] hover:shadow-[0_0_40px_rgba(204,255,0,0.4)] hover:-translate-y-0.5 transition-all"
-        >
-          <p className="text-xs font-black uppercase tracking-wide mb-1">🔥 Oferta por tiempo limitado</p>
-          <p className="text-lg font-black leading-snug">40% OFF — De creador/a a Dueño/a</p>
-          <p className="text-sm font-bold flex items-center gap-1.5 mt-1">
-            Acceso inmediato
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </p>
-        </Link>
-
-        {/* Lead magnets */}
-        <div className="mb-2 mt-8">
-          <p className="text-xs font-black uppercase tracking-widest text-[#ccff00]">Recursos gratis</p>
-          <h2 className="text-lg font-black">Llevate esto sin costo</h2>
-        </div>
-        <div className="flex flex-col gap-3 mb-8">
-          {leadMagnets.map((item) => (
-            <div
-              key={item.titulo}
-              className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-4 flex items-center gap-4 hover:border-[#ccff00]/30 transition-colors"
-            >
-              <span className="w-12 h-12 shrink-0 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-2xl">
-                {item.emoji}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-bold text-sm leading-snug">{item.titulo}</p>
-                <p className="text-neutral-500 text-xs mt-0.5 leading-snug">{item.descripcion}</p>
+          <div className="mt-5 grid w-full grid-cols-4 gap-2">
+            {METRICAS_GLOBALES.map((m) => (
+              <div key={m.etiqueta} className="rounded-2xl border border-neutral-900 bg-neutral-950/70 px-1 py-2.5 text-center">
+                <ContadorAnimado valor={m.valor} className="block text-lg font-black text-[#ccff00]" />
+                <span className="mt-0.5 block text-[10.5px] leading-tight text-neutral-500">{m.etiqueta}</span>
               </div>
-              <Link
-                href={item.link}
-                className="shrink-0 bg-[#ccff00] text-black text-xs font-black px-3.5 py-2 rounded-lg hover:bg-[#b8e600] transition-colors whitespace-nowrap"
-              >
-                Gratis
-              </Link>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Contacto */}
+        {/* 1. SERVICIOS */}
+        <div className="mt-8">
+          <TituloGrupo numero={1} color="#ff4fd8">
+            Nuestros servicios
+          </TituloGrupo>
+          <div className="grid gap-2.5">
+            {SERVICIOS_LANDING.map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={s.slug}
+                  href={s.href}
+                  style={{ "--acc": s.acento } as React.CSSProperties}
+                  className="group relative flex items-center gap-3.5 overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--acc)_40%,transparent)] bg-[linear-gradient(100deg,color-mix(in_srgb,var(--acc)_16%,#0d0d14),#0d0d14_70%)] p-4 transition-all hover:-translate-y-0.5 hover:border-[var(--acc)] hover:shadow-[0_12px_34px_-16px_var(--acc)] after:absolute after:inset-x-0 after:top-0 after:h-0.5 after:bg-[linear-gradient(90deg,transparent,var(--acc),transparent)] after:bg-[length:200%_100%] after:animate-[tm-shimmer_3.2s_linear_infinite]"
+                >
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[color-mix(in_srgb,var(--acc)_45%,transparent)] bg-[color-mix(in_srgb,var(--acc)_18%,transparent)] text-[var(--acc)] shadow-[0_0_22px_-8px_var(--acc)]">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <small className="block text-[10.5px] font-black uppercase tracking-widest text-[var(--acc)]">{s.categoria}</small>
+                    <b className="block font-bold">{s.nombre}</b>
+                    <span className="block text-[13px] leading-snug text-neutral-400">{s.corto}</span>
+                    {s.prueba && (
+                      <span className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-[var(--acc)]">
+                        <TrendingUp className="h-3.5 w-3.5" /> {s.prueba.numero} · {s.prueba.etiqueta}
+                      </span>
+                    )}
+                  </span>
+                  <ArrowRight className="h-5 w-5 shrink-0 text-[var(--acc)] transition-transform group-hover:translate-x-1" />
+                </Link>
+              );
+            })}
+            <Link
+              href="/#agendar"
+              className="rounded-2xl border border-dashed border-neutral-700 p-4 text-center text-sm font-semibold transition-all hover:border-[#ccff00] hover:shadow-[0_10px_30px_-16px_#ccff00]"
+            >
+              ¿No sabés cuál elegir? <b className="text-[#ccff00]">Agendá 15 min gratis →</b>
+            </Link>
+          </div>
+        </div>
+
+        {/* 2. OFERTA — borde de luz girando (la tarjeta no se anima, ver globals.css) */}
+        <div className="mt-8">
+          <TituloGrupo numero={2} color="#ccff00">
+            Oferta
+          </TituloGrupo>
+          <div className="tm-glow-border rounded-3xl">
+            <div className="rounded-3xl bg-[#0a0a0a] bg-[radial-gradient(420px_circle_at_50%_0%,rgba(204,255,0,0.14),transparent_70%)] px-6 py-7 text-center">
+              <span className="mb-3.5 inline-block rounded-full bg-[#ccff00] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-black">
+                🔥 Oferta por tiempo limitado
+              </span>
+              <h2 className="text-2xl font-black">40% OFF — De creador/a a Dueño/a</h2>
+              <p className="mb-5 mt-2.5 text-[15px] text-neutral-400">
+                Acceso inmediato al programa para pasar de crear contenido a tener un negocio que vende.
+              </p>
+              <Link
+                href="/de-creador-a-dueno"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#ccff00] py-4 text-lg font-bold text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-8px_rgba(204,255,0,0.7)]"
+              >
+                Quiero mi 40% OFF <ArrowRight className="h-5 w-5" />
+              </Link>
+              <small className="mt-3 block text-xs text-neutral-500">Precio especial por tiempo limitado</small>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. RECURSOS GRATUITOS */}
+        <div className="mt-8">
+          <TituloGrupo numero={3} color="#3b9dff">
+            Recursos gratuitos
+          </TituloGrupo>
+          <div className="grid gap-2.5">
+            {RECURSOS.map((r) => (
+              <Link
+                key={r.titulo}
+                href={r.link}
+                className="flex items-center gap-3.5 rounded-2xl border border-neutral-800 bg-neutral-950/85 p-4 transition-all hover:-translate-y-0.5 hover:border-[#3b9dff] hover:shadow-[0_10px_30px_-16px_#3b9dff]"
+              >
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#3b9dff]/35 bg-[#3b9dff]/15 text-xl">{r.emoji}</span>
+                <span className="min-w-0 flex-1">
+                  <b className="block font-bold">{r.titulo}</b>
+                  <span className="block text-[13px] leading-snug text-neutral-400">{r.descripcion}</span>
+                </span>
+                <span className="shrink-0 rounded-lg bg-[#ccff00] px-3 py-1.5 text-xs font-black text-black">Gratis</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         <a
           href={linkWhatsapp("¡Hola! Quiero trabajar con ustedes 🚀")}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 bg-white text-black font-black text-base py-4 rounded-2xl hover:bg-neutral-200 transition-colors mb-3"
+          className="mt-8 flex w-full items-center justify-center gap-2 rounded-full border border-neutral-700 py-4 font-bold transition-colors hover:border-white"
         >
           💬 Hablemos por WhatsApp
         </a>
-
-        {/* Web oficial */}
         <Link
-          href="/servicios"
-          className="w-full flex items-center justify-center gap-2 border-2 border-[#ccff00] text-[#ccff00] font-black text-base py-4 rounded-2xl hover:bg-[#ccff00]/10 transition-colors"
+          href="/#portfolio"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-neutral-700 py-4 font-bold transition-colors hover:border-[#ccff00]"
         >
-          Descubrí nuestros servicios Premium
-          <ArrowRight className="w-4 h-4" />
+          Ver nuestros resultados reales ↗
         </Link>
 
-        <p className="text-center text-neutral-600 text-xs mt-8">
+        <p className="mt-8 text-center text-xs text-neutral-600">
           © {new Date().getFullYear()} tumarketing. Todos los derechos reservados.
         </p>
       </div>

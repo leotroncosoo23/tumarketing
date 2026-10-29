@@ -1,77 +1,41 @@
-import {
-  MonitorSmartphone,
-  ShoppingCart,
-  Workflow,
-  MessagesSquare,
-  Megaphone,
-  Clapperboard,
-  type LucideIcon,
-} from "lucide-react";
-import type { Acento } from "@/components/landings/accents";
+import type { LucideIcon } from "lucide-react";
+import { servicioPorSlug, type ServicioSlug } from "@/lib/servicios-landing";
 
 export type ServicioNavItem = {
   titulo: string;
   href: string;
   descripcion: string;
   icon: LucideIcon;
+  /** Color hex del servicio (rosa CM, violeta Pauta, azul Web). */
+  acento: string;
 };
 
 export type SectorServicios = {
   sector: string;
-  acento: Acento;
+  /** Color hex del título del sector. */
+  acento: string;
   items: ServicioNavItem[];
 };
 
-// Fuente única de las 6 landings de servicios: alimenta el mega-menu del
-// Navbar (desktop y mobile). Agregar un servicio nuevo acá alcanza para que
-// aparezca en el menú.
+const item = (slug: ServicioSlug, descripcion: string): ServicioNavItem => {
+  const s = servicioPorSlug(slug);
+  return { titulo: s.nombre, href: s.href, descripcion, icon: s.icon, acento: s.acento };
+};
+
+// Mega-menu del Navbar (desktop y mobile). Los datos de cada servicio salen de
+// servicios-landing.ts, así el menú y las landings nunca se desincronizan.
 export const SERVICIOS_NAV: SectorServicios[] = [
   {
-    sector: "Software",
-    acento: "cyan",
+    sector: "Redes sociales",
+    acento: "#ff4fd8",
     items: [
-      {
-        titulo: "Páginas Web",
-        href: "/servicios/paginas-web",
-        descripcion: "Sitios rápidos y a medida",
-        icon: MonitorSmartphone,
-      },
-      {
-        titulo: "eCommerce",
-        href: "/servicios/ecommerce",
-        descripcion: "Tiendas online que venden 24/7",
-        icon: ShoppingCart,
-      },
-      {
-        titulo: "Apps y Sistemas",
-        href: "/servicios/apps",
-        descripcion: "Software a medida para tu negocio",
-        icon: Workflow,
-      },
+      item("community-manager", "Gestión profesional de tus redes"),
+      item("publicidad", "Campañas en Meta y Google que venden"),
     ],
   },
   {
-    sector: "Redes Sociales",
-    acento: "fuchsia",
-    items: [
-      {
-        titulo: "Community Manager",
-        href: "/servicios/community-manager",
-        descripcion: "Gestión profesional de tus redes",
-        icon: MessagesSquare,
-      },
-      {
-        titulo: "Publicidad",
-        href: "/servicios/publicidad",
-        descripcion: "Meta Ads que venden",
-        icon: Megaphone,
-      },
-      {
-        titulo: "Creación y Edición",
-        href: "/servicios/creacion-edicion",
-        descripcion: "Contenido que detiene el scroll",
-        icon: Clapperboard,
-      },
-    ],
+    sector: "Software",
+    acento: "#3b9dff",
+    items: [item("paginas-web", "Webs, tiendas online, apps y sistemas")],
   },
 ];

@@ -24,3 +24,49 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* =====================================================================
+   Efectos del rediseño (home, landings y /links). Son keyframes y capas que
+   Tailwind no puede expresar con clases: se usan como animate-[nombre_...]
+   o con la clase utilitaria correspondiente.
+   ===================================================================== */
+@keyframes tm-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes tm-travel { 0% { left: -6%; opacity: 0; } 10%, 90% { opacity: 1; } 100% { left: 96%; opacity: 0; } }
+@keyframes tm-glow { 0%, 100% { box-shadow: 0 0 22px -12px var(--c); } 50% { box-shadow: 0 0 46px -6px var(--c); } }
+@keyframes tm-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes tm-ping { 0% { box-shadow: 0 0 0 0 rgba(204,255,0,.6); } 100% { box-shadow: 0 0 0 10px rgba(204,255,0,0); } }
+@keyframes tm-hue { to { background-position: 300% 0; } }
+@keyframes tm-marquee { to { transform: translateX(-50%); } }
+
+/* Borde de luz giratorio (CTA final y oferta de /links). La tarjeta NO debe
+   llevar animaciones de opacity/transform: crearía su propia capa y el
+   degradé taparía el fondo mientras aparece. Animar su contenido interno. */
+@property --tm-ang { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes tm-spin { to { --tm-ang: 360deg; } }
+.tm-glow-border { position: relative; }
+.tm-glow-border::before,
+.tm-glow-border::after {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: conic-gradient(from var(--tm-ang), #ff4fd8, #a970ff, #3b9dff, #ccff00, #ff4fd8);
+  animation: tm-spin 6s linear infinite;
+}
+.tm-glow-border::after { filter: blur(28px); opacity: .45; }
+
+/* Texto con degradé rosa → violeta → azul en movimiento */
+.tm-grad-vb {
+  background: linear-gradient(90deg, #ff4fd8, #a970ff, #3b9dff, #ff4fd8); background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent; animation: tm-hue 8s linear infinite;
+}
+
+/* Grilla tenue de fondo con fundido en los bordes (sección "Cómo trabajamos") */
+.tm-grid-bg {
+  background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 55%, transparent 100%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 55%, transparent 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-glow-border::before, .tm-glow-border::after, .tm-grad-vb { animation: none; }
+  [class*="animate-[tm-"] { animation: none !important; }
+}
