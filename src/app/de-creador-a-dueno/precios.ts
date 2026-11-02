@@ -40,6 +40,9 @@ export const BONOS = [
 export const VALOR_TOTAL = VALOR_SISTEMA + BONOS.reduce((acc, b) => acc + b.valor, 0);
 
 export const PRECIO_LANZAMIENTO = 16;
+// Lo que se cobra por Mercado Pago. Es fijo: actualizarlo a mano si cambia el dólar.
+export const PRECIO_LANZAMIENTO_ARS = 27000;
+export const PRECIO_LANZAMIENTO_ARS_TEXTO = PRECIO_LANZAMIENTO_ARS.toLocaleString("es-AR");
 // Coincide a propósito con VALOR_TOTAL: el "precio de después" es el valor
 // real de todo lo que se lleva (sistema + bonos), no un número aparte que
 // pueda quedar desalineado del desglose que se muestra arriba en la oferta.

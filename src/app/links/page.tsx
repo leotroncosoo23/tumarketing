@@ -5,7 +5,7 @@ import { Mail, ArrowRight, TrendingUp } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { SERVICIOS_LANDING } from "@/lib/servicios-landing";
 import { METRICAS_GLOBALES } from "@/lib/casos-exito";
-import { PRECIO_LANZAMIENTO, VALOR_TOTAL } from "@/app/de-creador-a-dueno/precios";
+import { PRECIO_LANZAMIENTO, PRECIO_LANZAMIENTO_ARS_TEXTO, VALOR_TOTAL } from "@/app/de-creador-a-dueno/precios";
 import ContadorAnimado from "@/components/agencia/ContadorAnimado";
 
 export const metadata: Metadata = {
@@ -198,10 +198,11 @@ export default async function LinksPage() {
               <p className="mt-2.5 text-[15px] text-neutral-400">
                 El sistema completo + 4 bonos para transformar tu contenido en un activo que vende solo.
               </p>
-              <p className="mb-5 mt-3 flex items-baseline justify-center gap-2.5">
+              <p className="mt-3 flex items-baseline justify-center gap-2.5">
                 <span className="text-lg font-bold text-neutral-500 line-through">USD {VALOR_TOTAL}</span>
                 <span className="text-4xl font-black text-[#ccff00]">USD {PRECIO_LANZAMIENTO}</span>
               </p>
+              <p className="mb-5 mt-1 text-sm text-neutral-300">o ${PRECIO_LANZAMIENTO_ARS_TEXTO} ARS con Mercado Pago</p>
               <Link
                 href="/de-creador-a-dueno"
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-[#ccff00] py-4 text-lg font-bold text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-8px_rgba(204,255,0,0.7)]"

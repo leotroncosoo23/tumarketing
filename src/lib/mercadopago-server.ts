@@ -33,6 +33,33 @@ export async function verificarPagoAprobado(paymentId: string): Promise<PagoVeri
   return { usuarioId, items };
 }
 
+// Consulta un pago del infoproducto contra la API de Mercado Pago (misma regla que
+// arriba: nunca se confía en lo que llega por URL o por el body del webhook).
+// Devuelve null si no se pudo consultar o si el pago no es de ese producto.
+export async function consultarPagoInfoproducto(
+  paymentId: string,
+  producto: string
+): Promise<{ estado: string; referencia: string } | null> {
+  if (!process.env.MP_ACCESS_TOKEN) {
+    console.error("Falta MP_ACCESS_TOKEN para verificar el pago.");
+    return null;
+  }
+
+  const respuesta = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, {
+    headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+  });
+
+  if (!respuesta.ok) {
+    console.error(`No pudimos verificar el pago ${paymentId} (status ${respuesta.status}).`);
+    return null;
+  }
+
+  const pago = await respuesta.json();
+  if (pago.metadata?.producto !== producto || !pago.external_reference) return null;
+
+  return { estado: pago.status, referencia: pago.external_reference };
+}
+
 export function crearClienteSupabaseAdmin(): SupabaseClient | null {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error("Falta SUPABASE_SERVICE_ROLE_KEY para escribir en Supabase como admin.");

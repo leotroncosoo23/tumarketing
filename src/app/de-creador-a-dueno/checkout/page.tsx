@@ -5,26 +5,36 @@ import Link from "next/link";
 import Image from "next/image";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { ArrowLeft, Lock, CheckCircle2, Zap } from "lucide-react";
-import { crearOrdenInfoproducto } from "@/app/actions/infoproducto-checkout";
-import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO } from "../precios";
+import { crearOrdenInfoproducto, crearPreferenciaInfoproducto } from "@/app/actions/infoproducto-checkout";
+import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO, PRECIO_LANZAMIENTO_ARS_TEXTO } from "../precios";
 import "@/app/admin/admin.css";
 
 const fontDisplay = Space_Grotesk({ variable: "--font-display", subsets: ["latin"], weight: ["500", "700"] });
 const fontBody = Inter({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600"] });
 
+type MedioPago = "mercadopago" | "paypal";
+
+const MEDIOS_PAGO: { id: MedioPago; nombre: string; detalle: string; precio: string }[] = [
+  { id: "mercadopago", nombre: "Mercado Pago", detalle: "Tarjetas, saldo o efectivo · Argentina", precio: `$${PRECIO_LANZAMIENTO_ARS_TEXTO} ARS` },
+  { id: "paypal", nombre: "PayPal", detalle: "Tarjeta internacional · Desde el exterior", precio: `$${PRECIO_LANZAMIENTO}.00 USD` },
+];
+
 export default function CheckoutInfoproductoPage() {
+  const [medioPago, setMedioPago] = useState<MedioPago>("mercadopago");
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState("");
+  const nombreMedio = medioPago === "mercadopago" ? "Mercado Pago" : "PayPal";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setEnviando(true);
 
-    const resultado = await crearOrdenInfoproducto({ nombre, email, telefono });
+    const crearPago = medioPago === "mercadopago" ? crearPreferenciaInfoproducto : crearOrdenInfoproducto;
+    const resultado = await crearPago({ nombre, email, telefono });
     if (!resultado.ok) {
       setError(resultado.error);
       setEnviando(false);
@@ -116,6 +126,9 @@ export default function CheckoutInfoproductoPage() {
                 ${PRECIO_LANZAMIENTO} USD
               </span>
             </div>
+            <p className="mt-1 text-right text-[var(--text-tertiary)] [font-size:12px]">
+              o ${PRECIO_LANZAMIENTO_ARS_TEXTO} ARS con Mercado Pago
+            </p>
           </div>
 
           <div className="mt-[var(--space-6)] grid grid-cols-1 gap-[var(--space-3)] sm:grid-cols-2">
@@ -137,17 +150,41 @@ export default function CheckoutInfoproductoPage() {
               <p className="font-bold text-[var(--text-primary)] [font-size:var(--fs-body-m)]">De Creador/a a Dueño/a</p>
               <p className="text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">Pago único · Acceso de por vida</p>
             </div>
-            <p className="tm-display font-bold text-[var(--text-primary)] [font-size:var(--fs-heading-m)]">
-              ${PRECIO_LANZAMIENTO}.00
-            </p>
           </div>
+
+          <fieldset className="mt-[var(--space-5)] flex flex-col gap-2">
+            <legend className="mb-2 font-bold uppercase text-[var(--text-tertiary)] [font-size:var(--fs-eyebrow)] tracking-[var(--ls-eyebrow)]">
+              Cómo querés pagar
+            </legend>
+            {MEDIOS_PAGO.map((medio) => (
+              <label
+                key={medio.id}
+                className={`flex cursor-pointer items-center gap-3 rounded-[var(--radius-s)] border px-[14px] py-[12px] transition-colors ${
+                  medioPago === medio.id ? "border-[var(--accent)] bg-[var(--black-2)]" : "border-[var(--border-subtle)]"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="medio-pago"
+                  checked={medioPago === medio.id}
+                  onChange={() => setMedioPago(medio.id)}
+                  className="h-4 w-4 shrink-0 accent-[var(--accent)]"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-bold text-[var(--text-primary)] [font-size:var(--fs-body-s)]">{medio.nombre}</span>
+                  <span className="block text-[var(--text-tertiary)] [font-size:12px]">{medio.detalle}</span>
+                </span>
+                <span className="shrink-0 font-bold text-[var(--text-primary)] [font-size:var(--fs-body-s)]">{medio.precio}</span>
+              </label>
+            ))}
+          </fieldset>
 
           <div className="mt-[var(--space-5)] flex items-center justify-between border-t border-[var(--border-subtle)] pt-[var(--space-4)]">
             <span className="font-bold uppercase text-[var(--text-tertiary)] [font-size:var(--fs-eyebrow)] tracking-[var(--ls-eyebrow)]">
               Total
             </span>
             <span className="tm-display font-bold text-[var(--accent)] [font-size:var(--fs-heading-m)]">
-              ${PRECIO_LANZAMIENTO}.00 USD
+              {MEDIOS_PAGO.find((medio) => medio.id === medioPago)!.precio}
             </span>
           </div>
 
@@ -203,12 +240,12 @@ export default function CheckoutInfoproductoPage() {
               className="tm-display mt-[var(--space-2)] flex w-full items-center justify-center gap-2 rounded-[var(--radius-pill)] bg-[var(--accent)] px-[26px] py-[16px] font-bold text-[var(--accent-contrast)] transition-colors duration-[var(--dur-fast)] ease-[var(--ease-out)] hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Lock className="h-4 w-4" />
-              {enviando ? "Redirigiendo a PayPal..." : "Completar compra y acceder"}
+              {enviando ? `Redirigiendo a ${nombreMedio}...` : "Completar compra y acceder"}
             </button>
 
             <p className="text-center text-[var(--text-tertiary)] [font-size:12px] leading-relaxed">
-              🔒 Vas a cargar los datos de tu tarjeta en la página oficial de PayPal — nunca pasan por nuestro
-              servidor. Acceso inmediato apenas se acredita el pago.
+              🔒 Vas a pagar en la página oficial de {nombreMedio}: tus datos nunca pasan por nuestro servidor.
+              El acceso te llega por email apenas se acredita el pago.
             </p>
             <p className="text-center text-[var(--text-tertiary)] [font-size:11px] leading-relaxed">
               Al completar la compra aceptás nuestros{" "}

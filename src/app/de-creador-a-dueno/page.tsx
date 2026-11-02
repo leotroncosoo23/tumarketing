@@ -5,7 +5,7 @@ import { Space_Grotesk, Inter } from "next/font/google";
 import { CheckCircle2, CircleAlert, ArrowRight, X, Check } from "lucide-react";
 import { Accordion, type AccordionItem } from "@/components/dashboard/ui";
 import ContadorLanzamiento from "./ContadorLanzamiento";
-import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO, PRECIO_REGULAR } from "./precios";
+import { VALOR_SISTEMA, BONOS, VALOR_TOTAL, PRECIO_LANZAMIENTO, PRECIO_LANZAMIENTO_ARS_TEXTO, PRECIO_REGULAR } from "./precios";
 import "@/app/admin/admin.css";
 
 const fontDisplay = Space_Grotesk({ variable: "--font-display", subsets: ["latin"], weight: ["500", "700"] });
@@ -505,6 +505,9 @@ export default function DeCreadorADuenoPage() {
             </p>
             <p className="tm-display mt-[var(--space-2)] font-bold text-[var(--accent)] [font-size:var(--fs-display-xl)] leading-[var(--lh-tight)]">
               USD {PRECIO_LANZAMIENTO}
+            </p>
+            <p className="mt-[var(--space-2)] text-[var(--text-secondary)] [font-size:var(--fs-body-m)]">
+              o ${PRECIO_LANZAMIENTO_ARS_TEXTO} ARS con Mercado Pago
             </p>
           </div>
 

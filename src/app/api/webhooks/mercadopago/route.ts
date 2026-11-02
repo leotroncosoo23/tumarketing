@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verificarPagoAprobado, crearClienteSupabaseAdmin, otorgarAcceso } from "@/lib/mercadopago-server";
+import { confirmarPagoMercadoPagoInfoproducto } from "@/app/actions/infoproducto-checkout";
 
 // Siempre respondemos 200 (salvo que la notificación ni siquiera se pueda leer),
 // porque si le devolvemos error a Mercado Pago reintenta el mismo aviso sin parar
@@ -23,7 +24,13 @@ export async function POST(req: NextRequest) {
     // Nunca confiamos en el body de la notificación (cualquiera puede hacerle un POST
     // a esta URL): verificarPagoAprobado vuelve a preguntarle a la API de Mercado Pago.
     const pago = await verificarPagoAprobado(String(paymentId));
-    if (!pago) return OK(); // No aprobado, o no se pudo verificar: no se entrega nada todavía.
+    if (!pago) {
+      // No aprobado, no verificable, o no es del carrito: puede ser una venta de
+      // infoproducto, que no tiene usuario. Esta función revisa el pago de nuevo y
+      // no hace nada si no corresponde.
+      await confirmarPagoMercadoPagoInfoproducto(String(paymentId));
+      return OK();
+    }
 
     const supabaseAdmin = crearClienteSupabaseAdmin();
     if (!supabaseAdmin) return OK();

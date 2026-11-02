@@ -3,21 +3,26 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { confirmarCompraInfoproducto } from "@/app/actions/infoproducto-checkout";
+import { confirmarCompraInfoproducto, confirmarPagoMercadoPagoInfoproducto } from "@/app/actions/infoproducto-checkout";
 import { supabase } from "@/lib/supabase";
 
-type Estado = "confirmando" | "listo" | "error";
+type Estado = "confirmando" | "listo" | "pendiente" | "error";
 
 // El acceso (link a la carpeta de Drive) se manda por email al confirmar el pago
 // (ver entrega-infoproducto.ts) y nunca se muestra en el cliente. WhatsApp queda
 // como respaldo por si el email no llega.
 export default function GraciasContenido() {
   const searchParams = useSearchParams();
-  const ordenId = searchParams.get("token");
+  // PayPal vuelve con ?token=<orden> y Mercado Pago con ?payment_id=<pago>
+  // ("null" si el comprador canceló antes de pagar).
+  const ordenPayPal = searchParams.get("token");
+  const pagoMercadoPago = searchParams.get("payment_id");
+  const idMercadoPago = pagoMercadoPago && pagoMercadoPago !== "null" ? pagoMercadoPago : null;
+  const hayPago = Boolean(ordenPayPal || idMercadoPago);
 
-  const [estado, setEstado] = useState<Estado>(ordenId ? "confirmando" : "error");
+  const [estado, setEstado] = useState<Estado>(hayPago ? "confirmando" : "error");
   const [error, setError] = useState<string | null>(
-    ordenId ? null : "No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano."
+    hayPago ? null : "No pudimos confirmar el pago desde acá. Si ya pagaste, escribinos y lo revisamos a mano."
   );
   const [whatsapp, setWhatsapp] = useState("");
 
@@ -31,16 +36,22 @@ export default function GraciasContenido() {
   }, []);
 
   useEffect(() => {
-    if (!ordenId) return;
-    confirmarCompraInfoproducto(ordenId).then((resultado) => {
-      if (!resultado.ok) {
+    if (!ordenPayPal && !idMercadoPago) return;
+    const confirmar = idMercadoPago
+      ? confirmarPagoMercadoPagoInfoproducto(idMercadoPago)
+      : confirmarCompraInfoproducto(ordenPayPal!);
+
+    confirmar.then((resultado) => {
+      if (resultado.ok) {
+        setEstado("listo");
+      } else if ("pendiente" in resultado && resultado.pendiente) {
+        setEstado("pendiente");
+      } else {
         setEstado("error");
         setError(resultado.error);
-        return;
       }
-      setEstado("listo");
     });
-  }, [ordenId]);
+  }, [ordenPayPal, idMercadoPago]);
 
   const whatsappLimpio = whatsapp.replace(/\D/g, "");
   const mensajeWhatsapp = encodeURIComponent(
@@ -50,20 +61,23 @@ export default function GraciasContenido() {
 
   return (
     <div className="max-w-lg mx-auto px-6 py-24 text-center">
-      <div className="text-5xl mb-6">{estado === "error" ? "⚠️" : "🎉"}</div>
+      <div className="text-5xl mb-6">{estado === "error" ? "⚠️" : estado === "pendiente" ? "⏳" : "🎉"}</div>
       <h1 className="text-3xl font-black mb-4">
         {estado === "confirmando" && "Confirmando tu pago..."}
         {estado === "listo" && "¡Pago confirmado!"}
+        {estado === "pendiente" && "Tu pago está pendiente"}
         {estado === "error" && "No pudimos confirmar tu pago"}
       </h1>
       <p className="text-neutral-400 mb-10">
-        {estado === "confirmando" && "Ya recibimos la aprobación de PayPal, estamos verificando el pago."}
+        {estado === "confirmando" && "Estamos verificando tu pago, esperá un momento."}
         {estado === "listo" &&
           "¡Bienvenido/a a De Creador/a a Dueño/a! Te enviamos el acceso al sistema a tu email. Revisá también la carpeta de spam."}
+        {estado === "pendiente" &&
+          "Apenas se acredite te enviamos el acceso a tu email, no hace falta que hagas nada más. Si pagaste en efectivo, puede tardar unas horas."}
         {estado === "error" && (error || "Algo no salió como esperábamos.")}
       </p>
 
-      {estado === "listo" ? (
+      {estado === "listo" || estado === "pendiente" ? (
         <a
           href={linkWhatsapp}
           target="_blank"
