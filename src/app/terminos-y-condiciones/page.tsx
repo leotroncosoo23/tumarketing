@@ -36,7 +36,8 @@ export default function TerminosYCondiciones() {
         <div className="space-y-8 text-sm leading-relaxed text-neutral-300">
           <Seccion titulo="1. Quiénes somos">
             <p>
-              TuMarketing es una agencia de marketing digital con base en Trevelin, Chubut, Argentina. Estos términos
+              TuMarketing es una agencia de marketing digital con base en Trevelin, Chubut, Argentina, cuya titular es
+              Natasha Troncoso. Estos términos
               regulan el uso de este sitio, la contratación de nuestros servicios y la compra de nuestros productos
               digitales. Al usar el sitio o comprar, los aceptás. Si no estás de acuerdo, te pedimos que no lo hagas.
             </p>
