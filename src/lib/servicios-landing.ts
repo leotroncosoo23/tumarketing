@@ -136,7 +136,7 @@ export const SERVICIOS_LANDING: ServicioLanding[] = [
     nombre: "Desarrollo Web & Apps",
     corto: "Webs, landings, tiendas online, apps y sistemas a medida pensados para vender y automatizar.",
     ideal: "Necesitás una web, tienda o sistema que venda y trabaje por vos 24/7.",
-    prueba: { numero: "4 webs", etiqueta: "lanzadas en Argentina y Chile" },
+    prueba: { numero: "+6 webs", etiqueta: "100% personalizadas, hechas a medida" },
     titular: "La web y la tecnología que tu negocio necesita para escalar.",
     bajada:
       "Combinamos marketing y programación: sitios, tiendas online, apps y sistemas a medida conectados a tu estrategia de ventas.",
