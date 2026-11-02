@@ -543,6 +543,10 @@ export default function DeCreadorADuenoPage() {
 
           <p className="mt-[var(--space-9)] text-center text-[var(--text-tertiary)] [font-size:12px]">
             © {new Date().getFullYear()} tumarketing. Todos los derechos reservados.
+            <br />
+            <Link href="/terminos-y-condiciones" className="underline">Términos y Condiciones</Link>
+            {" · "}
+            <Link href="/terminos-y-condiciones#arrepentimiento" className="underline">Botón de arrepentimiento</Link>
           </p>
         </div>
       </section>

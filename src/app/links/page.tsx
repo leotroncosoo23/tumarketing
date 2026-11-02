@@ -264,6 +264,10 @@ export default async function LinksPage() {
 
         <p className="mt-8 text-center text-xs text-neutral-600">
           © {new Date().getFullYear()} tumarketing. Todos los derechos reservados.
+          <br />
+          <Link href="/terminos-y-condiciones" className="underline">Términos y Condiciones</Link>
+          {" · "}
+          <Link href="/terminos-y-condiciones#arrepentimiento" className="underline">Botón de arrepentimiento</Link>
         </p>
       </div>
     </main>

@@ -249,9 +249,9 @@ export default function CheckoutInfoproductoPage() {
             </p>
             <p className="text-center text-[var(--text-tertiary)] [font-size:11px] leading-relaxed">
               Al completar la compra aceptás nuestros{" "}
-              <a href="#" className="underline hover:text-[var(--text-secondary)]">
+              <Link href="/terminos-y-condiciones" className="underline hover:text-[var(--text-secondary)]">
                 Términos
-              </a>{" "}
+              </Link>{" "}
               y nuestra{" "}
               <Link href="/politica-de-privacidad" className="underline hover:text-[var(--text-secondary)]">
                 Política de Privacidad

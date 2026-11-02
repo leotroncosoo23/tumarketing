@@ -92,8 +92,9 @@ export default function Footer() {
           <p className="text-neutral-400 text-sm">
             Copyright © 2026 TuMarketing. Todos los derechos reservados.
           </p>
-          <div className="flex gap-6 text-sm text-neutral-400">
-            <a href="#" className="hover:text-neutral-200 transition-colors">Términos y Condiciones</a>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-400">
+            <Link href="/terminos-y-condiciones#arrepentimiento" className="hover:text-neutral-200 transition-colors">Botón de arrepentimiento</Link>
+            <Link href="/terminos-y-condiciones" className="hover:text-neutral-200 transition-colors">Términos y Condiciones</Link>
             <a href="/politica-de-privacidad" className="hover:text-neutral-200 transition-colors">Política de Privacidad</a>
           </div>
         </div>
