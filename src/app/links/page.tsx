@@ -5,6 +5,7 @@ import { Mail, ArrowRight, TrendingUp } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 import { SERVICIOS_LANDING } from "@/lib/servicios-landing";
 import { METRICAS_GLOBALES } from "@/lib/casos-exito";
+import { PRECIO_LANZAMIENTO, VALOR_TOTAL } from "@/app/de-creador-a-dueno/precios";
 import ContadorAnimado from "@/components/agencia/ContadorAnimado";
 
 export const metadata: Metadata = {
@@ -42,9 +43,9 @@ function IconoYoutube({ className }: { className?: string }) {
   );
 }
 
-// Recursos gratuitos (lead magnets cargados desde el panel de admin en Recursos).
-// "Tu negocio en digital": cargar la guía en el panel con este slug.
-const RECURSOS = [
+// Recursos gratuitos: los que tienen "archivo" se descargan directo desde /public;
+// el resto es un lead magnet cargado desde el panel de admin (pide email).
+const RECURSOS: { emoji: string; titulo: string; descripcion: string; link: string; archivo?: boolean }[] = [
   {
     emoji: "🎬",
     titulo: "20 Guiones Virales",
@@ -54,8 +55,9 @@ const RECURSOS = [
   {
     emoji: "📘",
     titulo: "Guía: Tu negocio en digital",
-    descripcion: "Los pasos clave para llevar tu negocio al mundo digital y empezar a vender online.",
-    link: "/recursos/tu-negocio-en-digital",
+    descripcion: "Autodiagnóstico de 12 preguntas y plan de 30 días para saber por dónde empezar.",
+    link: "/recursos/guia-tu-negocio-en-digital.pdf",
+    archivo: true,
   },
 ];
 
@@ -190,19 +192,23 @@ export default async function LinksPage() {
           <div className="tm-glow-border rounded-3xl">
             <div className="rounded-3xl bg-[#0a0a0a] bg-[radial-gradient(420px_circle_at_50%_0%,rgba(204,255,0,0.14),transparent_70%)] px-6 py-7 text-center">
               <span className="mb-3.5 inline-block rounded-full bg-[#ccff00] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-black">
-                🔥 Oferta por tiempo limitado
+                🔥 Precio de lanzamiento
               </span>
-              <h2 className="text-2xl font-black">40% OFF — De creador/a a Dueño/a</h2>
-              <p className="mb-5 mt-2.5 text-[15px] text-neutral-400">
-                Acceso inmediato al programa para pasar de crear contenido a tener un negocio que vende.
+              <h2 className="text-2xl font-black">De Creador/a a Dueño/a</h2>
+              <p className="mt-2.5 text-[15px] text-neutral-400">
+                El sistema completo + 4 bonos para transformar tu contenido en un activo que vende solo.
+              </p>
+              <p className="mb-5 mt-3 flex items-baseline justify-center gap-2.5">
+                <span className="text-lg font-bold text-neutral-500 line-through">USD {VALOR_TOTAL}</span>
+                <span className="text-4xl font-black text-[#ccff00]">USD {PRECIO_LANZAMIENTO}</span>
               </p>
               <Link
                 href="/de-creador-a-dueno"
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-[#ccff00] py-4 text-lg font-bold text-black transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_40px_-8px_rgba(204,255,0,0.7)]"
               >
-                Quiero mi 40% OFF <ArrowRight className="h-5 w-5" />
+                Quiero el sistema <ArrowRight className="h-5 w-5" />
               </Link>
-              <small className="mt-3 block text-xs text-neutral-500">Precio especial por tiempo limitado</small>
+              <small className="mt-3 block text-xs text-neutral-500">Pago único · Sin mensualidades · Acceso inmediato</small>
             </div>
           </div>
         </div>
@@ -213,20 +219,30 @@ export default async function LinksPage() {
             Recursos gratuitos
           </TituloGrupo>
           <div className="grid gap-2.5">
-            {RECURSOS.map((r) => (
-              <Link
-                key={r.titulo}
-                href={r.link}
-                className="flex items-center gap-3.5 rounded-2xl border border-neutral-800 bg-neutral-950/85 p-4 transition-all hover:-translate-y-0.5 hover:border-[#3b9dff] hover:shadow-[0_10px_30px_-16px_#3b9dff]"
-              >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#3b9dff]/35 bg-[#3b9dff]/15 text-xl">{r.emoji}</span>
-                <span className="min-w-0 flex-1">
-                  <b className="block font-bold">{r.titulo}</b>
-                  <span className="block text-[13px] leading-snug text-neutral-400">{r.descripcion}</span>
-                </span>
-                <span className="shrink-0 rounded-lg bg-[#ccff00] px-3 py-1.5 text-xs font-black text-black">Gratis</span>
-              </Link>
-            ))}
+            {RECURSOS.map((r) => {
+              const claseTarjeta =
+                "flex items-center gap-3.5 rounded-2xl border border-neutral-800 bg-neutral-950/85 p-4 transition-all hover:-translate-y-0.5 hover:border-[#3b9dff] hover:shadow-[0_10px_30px_-16px_#3b9dff]";
+              const contenido = (
+                <>
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#3b9dff]/35 bg-[#3b9dff]/15 text-xl">{r.emoji}</span>
+                  <span className="min-w-0 flex-1">
+                    <b className="block font-bold">{r.titulo}</b>
+                    <span className="block text-[13px] leading-snug text-neutral-400">{r.descripcion}</span>
+                  </span>
+                  <span className="shrink-0 rounded-lg bg-[#ccff00] px-3 py-1.5 text-xs font-black text-black">Gratis</span>
+                </>
+              );
+              // Los PDF se abren en una pestaña nueva: el navegador de Instagram no siempre respeta "download".
+              return r.archivo ? (
+                <a key={r.titulo} href={r.link} target="_blank" rel="noopener noreferrer" className={claseTarjeta}>
+                  {contenido}
+                </a>
+              ) : (
+                <Link key={r.titulo} href={r.link} className={claseTarjeta}>
+                  {contenido}
+                </Link>
+              );
+            })}
           </div>
         </div>
 

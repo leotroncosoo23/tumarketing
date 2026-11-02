@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 // "ahora + 7 días" calculado en cada visita — así todos los visitantes ven la
 // MISMA cuenta regresiva real, en vez de una urgencia falsa que se resetea
 // sola para cada uno. Actualizala manualmente cuando relancen la oferta.
+// Pasada la fecha el contador no se muestra (nunca un 00:00:00 en la landing).
 const FECHA_LIMITE = new Date("2026-08-20T23:59:59-03:00");
 
 function calcularRestante() {
@@ -41,7 +42,7 @@ export default function ContadorLanzamiento() {
 
   // Antes de montar en el cliente no mostramos nada (evita un parpadeo de
   // "00:00:00" en el HTML del servidor que después salta al valor real).
-  if (!restante) return null;
+  if (!restante || Object.values(restante).every((valor) => valor === 0)) return null;
 
   return (
     <div className="flex items-center justify-center gap-3 sm:gap-5">

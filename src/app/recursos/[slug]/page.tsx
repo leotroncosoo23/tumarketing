@@ -148,7 +148,7 @@ export default function RecursoDetallePage({ params }: { params: Promise<{ slug:
   const esPago = recurso.tipo === "Pago";
   const whatsappLimpio = whatsapp.replace(/\D/g, "");
   const mensajeWhatsapp = encodeURIComponent(`Hola! Quiero más información sobre "${recurso.titulo}" 🚀`);
-  const linkWhatsapp = whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${mensajeWhatsapp}` : "#contacto";
+  const linkWhatsapp = whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${mensajeWhatsapp}` : "/#agendar";
 
   const beneficios = (recurso.beneficios || "").split("\n").map((s) => s.trim()).filter(Boolean);
 

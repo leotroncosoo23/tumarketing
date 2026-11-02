@@ -184,7 +184,7 @@ export default function DeCreadorADuenoPage() {
             cada publicación y empezás a tomar decisiones de dueño/a, no de creador/a.
           </p>
           <p className="mt-[var(--space-6)] font-bold text-[var(--accent)] [font-size:var(--fs-body-s)] uppercase tracking-[var(--ls-eyebrow)]">
-            🔥 Precio de lanzamiento — sube en cuanto termine la cuenta
+            🔥 Precio de lanzamiento
           </p>
           <div className="mt-[var(--space-4)] flex justify-center">
             <ContadorLanzamiento />
@@ -513,7 +513,7 @@ export default function DeCreadorADuenoPage() {
             <p className="mt-[var(--space-4)] text-center text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
               Accedé ahora al precio de lanzamiento.
               <br />
-              Después de esto, el precio vuelve a ${PRECIO_REGULAR} y no hay vuelta atrás.
+              Todo lo que incluye tiene un valor de ${PRECIO_REGULAR} USD.
             </p>
           </div>
 
@@ -556,7 +556,7 @@ export default function DeCreadorADuenoPage() {
         <div className="mx-auto flex max-w-[var(--container-max)] items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="truncate font-bold uppercase text-[var(--accent)] [font-size:10px] tracking-[var(--ls-eyebrow)]">
-              Últimos cupos al precio de lanzamiento
+              Precio de lanzamiento
             </p>
             <p className="truncate text-[var(--text-tertiary)] [font-size:var(--fs-body-s)]">
               <span className="font-bold text-[var(--text-primary)]">De Creador/a a Dueño/a</span> ·{" "}

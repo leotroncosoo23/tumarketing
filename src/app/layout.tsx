@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import Providers from "@/lib/Providers";
+import { URL_SITIO } from "@/lib/url-sitio";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.tumarketingar.com"),
-  title: "Tu Agencia | Marketing y Desarrollo",
-  description: "Potenciamos tu marca con desarrollo web y marketing digital.",
+  metadataBase: new URL(URL_SITIO),
+  title: "TuMarketing | Agencia de marketing digital",
+  description: "Community management, pauta en Meta y Google y desarrollo web & apps. +15 marcas y +50M de views. Agendá tu asesoría 1:1 gratis.",
+  openGraph: { siteName: "TuMarketing", locale: "es_AR", type: "website" },
 };
 
 export default function RootLayout({
@@ -27,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
     >
       <head>

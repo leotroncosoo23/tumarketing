@@ -8,11 +8,9 @@ import { supabase } from "@/lib/supabase";
 
 type Estado = "confirmando" | "listo" | "error";
 
-// El material todavía no tiene entrega automática (no hay portal ni email con
-// el link de descarga armado para este infoproducto puntual) — por eso, una
-// vez confirmado el pago, se ofrece WhatsApp para recibirlo al toque. Es el
-// mismo criterio honesto que ya usamos en /links para los lead magnets: nunca
-// prometemos una entrega automática que todavía no existe.
+// El acceso (link a la carpeta de Drive) se manda por email al confirmar el pago
+// (ver entrega-infoproducto.ts) y nunca se muestra en el cliente. WhatsApp queda
+// como respaldo por si el email no llega.
 export default function GraciasContenido() {
   const searchParams = useSearchParams();
   const ordenId = searchParams.get("token");
@@ -46,9 +44,9 @@ export default function GraciasContenido() {
 
   const whatsappLimpio = whatsapp.replace(/\D/g, "");
   const mensajeWhatsapp = encodeURIComponent(
-    "¡Hola! Acabo de comprar \"De Creador/a a Dueño/a\" 🎉 Quiero recibir el acceso al sistema."
+    "¡Hola! Compré \"De Creador/a a Dueño/a\" 🎉 y no me llegó el email con el acceso."
   );
-  const linkWhatsapp = whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${mensajeWhatsapp}` : "/servicios#contacto";
+  const linkWhatsapp = whatsappLimpio ? `https://wa.me/${whatsappLimpio}?text=${mensajeWhatsapp}` : "/#agendar";
 
   return (
     <div className="max-w-lg mx-auto px-6 py-24 text-center">
@@ -61,7 +59,7 @@ export default function GraciasContenido() {
       <p className="text-neutral-400 mb-10">
         {estado === "confirmando" && "Ya recibimos la aprobación de PayPal, estamos verificando el pago."}
         {estado === "listo" &&
-          "¡Bienvenido/a a De Creador/a a Dueño/a! Tocá el botón de abajo para que te mandemos el acceso a tu sistema por WhatsApp al instante."}
+          "¡Bienvenido/a a De Creador/a a Dueño/a! Te enviamos el acceso al sistema a tu email. Revisá también la carpeta de spam."}
         {estado === "error" && (error || "Algo no salió como esperábamos.")}
       </p>
 
@@ -72,7 +70,7 @@ export default function GraciasContenido() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 bg-[#ccff00] text-black px-8 py-4 rounded-full font-black text-lg hover:bg-[#b8e600] transition-colors"
         >
-          💬 Recibir mi acceso por WhatsApp
+          💬 ¿No te llegó? Escribinos por WhatsApp
         </a>
       ) : (
         <Link
