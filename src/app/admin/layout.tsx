@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#0a0a0a",
   viewportFit: "cover",
+  // En Android, el teclado achica la pantalla (como WhatsApp) en vez de tapar el chat.
+  interactiveWidget: "resizes-content",
 };
 
 // Protege todo lo que esté bajo /admin: sin sesión -> /login,

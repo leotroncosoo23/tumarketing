@@ -189,7 +189,9 @@ export default function AdminShell({ initial, usuario }: { initial: InitialAdmin
             <TopBar usuario={usuario} initial={initial} mensajesSinLeer={mensajesSinLeer} onSelectSection={irA} />
           </div>
 
-          <motion.div key={section} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}>
+          {/* Solo opacidad: un transform acá rompería los elementos "fixed" de las
+              secciones (ej. el chat a pantalla completa de Mensajes en el celular). */}
+          <motion.div key={section} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}>
             {section === "dashboard" && <DashboardSection initial={initial} onSelectSection={irA} />}
             {section === "clientes" && <ClientesSection initial={initial.clientes} onSelectSection={irA} />}
             {section === "proyectos" && <ProyectosSection initial={initial.proyectos} />}

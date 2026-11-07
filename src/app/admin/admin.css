@@ -136,3 +136,10 @@
 .tm-sin-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Fondo del chat de mensajes: textura sutil de puntos */
+.tm-chat-fondo {
+  background-color: var(--surface-page);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 18px 18px;
+}

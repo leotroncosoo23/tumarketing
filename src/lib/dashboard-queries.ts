@@ -148,6 +148,10 @@ export type ConversacionResumen = {
   ultimoMensaje: string | null;
   ultimaFecha: string | null;
   noLeidos: number;
+  // Quién escribió el último mensaje (para mostrar "Vos: …" en la bandeja).
+  ultimoAutorRol?: "admin" | "cliente" | null;
+  // Si el cliente ya leyó el último mensaje que le mandó la agencia.
+  ultimoLeido?: boolean;
 };
 
 export async function getConversaciones(supabase: SupabaseClient): Promise<ConversacionResumen[]> {
@@ -191,6 +195,8 @@ export async function getConversaciones(supabase: SupabaseClient): Promise<Conve
         ultimoMensaje: ultimo ? ultimo.texto || (ultimo.archivo_nombre ? `📎 ${ultimo.archivo_nombre}` : null) : null,
         ultimaFecha: ultimo ? ultimo.creado_en : null,
         noLeidos: propios.filter((m) => m.autor_rol === "cliente" && !m.leido).length,
+        ultimoAutorRol: ultimo ? ultimo.autor_rol : null,
+        ultimoLeido: ultimo ? ultimo.leido : false,
       };
     })
     .filter((c) => c.ultimaFecha) // solo proyectos con al menos un mensaje
