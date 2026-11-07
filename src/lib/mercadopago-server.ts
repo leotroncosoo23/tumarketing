@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { obtenerAccessTokenMP } from "@/lib/mercadopago-oauth";
 
 export type ItemComprado = { id: string; tipo: "servicio" };
 export type PagoVerificado = { usuarioId: string; items: ItemComprado[] };
@@ -9,13 +10,14 @@ export type PagoVerificado = { usuarioId: string; items: ItemComprado[] };
 // otorguemos ningún acceso. Devuelve null si el pago no está aprobado o si
 // no se pudo verificar.
 export async function verificarPagoAprobado(paymentId: string): Promise<PagoVerificado | null> {
-  if (!process.env.MP_ACCESS_TOKEN) {
-    console.error("Falta MP_ACCESS_TOKEN para verificar el pago.");
+  const accessToken = await obtenerAccessTokenMP();
+  if (!accessToken) {
+    console.error("Mercado Pago no está configurado: no se puede verificar el pago.");
     return null;
   }
 
   const respuesta = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
-    headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (!respuesta.ok) {
@@ -40,13 +42,14 @@ export async function consultarPagoInfoproducto(
   paymentId: string,
   producto: string
 ): Promise<{ estado: string; referencia: string } | null> {
-  if (!process.env.MP_ACCESS_TOKEN) {
-    console.error("Falta MP_ACCESS_TOKEN para verificar el pago.");
+  const accessToken = await obtenerAccessTokenMP();
+  if (!accessToken) {
+    console.error("Mercado Pago no está configurado: no se puede verificar el pago.");
     return null;
   }
 
   const respuesta = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`, {
-    headers: { Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (!respuesta.ok) {

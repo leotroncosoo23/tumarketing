@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { crearOrdenPayPal, capturarOrdenPayPal } from "@/lib/paypal-server";
 import { crearClienteSupabaseAdmin, consultarPagoInfoproducto } from "@/lib/mercadopago-server";
+import { obtenerAccessTokenMP } from "@/lib/mercadopago-oauth";
 import { obtenerUrlBase } from "@/lib/notificar-suscriptores";
 import { PRECIO_LANZAMIENTO, PRECIO_LANZAMIENTO_ARS } from "@/app/de-creador-a-dueno/precios";
 import { enviarAccesoInfoproducto } from "@/lib/entrega-infoproducto";
@@ -86,7 +87,8 @@ export async function crearPreferenciaInfoproducto(datos: {
     return { ok: false, error: "Completá tu nombre y tu email antes de continuar." };
   }
   const supabaseAdmin = crearClienteSupabaseAdmin();
-  if (!process.env.MP_ACCESS_TOKEN || !supabaseAdmin) {
+  const accessToken = await obtenerAccessTokenMP();
+  if (!accessToken || !supabaseAdmin) {
     return { ok: false, error: "Mercado Pago no está disponible en este momento. Probá con PayPal o escribinos." };
   }
 
@@ -97,7 +99,7 @@ export async function crearPreferenciaInfoproducto(datos: {
     // Mercado Pago rechaza auto_return y notification_url si la URL no es pública (https).
     const esUrlPublica = /^https:\/\//.test(urlBase);
 
-    const preferencia = new Preference(new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN }));
+    const preferencia = new Preference(new MercadoPagoConfig({ accessToken }));
     const respuesta = await preferencia.create({
       body: {
         items: [{ id: PRODUCTO, title: TITULO_PRODUCTO, quantity: 1, unit_price: PRECIO_LANZAMIENTO_ARS, currency_id: "ARS" }],

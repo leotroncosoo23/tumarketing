@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Card, Button, Input, Select, Accordion } from "@/components/dashboard/ui";
+import MercadoPagoConexion from "@/components/dashboard/MercadoPagoConexion";
 
 type Configuracion = {
   id: number;
@@ -36,7 +37,7 @@ const ROLES_ACCORDION = [
 ];
 
 export default function ConfiguracionSection() {
-  const [tab, setTab] = useState<"agencia" | "equipo">("agencia");
+  const [tab, setTab] = useState<"agencia" | "equipo" | "pagos">("agencia");
   const [config, setConfig] = useState<Configuracion>(CONFIG_VACIA);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -145,9 +146,19 @@ export default function ConfiguracionSection() {
         >
           Equipo
         </button>
+        <button
+          onClick={() => setTab("pagos")}
+          className={`rounded-[var(--radius-pill)] px-4 py-2 text-sm font-semibold ${
+            tab === "pagos" ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "bg-[var(--surface-card)] text-[var(--text-secondary)]"
+          }`}
+        >
+          Pagos
+        </button>
       </div>
 
-      {tab === "agencia" ? (
+      {tab === "pagos" ? (
+        <MercadoPagoConexion />
+      ) : tab === "agencia" ? (
         cargando ? (
           <p className="text-center text-[var(--text-tertiary)]">Cargando...</p>
         ) : (

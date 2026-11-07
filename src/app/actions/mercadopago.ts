@@ -2,6 +2,7 @@
 
 import { MercadoPagoConfig, Preference } from "mercadopago";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+import { obtenerAccessTokenMP } from "@/lib/mercadopago-oauth";
 import type { ItemCarrito } from "@/lib/CartContext";
 
 type ResultadoPreferencia = { ok: true; initPoint: string } | { ok: false; error: string };
@@ -23,7 +24,8 @@ export async function crearPreferenciaPago(itemsCarrito: ItemCarrito[]): Promise
     return { ok: false, error: "Tu carrito está vacío." };
   }
 
-  if (!process.env.MP_ACCESS_TOKEN) {
+  const accessToken = await obtenerAccessTokenMP();
+  if (!accessToken) {
     return { ok: false, error: "Mercado Pago no está configurado en el servidor." };
   }
 
@@ -48,7 +50,7 @@ export async function crearPreferenciaPago(itemsCarrito: ItemCarrito[]): Promise
       }))
     );
 
-    const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+    const client = new MercadoPagoConfig({ accessToken });
     const preference = new Preference(client);
 
     // "auto_return" exige que back_urls.success sea una URL pública (https), así que
@@ -64,7 +66,11 @@ export async function crearPreferenciaPago(itemsCarrito: ItemCarrito[]): Promise
           failure: `${URL_BASE}/estado-pago`,
           pending: `${URL_BASE}/estado-pago`,
         },
-        ...(esUrlPublica ? { auto_return: "approved" as const } : {}),
+        // notification_url en cada cobro: así el aviso de pago llega aunque el
+        // webhook no esté configurado a mano en el panel de Mercado Pago.
+        ...(esUrlPublica
+          ? { auto_return: "approved" as const, notification_url: `${URL_BASE}/api/webhooks/mercadopago` }
+          : {}),
         external_reference: user.id,
         // Mandamos los ítems como string (no como objeto anidado) para que el
         // webhook los recupere tal cual, sin depender de cómo Mercado Pago
