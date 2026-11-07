@@ -59,7 +59,7 @@ export default async function NewsletterPage() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-white font-bold text-sm truncate">TuMarketing</p>
-                  <p className="text-neutral-500 text-xs">hola@tumarketing.ar</p>
+                  <p className="text-neutral-500 text-xs">hola@tumarketing.agency</p>
                 </div>
               </div>
               <p className="text-white font-bold mb-2">¡Llegó tu newsletter! 🔔</p>

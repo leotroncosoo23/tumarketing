@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { crearTokenBaja } from "@/lib/unsubscribe-token";
 
 // "blog@tumarketing.com" hardcodeado hacía fallar el envío en silencio: no
-// era ni el dominio real (tumarketingar.com) ni uno verificado en Resend.
+// era ni el dominio real (tumarketing.agency) ni uno verificado en Resend.
 const REMITENTE = process.env.RESEND_REMITENTE || "TuMarketing <onboarding@resend.dev>";
 
 // Sin NEXTAUTH_URL configurada, caer a localhost está bien en dev pero manda
@@ -12,7 +12,7 @@ const REMITENTE = process.env.RESEND_REMITENTE || "TuMarketing <onboarding@resen
 // nunca es "development" en un build/deploy real, sea Production o Preview).
 export function obtenerUrlBase(): string {
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
-  return process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.tumarketingar.com";
+  return process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.tumarketing.agency";
 }
 
 export type ParametrosAviso = {
