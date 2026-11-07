@@ -125,3 +125,14 @@
   background: var(--black-5);
   border-radius: 4px;
 }
+
+/* Comportamiento de app en el celular */
+.tm-app {
+  -webkit-tap-highlight-color: transparent;
+}
+.tm-sin-scrollbar {
+  scrollbar-width: none;
+}
+.tm-sin-scrollbar::-webkit-scrollbar {
+  display: none;
+}

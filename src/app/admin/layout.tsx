@@ -1,5 +1,19 @@
+import type { Metadata, Viewport } from "next";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
+
+// El panel se puede instalar en el celular como una app ("Agregar a pantalla de inicio").
+export const metadata: Metadata = {
+  title: "Panel · Tu Marketing",
+  manifest: "/admin.webmanifest",
+  robots: { index: false, follow: false },
+  appleWebApp: { capable: true, title: "TuMarketing", statusBarStyle: "black-translucent" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  viewportFit: "cover",
+};
 
 // Protege todo lo que esté bajo /admin: sin sesión -> /login,
 // cuenta desactivada -> /login, logueado pero no admin -> /usuarios.
