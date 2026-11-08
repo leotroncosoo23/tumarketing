@@ -6,7 +6,92 @@ import {
   obtenerEstadoMercadoPago,
   generarLinkConexionMercadoPago,
   desconectarMercadoPago,
+  diagnosticarMercadoPago,
 } from "@/app/actions/mercadopago-conexion";
+
+type Diag = Extract<Awaited<ReturnType<typeof diagnosticarMercadoPago>>, { ok: true }>["data"];
+type Cuenta = NonNullable<Diag["app"]["duenio"]>;
+
+function NombreCuenta({ c }: { c: Cuenta }) {
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <span className="text-[var(--text-primary)]">{c.nickname || `ID ${c.id}`}</span>
+      {c.email && <span className="text-[var(--text-tertiary)]">{c.email}</span>}
+      {c.esPrueba ? <Badge tone="red">Prueba (no cobra de verdad)</Badge> : <Badge tone="lime">Real</Badge>}
+    </span>
+  );
+}
+
+// Le pregunta a Mercado Pago de quién son las credenciales cargadas en Vercel,
+// sin mostrar nunca los valores.
+function Diagnostico() {
+  const [d, setD] = useState<Diag | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
+
+  const verificar = async () => {
+    setCargando(true);
+    setError(null);
+    const res = await diagnosticarMercadoPago();
+    if (res.ok) setD(res.data);
+    else setError(res.error);
+    setCargando(false);
+  };
+
+  return (
+    <Card className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="font-bold text-[var(--text-primary)]">Verificar credenciales</h3>
+        <Button variant="secondary" onClick={verificar} disabled={cargando}>
+          {cargando ? "Verificando..." : d ? "Volver a verificar" : "Verificar"}
+        </Button>
+      </div>
+      {!d && !error && (
+        <p className="text-sm text-[var(--text-secondary)]">
+          Consulta a Mercado Pago de quién es cada credencial cargada en el servidor y a qué cuenta entra la plata.
+        </p>
+      )}
+      {error && <p className="text-sm text-[var(--signal-error)]">{error}</p>}
+      {d && (
+        <dl className="grid grid-cols-1 gap-y-3 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+          <dt className="text-[var(--text-tertiary)]">Hoy cobra</dt>
+          <dd className="font-semibold text-[var(--text-primary)]">
+            {d.cobraCon === "token_fijo"
+              ? "Con MP_ACCESS_TOKEN"
+              : d.cobraCon === "cuenta_conectada"
+                ? "Con la cuenta conectada por link"
+                : "Nadie: no hay token ni cuenta conectada"}
+          </dd>
+
+          <dt className="text-[var(--text-tertiary)]">MP_ACCESS_TOKEN</dt>
+          <dd>
+            {!d.tokenFijo.cargado ? (
+              <span className="text-[var(--text-secondary)]">No está cargado</span>
+            ) : d.tokenFijo.cuenta ? (
+              <NombreCuenta c={d.tokenFijo.cuenta} />
+            ) : (
+              <span className="text-[var(--signal-error)]">Inválido: {d.tokenFijo.error}</span>
+            )}
+          </dd>
+
+          <dt className="text-[var(--text-tertiary)]">App (Client ID/Secret)</dt>
+          <dd>
+            {!d.app.cargada ? (
+              <span className="text-[var(--signal-error)]">Faltan MP_CLIENT_ID o MP_CLIENT_SECRET</span>
+            ) : d.app.duenio ? (
+              <span className="flex flex-col gap-1">
+                <span className="text-[var(--text-secondary)]">Válidos · Client ID {d.app.clientId} · dueño de la app:</span>
+                <NombreCuenta c={d.app.duenio} />
+              </span>
+            ) : (
+              <span className="text-[var(--signal-error)]">Inválidos: {d.app.error}</span>
+            )}
+          </dd>
+        </dl>
+      )}
+    </Card>
+  );
+}
 
 type Estado = Extract<Awaited<ReturnType<typeof obtenerEstadoMercadoPago>>, { ok: true }>["data"];
 
@@ -134,6 +219,8 @@ export default function MercadoPagoConexion() {
           </div>
         )}
       </Card>
+
+      <Diagnostico />
 
       <Card>
         <h3 className="mb-2 font-bold text-[var(--text-primary)]">URL de redirección</h3>
